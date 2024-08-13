@@ -9,6 +9,7 @@ if (!window.scriptExecuted) {
     const { data } = await axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${org}`);
     const { total_students, parents: parentsCount, school_buildings } = data.organization;
     const studentsLoginLog = data.students_login_log;
+    const feedback = data.feedback;
 
     document.getElementById("total_students").textContent = total_students.toLocaleString();
     document.getElementById("community_registration_goal").textContent = Math.round(total_students * 0.05).toLocaleString();
