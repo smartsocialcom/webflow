@@ -226,7 +226,20 @@ if (!window.scriptExecuted) {
     }
 
     document.getElementById('student_pin_list').innerHTML = school_buildings.map(school => `<a fs-copyclip-text="https://smartsocial.com/students?pin=${school.student_pin_code}" fs-copyclip-element="click" fs-copyclip-message="Link Copied!" href="#" class="link-list w-button">${school.school_name}<span class="pincode">Pincode: ${school.student_pin_code}</span></a>`).join(''); // List School Buildings Pincodes
-  
+    
+    const testimonialList = document.querySelector(".testimonial-list");
+
+    feedback.forEach(({ positive_feedback, user }) => {
+      const schoolNames = user.school_buildings_id.map(s => s.school_name).join(", ");
+      testimonialList.innerHTML += `
+        <div class="testimonial_card">
+          <div class="feedback">"${positive_feedback}"</div>
+          <p class="name">${user.first_name} ${user.last_name}</p>
+          <p class="schools">${schoolNames}</p>
+        </div>
+      `;
+    });
+
     document.getElementById("download").addEventListener("click", async () => {
       const data = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
       const csv = "Email,First Name,Last Name,School Buildings\n" + data.users.map(user => {
