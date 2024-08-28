@@ -230,18 +230,26 @@ if (!window.scriptExecuted) {
     const testimonialList = document.querySelector(".testimonial-list");
 
     feedback.forEach(({ positive_feedback, user }) => {
-      const schoolNames = user.school_buildings_id.filter(s => s.school_name !== "District Staff").map(s => s.school_name).join(", ");
-      
+      const firstName = user?.first_name || "";
+      const lastName = user?.last_name || "";
+      const schoolNames = user?.school_buildings_id
+        ? user.school_buildings_id
+            .filter(s => s.school_name !== "District Staff")
+            .map(s => s.school_name)
+            .join(", ")
+        : "";
+    
       testimonialList.innerHTML += `
         <div class="testimonial_card">
           <div class="feedback">"${positive_feedback}"</div>
           <div>
-            <p class="name">${user.first_name} ${user.last_name}</p>
+            <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
           </div>
         </div>
       `;
     });
+    
 
     document.getElementById("download").addEventListener("click", async () => {
       const data = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
