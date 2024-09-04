@@ -129,76 +129,33 @@ if (!window.scriptExecuted) {
 
     //Top Users, Pages, Active Schoolbuildings
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-    const filteredLogData = data.log.filter(l => l.user && l.user.school_buildings_id && !l.user.school_buildings_id.some(s => s && s.id === 1));
-
-    const log = data.log.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
-      if (!user || !user.first_name || !user.last_name) return acc;
+    const validPaths = [
+      '/events', '/teen-slang', '/app-guide', '/video-games', 
+      '/parental-control', '/online-activities', '/offline-activities', 
+      '/sex-trafficking', '/post/'
+    ];
     
-      // Ensure school_buildings_id array is valid and check for school with id 1
-      if (school_buildings_id && school_buildings_id.some(building => building && building.id === 1)) return acc;
-    
-      const validPaths = [
-        '/events', '/teen-slang', '/app-guide',
-        '/video-games', '/parental-control', '/online-activities',
-        '/offline-activities', '/sex-trafficking', '/post/'
-      ];
-    
-      if (!validPaths.some(path => page_url.includes(path))) return acc;
+    const processLog = (data) => data.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
+      if (!user || !user.first_name || !user.last_name || 
+          (school_buildings_id && school_buildings_id.some(s => s && s.id === 1)) || 
+          !validPaths.some(path => page_url.includes(path))) return acc;
     
       const fullName = `${user.first_name} ${user.last_name}`.trim();
       const path = page_url.split('.com')[1]?.split('?')[0] || null;
     
-      // Assuming thirtyDaysAgo is defined earlier in the code
-      if (path && created_at > thirtyDaysAgo) {
-        acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
-      }
-    
+      if (path && created_at > thirtyDaysAgo) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
       acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
     
-      // Ensure each building is valid before accessing school_name
-      school_buildings_id.forEach((building) => {
-        if (building && building.school_name) {
-          acc.schoolCounts[building.school_name] = (acc.schoolCounts[building.school_name] || 0) + 1;
-        }
+      school_buildings_id?.forEach(b => {
+        if (b?.school_name) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1;
       });
     
       return acc;
     }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
     
-    const filteredLog = filteredLogData.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
-      if (!user || !user.first_name || !user.last_name) return acc;
-    
-      // Ensure school_buildings_id array is valid and check for school with id 1
-      if (school_buildings_id && school_buildings_id.some(building => building && building.id === 1)) return acc;
-    
-      const validPaths = [
-        '/events', '/teen-slang', '/app-guide',
-        '/video-games', '/parental-control', '/online-activities',
-        '/offline-activities', '/sex-trafficking', '/post/'
-      ];
-    
-      if (!validPaths.some(path => page_url.includes(path))) return acc;
-    
-      const fullName = `${user.first_name} ${user.last_name}`.trim();
-      const path = page_url.split('.com')[1]?.split('?')[0] || null;
-    
-      // Assuming thirtyDaysAgo is defined earlier in the code
-      if (path && created_at > thirtyDaysAgo) {
-        acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
-      }
-    
-      acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
-    
-      // Ensure each building is valid before accessing school_name
-      school_buildings_id.forEach((building) => {
-        if (building && building.school_name) {
-          acc.schoolCounts[building.school_name] = (acc.schoolCounts[building.school_name] || 0) + 1;
-        }
-      });
-    
-      return acc;
-    }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
-    
+    const filteredLogData = data.log.filter(l => !(l.user?.school_buildings_id?.some(s => s && s.id === 1)));
+    const log = processLog(data.log);
+    const filteredLog = processLog(filteredLogData);    
 
     const topUsers = getTop(filteredLog.userCounts).map(({ key, count }) => ({ name: key, count }));
     const topPages = getTop(log.pageCounts).map(({ key, count }) => ({ url: key, count }));
