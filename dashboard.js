@@ -226,6 +226,10 @@ if (!window.scriptExecuted) {
       document.getElementById("topSchoolBuildingsWrapper").innerHTML = `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated as more parents access. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> to get more parents involved so this graph has accurate data.</h4></div>`
     }
 
+    const script = document.createElement('script');
+    script.defer = true;
+    script.src = "https://cdn.jsdelivr.net/npm/@finsweet/attributes-copyclip@1/copyclip.js";
+    document.head.appendChild(script);
     document.getElementById('student_pin_list').innerHTML = school_buildings.map(school => `<a fs-copyclip-text="https://smartsocial.com/students?pin=${school.student_pin_code}" fs-copyclip-element="click" fs-copyclip-message="Link Copied!" href="#" class="link-list w-button">${school.school_name}<span class="pincode">Pincode: ${school.student_pin_code}</span></a>`).join(''); // List School Buildings Pincodes
     
     const testimonialList = document.querySelector(".testimonial-list");
@@ -269,7 +273,8 @@ if (!window.scriptExecuted) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
-
+    
+    document.getElementById('close').click();
   } catch (error) {
     console.error("Error:", error);
   }
