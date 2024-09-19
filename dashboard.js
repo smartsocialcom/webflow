@@ -92,18 +92,18 @@ if (!window.scriptExecuted) {
       document.getElementById("studentLoginsPerMonthChartWrapper").innerHTML = `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated as more parents access. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> to get more parents involved so this graph has accurate data.</h4></div>`
     }
     if (studentsLoginLog.length) {
+      const loginData = studentsLoginLog.reduce((acc, { _school_buildings }) => {
+        const name = _school_buildings?.school_name;
+        if (name) acc[name] = (acc[name] || 0) + 1;
+        return acc;
+      }, {});
+    
       new Chart(document.getElementById("studentLoginsPerBuilding"), {
         type: "doughnut",
         data: {
-          labels: Object.keys(studentsLoginLog.reduce((acc, { _school_buildings: { school_name } }) => {
-            acc[school_name] = (acc[school_name] || 0) + 1;
-            return acc;
-          }, {})),
+          labels: Object.keys(loginData),
           datasets: [{
-            data: Object.values(studentsLoginLog.reduce((acc, { _school_buildings: { school_name } }) => {
-              acc[school_name] = (acc[school_name] || 0) + 1;
-              return acc;
-            }, {})),
+            data: Object.values(loginData),
             backgroundColor: generateColors(studentsLoginLog.length)
           }]
         },
@@ -114,9 +114,9 @@ if (!window.scriptExecuted) {
             legend: { display: true, position: "bottom" },
             tooltip: {
               callbacks: {
-                label: function(context) {
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  return `${context.label}: ${(context.raw / total * 100).toFixed(2)}%`;
+                label: ({ raw, dataset }) => {
+                  const total = dataset.data.reduce((a, b) => a + b, 0);
+                  return `${raw}: ${(raw / total * 100).toFixed(2)}%`;
                 }
               }
             }
