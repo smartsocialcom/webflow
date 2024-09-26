@@ -237,12 +237,11 @@ if (!window.scriptExecuted) {
     feedback.forEach(({ positive_feedback, user }) => {
       const firstName = user?.first_name || "";
       const lastName = user?.last_name || "";
+      
       const schoolNames = user?.school_buildings_id
-        ? user.school_buildings_id
-            .filter(s => s.school_name !== "District Staff")
-            .map(s => s.school_name)
-            .join(", ")
-        : "";
+        ?.filter(s => s && s.school_name && s.school_name !== "District Staff")
+        .map(s => s.school_name)
+        .join(", ") || "";
     
       testimonialList.innerHTML += `
         <div class="testimonial_card">
@@ -254,6 +253,7 @@ if (!window.scriptExecuted) {
         </div>
       `;
     });
+    
     
 
     document.getElementById("download").addEventListener("click", async () => {
