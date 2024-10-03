@@ -234,14 +234,14 @@ if (!window.scriptExecuted) {
     
     const testimonialList = document.querySelector(".testimonial-list");
 
-    feedback.forEach(({ positive_feedback, user }) => {
+    feedback.forEach(({ positive_feedback, user, created_at }) => {
       const firstName = user?.first_name || "";
       const lastName = user?.last_name || "";
-      
       const schoolNames = user?.school_buildings_id
-        ?.filter(s => s && s.school_name && s.school_name !== "District Staff")
+        ?.filter(s => s?.school_name && s.school_name !== "District Staff")
         .map(s => s.school_name)
         .join(", ") || "";
+      const formattedDate = new Date(created_at).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
     
       testimonialList.innerHTML += `
         <div class="testimonial_card">
@@ -249,10 +249,11 @@ if (!window.scriptExecuted) {
           <div>
             <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
+            <p class="created_at">Date: ${formattedDate}</p>
           </div>
-        </div>
-      `;
+        </div>`;
     });
+    
     
     
 
