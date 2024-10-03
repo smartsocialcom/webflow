@@ -249,7 +249,7 @@ if (!window.scriptExecuted) {
           <div>
             <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
-            <p class="created_at">Date: ${formattedDate}</p>
+            <p class="created_at">${formattedDate}</p>
           </div>
         </div>`;
     });
