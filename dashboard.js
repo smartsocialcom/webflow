@@ -232,76 +232,26 @@ if (!window.scriptExecuted) {
     document.head.appendChild(script);
     document.getElementById('student_pin_list').innerHTML = school_buildings.map(school => `<a fs-copyclip-text="https://smartsocial.com/students?pin=${school.student_pin_code}" fs-copyclip-element="click" fs-copyclip-message="Link Copied!" href="#" class="link-list w-button">${school.school_name}<span class="pincode">Pincode: ${school.student_pin_code}</span></a>`).join(''); // List School Buildings Pincodes
     
-    //const testimonialList = document.querySelector(".testimonial-list");
-    // feedback.forEach(({ positive_feedback, user, created_at }) => {
-    //   const firstName = user?.first_name || "";
-    //   const lastName = user?.last_name || "";
-    //   const schoolNames = user?.school_buildings_id
-    //     ?.filter(s => s?.school_name && s.school_name !== "District Staff")
-    //     .map(s => s.school_name)
-    //     .join(", ") || "";
-    //   const formattedDate = new Date(created_at).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
-    
-    //   testimonialList.innerHTML += `
-    //     <div class="testimonial_card">
-    //       <div class="feedback">"${positive_feedback}"</div>
-    //       <div>
-    //         <p class="name">${firstName} ${lastName}</p>
-    //         <p class="schools">${schoolNames}</p>
-    //         <p class="created_at">${formattedDate}</p>
-    //       </div>
-    //     </div>`;
-    // });
-    
-    const testimonialSlider = document.querySelector(".testimonial-slider");
-    feedback.forEach(({ positive_feedback, organization, user }) => {
+    const testimonialList = document.querySelector(".testimonial-list");
+    feedback.forEach(({ positive_feedback, user, created_at }) => {
       const firstName = user?.first_name || "";
       const lastName = user?.last_name || "";
-      
-      const schoolNames = user?.school_buildings_id?.filter(s => s && s.school_name && s.school_name !== "District Staff").map(s => s.school_name).join(", ") || "";
-
-      testimonialSlider.insertAdjacentHTML('beforeend', `
-        <div class="testimonial_card swiper-slide">
+      const schoolNames = user?.school_buildings_id
+        ?.filter(s => s?.school_name && s.school_name !== "District Staff")
+        .map(s => s.school_name)
+        .join(", ") || "";
+      const formattedDate = new Date(created_at).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    
+      testimonialList.innerHTML += `
+        <div class="testimonial_card">
           <div class="feedback">"${positive_feedback}"</div>
           <div>
-            <p class="organization">${firstName}</p> <!-- User's first name -->
+            <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
+            <p class="created_at">${formattedDate}</p>
           </div>
-        </div>`);
+        </div>`;
     });
-
-    const testimonialwrap = new Swiper(".testimonial-wrapper", {
-      loop: true,
-      slidesPerView: 1,
-      spaceBetween: 10,
-      autoplay: {
-        delay: 3000,
-        disableOnInteraction: false,
-      },
-      breakpoints: {
-        320: {
-          slidesPerView: 1,
-          spaceBetween: 10
-        },
-        768: {
-          slidesPerView: 2,
-          spaceBetween: 20
-        },
-        1024: {
-          slidesPerView: 3,
-          spaceBetween: 30
-        }
-      },
-      navigation: {
-        nextEl: ".slider-arrows-button-next",
-        prevEl: ".slider-arrows-button-prev",
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
-    });
-    
 
     document.getElementById("download").addEventListener("click", async () => {
       const data = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
