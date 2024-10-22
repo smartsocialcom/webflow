@@ -1,235 +1,157 @@
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    // Constants and Variables
-    const url = new URL(window.location.href);
-    const searchParams = url.searchParams;
-    let orgValue;
-  
-    // Apply Organization Data
-    function applyOrgData(district_name_value, shool_buildings) {
-      const district_name_text = document.getElementById("district_name");
-      const district_name_input = document.getElementById("district_name_input");
-  
-      if (district_name_value.includes("free trial")) {
-        district_name_text.textContent = district_name_value;
-      } else {
-        district_name_text.textContent = `${district_name_value} has partnered with Smartsocial.com`;
-      }
-      district_name_input.value = district_name_value;
-    }
-  
-    // GET Org
-    function getOrg(orgValue) {
-      return new Promise((resolve, reject) => {
-        const endpoint = `https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${orgValue}`;
-        axios
-          .get(endpoint)
-          .then((response) => {
-            console.log(response); // This will log the whole response object
-            if (response.status !== 200) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.data;
-          })
-          .then((data) => {
-            if (data.subscription_status === "active") {
-              const cookie_duration = data.organization.cookie_duration;
-              const district_name_value = data.organization.district_name;
-              const school_buildings = data.organization.school_buildings;
-              setCookie("org", orgValue, cookie_duration);
-              applyOrgData(district_name_value);
-              resolve(data);
-            } else {
-              reject(new Error("Subscription status is not active."));
-            }
-          })
-          .catch((error) => {
-            console.error("Axios GET request error:", error);
-            reject(error);
-          });
-      });
-    }
-  
-    // Get Access
-    function getAccess() {
-      const org = getCookie("org");
-      console.log("access");
-      if (org) {
-        var getAccessPopup = document.getElementById("get_access");
-        getAccessPopup.click();
-        var orgInput = document.getElementById("org");
-        orgInput.value = org;
-        console.log("access org");
-      }
-    }
-  
-    // On Load
-    window.addEventListener("load", (event) => {
-      if (searchParams.has("org")) {
-        orgValue = decodeURIComponent(searchParams.get("org"));
-        orgValue = orgValue.split('?')[0];
-      } else if (getCookie("org")) {
-        orgValue = getCookie("org");
-      }
-      console.log("load");
-      window.$memberstackDom.getCurrentMember().then(({ data: member }) => {
-        if (!member) {
-          console.log("!member");
-          getOrg(orgValue)
-            .then(() => {
-              getAccess();
-            })
-            .catch((error) => {
-              console.error("Error in getOrg:", error);
-            });
-        }
-      });
-      
-      if (orgValue) document.querySelectorAll('a').forEach(link => link.href += (link.href.includes('?') ? '&' : '?') + 'org=' + orgValue); // add org to all links
-    });
-  
-    // Refresh page on lang switcher click
-    const langSelectElements = document.querySelectorAll(".lang-select");
-    langSelectElements.forEach((element) => {
-      element.addEventListener("click", () => {
-        setTimeout(() => location.reload(), 100);
-      });
-    });
-  
-    // Store last page before login
-    function storeLastPage() {
-      localStorage.setItem("locat", location.href);
-    }
-  
-    var storeLinks = document.querySelectorAll('[sms="store_link"]');
-    storeLinks.forEach(function(link) {
-      link.addEventListener('click', storeLastPage);
-  });
-  
-    // Redirect to Login if email is already used
-    const signupButton = document.getElementById("signup_button");
-    const msSignupButton = document.getElementById("ms_signup_button");
-  
-    function emailInUse() {
-      const emailFieldSignup = document.getElementById("email");
-      const firstNameFieldSignup = document.getElementById("first_name");
-      const loginButton = document.getElementById("login_button_signup");
-  
-      //  loginButton.classList.remove("hide");
-      loginButton.href = `/login?email=${emailFieldSignup.value}`;
-  
-      mixpanel.identify(emailFieldSignup.value);
-      mixpanel.people.set({
-        first_name: firstNameFieldSignup.value,
-        email: emailFieldSignup.value,
-        org: orgValue,
-      });
-    }
-  
-    signupButton.addEventListener("click", function () {
-      setTimeout(function () {
-        emailInUse();
-      }, 500);
-  
-      msSignupButton.click();
-    });
-  </script>
-  
-  <script>
-    // Set Cookie
-    function setCookie(key, value, daysToExpire) {
-      const expires = new Date();
-      expires.setTime(expires.getTime() + daysToExpire * 24 * 60 * 60 * 1000);
-      const cookieValue = `${encodeURIComponent(key)}=${encodeURIComponent(
-        value
-      )};expires=${expires.toUTCString()};path=/`;
-      document.cookie = cookieValue;
-    }
-  
-    // Get Cookie
-    function getCookie(key) {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.indexOf(key + "=") === 0) {
-          return cookie.substring(key.length + 1);
-        }
-      }
-      return null;
-    }
-  
-    // Copy to clipboard
-    function copyToClipboard(text) {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-    }
-  
-    // Trigger Mixpanel Event
-    document.querySelectorAll("[mx]").forEach(function (element) {
-      element.addEventListener("click", function () {
-        // Get the value of the mx attribute
-        var mxValue = element.getAttribute("mx");
-  
-        mixpanel.track(mxValue);
-      });
-    });
-  </script>
-  
-  <script>
-    // when the DOM is ready (this allows for adding sub bullets using the ~ character in a bulleted list)
-    $(document).ready(function () {
-      const listItems = $("li");
-      listItems.each(function (index, item) {
-        if ($(item).text().startsWith("~~")) {
-          indentText(this, "hack20-sub-bullet-2");
-        } else if ($(item).text().startsWith("~")) {
-          indentText(this, "hack20-sub-bullet");
-        }
-      });
-      function indentText(li, className) {
-        $(li).addClass(className);
-        const reformatedText = $(li).html().replace(/~+/g, "");
-        $(li).html(reformatedText);
-      }
-    });
-  </script>
-  
-  <script>
-  function setThumbnails() {
-      var iframes = document.querySelectorAll('.w-embed-youtubevideo iframe');
-      
-      iframes.forEach(function(iframe, index) {
-          var videoId = iframe.src.split('/embed/')[1].split('?')[0];
-          
-          var thumbnailUrl = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
-  
-          var postLink = iframe.closest('.lightbox_modal').previousElementSibling;
-          var videoImg = postLink.querySelector('.video-img');
-          
-          if(videoImg) {
-              videoImg.src = thumbnailUrl;
-          }
-      });
+  const url = new URL(window.location.href);
+  const searchParams = url.searchParams;
+  let orgValue;
+  let memberData;
+  let orgActive;
+
+  function setCookie(k, v, d) {
+    document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/`;
+  }
+
+  function getCookie(k) {
+      const cookie = document.cookie.split('; ').find(row => row.startsWith(k + '='));
+      return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
   }
   
-  setThumbnails();
-  </script>
-  
-  <script>
-  // Log
-  window.$memberstackDom.getCurrentMember().then(({ data: member }) => {   
-      const memberID = member.id
-      axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
-          member_id: memberID,
-          page_url: window.location.href
-      })
-      .then(response => {
-      });  
-  });
-  </script>
-  <script>
+  function removeCookie(key) {
+    document.cookie = `${encodeURIComponent(key)}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  }
 
-  </script>
+  function applyOrgData(districtName, schoolBuildings) {
+    document.getElementById("district_name").textContent = districtName.includes("free trial") ? districtName : `${districtName} has partnered with Smartsocial.com`;
+    document.getElementById("district_name_input").value = districtName;
+  }
+
+  function getOrg(orgValue) {
+    return new Promise((resolve, reject) => {
+      axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${orgValue}`)
+        .then(response => {
+          orgData = response.data;
+          orgActive = orgData.organization.org_active;
+          
+          if(orgActive) {
+            setCookie("org", orgValue, 400);
+            applyOrgData(orgData.organization.district_name);
+            resolve(response.data);
+            console.log(orgActive+"YES")
+          } else {
+            console.log(orgActive+"NO");
+            orgNotActive();
+          }
+          console.log(orgData.organization.org_active);
+      });
+    });
+  }
+
+  function getAccess() {
+    if (orgValue) {
+      document.getElementById("get_access").click();
+      document.getElementById("orgInput").value = orgValue;
+    }
+  }
+
+  function emailInUse() {
+    const emailFieldSignup = document.getElementById("email");
+    const firstNameFieldSignup = document.getElementById("first_name");
+    document.getElementById("login_button_signup").href = `/login?email=${emailFieldSignup.value}`;
+
+    mixpanel.identify(emailFieldSignup.value);
+    mixpanel.people.set({
+      first_name: firstNameFieldSignup.value,
+      email: emailFieldSignup.value,
+      org: orgValue,
+    });
+  }
+
+  function getOrgValue() {
+    const cookie = getCookie("org");
+    const ms = memberData && memberData.customFields ? memberData.customFields.organization : undefined;
+    const parameter = decodeURIComponent(searchParams.get("org")?.split('?')[0] ?? "");
+    orgValue = cookie ? cookie : ms ? ms : parameter;
+  }
+
+  function orgNotActive(){
+    document.getElementById('not_active_banner').classList.remove('hide');
+  }
+
+  // On Load
+  // url.hash && (window.location.href = url.href.replace('#', ''));
+  document.addEventListener('DOMContentLoaded', function() {
+    (async () => {
+      memberData = (await window.$memberstackDom.getCurrentMember()).data;
+      getOrgValue();
+      getOrg(orgValue);
+      if (!memberData){
+        getOrg(orgValue).then(getAccess);
+        setTimeout(() => {
+			    if (getCookie("org")){
+            document.querySelectorAll('[ss-content="hide"]').forEach(el => el.classList.add('hide'));
+        	}
+      	}, 4000);
+        	
+      } else {
+        axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
+          member_id: memberData.id,
+          page_url: window.location.href
+        });
+      }
+      
+      document.querySelectorAll(".lang-select").forEach(e => e.onclick = () => setTimeout(() => location.reload(), 500)); // Refresh page on lang switcher click
+      document.querySelectorAll('[sms="store_link"]').forEach(link => link.addEventListener('click', () => localStorage.setItem("locat", location.href))); // Store Last Page
+      if(orgValue) document.querySelectorAll('a').forEach(link => !link.href.includes('org=') && (link.href += (link.href.includes('?') ? '&' : '?') + 'org=' + orgValue)); // add org to all links 
+
+      // Handle Signup Button Click
+      document.getElementById("signup_button").addEventListener("click", function () {
+        setTimeout(function () {
+          emailInUse();
+        }, 500);
+        document.getElementById("ms_signup_button").click();
+      });
+
+            
+      // Trigger Mixpanel Event
+      document.querySelectorAll("[mx]").forEach(function (element) {
+        element.addEventListener("click", function () {
+          var mxValue = element.getAttribute("mx");
+          mixpanel.track(mxValue);
+        });
+      });
+    })();
+  });
+</script>
+
+
+<!-- 💙 MEMBERSCRIPT #10 v0.2 💙 HIDE ELEMENTS IF CUSTOM FIELD IS BLANK -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Get the `_ms-mem` object from the local storage
+  const msMem = JSON.parse(localStorage.getItem('_ms-mem'));
+
+  // Get all the elements that have the `ms-code-customfield` attribute
+  const elements = document.querySelectorAll('[ms-code-customfield]');
+
+  // Iterate over each element
+  elements.forEach(element => {
+    // Get the value of the `ms-code-customfield` attribute
+    const customField = element.getAttribute('ms-code-customfield');
+
+    // If customField starts with '!', we invert the logic
+    if (customField.startsWith('!')) {
+      const actualCustomField = customField.slice(1); // remove the '!' from the start
+
+      // If the custom field is empty, remove the element from the DOM
+      if (msMem.customFields && msMem.customFields[actualCustomField]) {
+        element.parentNode.removeChild(element);
+      }
+    } else {
+      // Check if the user has the corresponding custom field in Memberstack
+      if (!msMem.customFields || !msMem.customFields[customField]) {
+        // If the custom field is empty, remove the element from the DOM
+        element.parentNode.removeChild(element);
+      }
+    }
+  });
+});
+</script>

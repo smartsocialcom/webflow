@@ -252,6 +252,13 @@ if (!window.scriptExecuted) {
           </div>
         </div>`;
     });
+    if (feedback.length > 3) {
+      document.querySelector('.view-more_btn').classList.remove('hide');
+      document.querySelector('.view-more_btn').addEventListener('click', () => {
+        document.querySelector('.testimonial-list').classList.remove('max-height');
+      });
+      
+    }
 
     document.getElementById("download").addEventListener("click", async () => {
       const data = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
