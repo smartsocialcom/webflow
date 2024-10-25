@@ -4,7 +4,7 @@ if (!window.scriptExecuted) {
   try {
     const member = await window.$memberstackDom.getCurrentMember();
     const org = member.data.customFields.organization;
-    document.getElementById("copy_link").textContent = `https://${window.location.hostname}/members`;
+    document.getElementById("copy_link").textContent = `https://${window.location.hostname}/members?org=${org}`;
 
     const { data } = await axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${org}`);
     const { total_students, parents: parentsCount, school_buildings } = data.organization;

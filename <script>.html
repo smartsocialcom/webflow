@@ -35,9 +35,7 @@
             setCookie("org", orgValue, 400);
             applyOrgData(orgData.organization.district_name);
             resolve(response.data);
-            console.log(orgActive+"YES")
           } else {
-            console.log(orgActive+"NO");
             orgNotActive();
           }
           console.log(orgData.organization.org_active);
@@ -76,6 +74,11 @@
     document.getElementById('not_active_banner').classList.remove('hide');
   }
 
+  function addPoints(action, points) {
+    return axios.put('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/points', { memberid: memberData.id, points: points, action: action });
+
+  }
+  
   // On Load
   // url.hash && (window.location.href = url.href.replace('#', ''));
   document.addEventListener('DOMContentLoaded', function() {
@@ -122,36 +125,14 @@
   });
 </script>
 
-
-<!-- 💙 MEMBERSCRIPT #10 v0.2 💙 HIDE ELEMENTS IF CUSTOM FIELD IS BLANK -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Get the `_ms-mem` object from the local storage
-  const msMem = JSON.parse(localStorage.getItem('_ms-mem'));
-
-  // Get all the elements that have the `ms-code-customfield` attribute
-  const elements = document.querySelectorAll('[ms-code-customfield]');
-
-  // Iterate over each element
-  elements.forEach(element => {
-    // Get the value of the `ms-code-customfield` attribute
-    const customField = element.getAttribute('ms-code-customfield');
-
-    // If customField starts with '!', we invert the logic
-    if (customField.startsWith('!')) {
-      const actualCustomField = customField.slice(1); // remove the '!' from the start
-
-      // If the custom field is empty, remove the element from the DOM
-      if (msMem.customFields && msMem.customFields[actualCustomField]) {
-        element.parentNode.removeChild(element);
-      }
-    } else {
-      // Check if the user has the corresponding custom field in Memberstack
-      if (!msMem.customFields || !msMem.customFields[customField]) {
-        // If the custom field is empty, remove the element from the DOM
-        element.parentNode.removeChild(element);
-      }
-    }
+// Hide if memberstack custom field blank
+document.addEventListener('DOMContentLoaded', () => {
+  const ms = JSON.parse(localStorage.getItem('_ms-mem'));
+  document.querySelectorAll('[ms-code-customfield]').forEach(el => {
+    const field = el.getAttribute('ms-code-customfield');
+    const exists = ms?.customFields?.[field.replace('!', '')];
+    if ((field.startsWith('!') && exists) || (!field.startsWith('!') && !exists)) el.remove();
   });
 });
 </script>
