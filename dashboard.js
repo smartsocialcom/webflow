@@ -245,10 +245,11 @@ if (!window.scriptExecuted) {
       testimonialList.innerHTML += `
         <div class="testimonial_card">
           <div class="feedback">"${positive_feedback}"</div>
+          <p class="page_name">${page_name}</p>
+
           <div>
             <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
-            <p class="page_name">${page_name}</p>
             <p class="created_at">${formattedDate}</p>
           </div>
         </div>`;
