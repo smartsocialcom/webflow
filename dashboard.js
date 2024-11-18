@@ -233,11 +233,10 @@ if (!window.scriptExecuted) {
     document.getElementById('student_pin_list').innerHTML = school_buildings.map(school => `<a fs-copyclip-text="https://smartsocial.com/students?pin=${school.student_pin_code}" fs-copyclip-element="click" fs-copyclip-message="Link Copied!" href="#" class="link-list w-button">${school.school_name}<span class="pincode">Pincode: ${school.student_pin_code}</span></a>`).join(''); // List School Buildings Pincodes
     
     const testimonialList = document.querySelector(".testimonial-list");
-    feedback.forEach(({ positive_feedback, user, created_at }) => {
+    feedback.forEach(({ positive_feedback, user, created_at, page_name }) => {
       const firstName = user?.first_name || "";
       const lastName = user?.last_name || "";
       const schoolNames = user?.school_buildings_id
-      const pageName = user?.page_name
         ?.filter(s => s?.school_name && s.school_name !== "District Staff")
         .map(s => s.school_name)
         .join(", ") || "";
@@ -249,7 +248,7 @@ if (!window.scriptExecuted) {
           <div>
             <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
-            <p class="page_name">${pageName}</p>
+            <p class="page_name">${page_name}</p>
             <p class="created_at">${formattedDate}</p>
           </div>
         </div>`;
