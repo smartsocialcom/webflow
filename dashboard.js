@@ -248,7 +248,7 @@ if (!window.scriptExecuted) {
           <div>
             <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
-            <p class="page_name">Feedback for: ${page_name}</p>
+            <p class="page_name">${page_name}</p>
             <p class="created_at">${formattedDate}</p>
           </div>
         </div>`;
