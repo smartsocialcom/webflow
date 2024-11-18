@@ -237,6 +237,7 @@ if (!window.scriptExecuted) {
       const firstName = user?.first_name || "";
       const lastName = user?.last_name || "";
       const schoolNames = user?.school_buildings_id
+      const pageName = user?.page_name
         ?.filter(s => s?.school_name && s.school_name !== "District Staff")
         .map(s => s.school_name)
         .join(", ") || "";
@@ -248,6 +249,7 @@ if (!window.scriptExecuted) {
           <div>
             <p class="name">${firstName} ${lastName}</p>
             <p class="schools">${schoolNames}</p>
+            <p class="page_name">${pageName}</p>
             <p class="created_at">${formattedDate}</p>
           </div>
         </div>`;
