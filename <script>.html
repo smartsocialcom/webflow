@@ -5,7 +5,8 @@
   let orgValue;
   let memberData;
   let orgActive;
-
+  let actions;
+  
   function setCookie(k, v, d) {
     document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/`;
   }
@@ -112,6 +113,32 @@
         }, 500);
         document.getElementById("ms_signup_button").click();
       });
+      
+      // Get Actions Data
+axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/points_log/user/${memberData.id}`)
+  .then(({ data }) => {
+    let found = false;
+
+    data.forEach(({ action }) => {
+      const el = document.getElementById(action.split('_').slice(1).join('_') || action);
+      if (el) {
+        found = true;
+        el.classList.add('hide');
+        document.querySelectorAll('.used_message').forEach(msg => msg.classList.remove('hide'));
+      }
+    });
+
+    if (!found) {
+      setTimeout(() => {
+        document.querySelectorAll('.feedback_link_button').forEach(el => el.classList.remove('hide'));
+        document.querySelectorAll('.loader').forEach(el => el.classList.add('hide'));
+        document.querySelectorAll('[ss="points_action"]').forEach(el => el.classList.remove('hide'));
+      }, 60000);
+    } else {
+      document.querySelectorAll('.loader').forEach(el => el.classList.add('hide'));
+    }
+  })
+  .catch(console.error);
 
             
       // Trigger Mixpanel Event
