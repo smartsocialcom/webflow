@@ -25,7 +25,7 @@ if (!window.scriptExecuted) {
     if (data.organization.student_access === true) document.getElementById("student_registration_links_lock").classList.add("hide");
     const getTop = (items) => Object.entries(items).map(([key, count]) => ({ key, count })).sort((a, b) => b.count - a.count).slice(0, 10);
   
-    document.getElementById("custom_graphics").setAttribute("href", data.organization.custom_graphics);
+    // document.getElementById("custom_graphics").setAttribute("href", data.organization.custom_graphics);
     const generateColors = (count) => ["#EF476F", "#FFD166", "#06D6A0", "#118AB2", "#073B4C", "#FFC6FF", "#9BF6FF", "#A0C4FF", "#BDB2FF", "#FFADAD", "#F94144", "#F3722C", "#F8961E", "#F9C74F", "#90BE6D", "#277DA1", "#577590", "#4D908E", "#43AA8B", "#F9844A", "#8338EC", "#3A86FF", "#EF233C", "#FF6D00", "#FFD500", "#06D6A0", "#118AB2", "#073B4C", "#FFD166", "#EF476F"].slice(0, count);
 
     new Chart(document.getElementById("usersPerMonthChart"), {
@@ -263,23 +263,23 @@ if (!window.scriptExecuted) {
       
     }
 
-    document.getElementById("download").addEventListener("click", async () => {
-      const data = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
-      const csv = "Email,First Name,Last Name,School Buildings\n" + data.users.map(user => {
-        const schoolBuildings = (user.school_buildings_id || []).filter(b => b && b.school_name).map(b => b.school_name).join(', ');
-        return `"${user.email}","${user.first_name}","${user.last_name}","${schoolBuildings}"`;
-      }).join("\n");
+    // document.getElementById("download").addEventListener("click", async () => {
+    //   const data = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
+    //   const csv = "Email,First Name,Last Name,School Buildings\n" + data.users.map(user => {
+    //     const schoolBuildings = (user.school_buildings_id || []).filter(b => b && b.school_name).map(b => b.school_name).join(', ');
+    //     return `"${user.email}","${user.first_name}","${user.last_name}","${schoolBuildings}"`;
+    //   }).join("\n");
       
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${data.organization.district_name} SmartSocial Parent List Export ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-')}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
+    //   const blob = new Blob([csv], { type: "text/csv" });
+    //   const url = URL.createObjectURL(blob);
+    //   const a = document.createElement("a");
+    //   a.href = url;
+    //   a.download = `${data.organization.district_name} SmartSocial Parent List Export ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-')}.csv`;
+    //   document.body.appendChild(a);
+    //   a.click();
+    //   document.body.removeChild(a);
+    //   URL.revokeObjectURL(url);
+    // });
     
     document.getElementById('close').click();
   } catch (error) {
