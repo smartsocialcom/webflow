@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   .then(response => {
     const data = response.data;
     const orgsList = document.querySelector('.orgs_list');
-    let html = '<table border="1"><tr><th>School District Name</th><th>Registration Goal</th><th>Current Registrations</th><th>% to Goal</th><th>Dashboard</th></tr>';
+    let html = '<table border="1"><tr><th>School District Name</th><th>Total Students</th><th>Registration Goal</th><th>Current Registrations</th><th>% to Goal</th><th>Total Feedbacks</th><th>Dashboard</th></tr>';
 
     data.forEach(organization => {
       const registrationGoal = Math.round(organization.total_students * 0.05).toLocaleString();
@@ -11,10 +11,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       html += `<tr>
         <td>${organization.district_name}</td>
+        <td>${organization.total_students}</td>
         <td>${registrationGoal}</td>
         <td>${organization.parents}</td>
         <td>${percentageToGoal}</td>
-        <td><a class="btn" href="https://smartsocial.com/dashboard?as_org=${organization.short_code}" target="_blank">View All Stats</a></td>
+        <td>${organization.total_feedbacks}</td>
+        <td><a class="cell_btn" href="https://smartsocial.com/dashboard?as_org=${organization.short_code}" target="_blank">View All Stats</a></td>
       </tr>`;
     });
 

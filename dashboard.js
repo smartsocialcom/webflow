@@ -7,10 +7,11 @@ if (!window.scriptExecuted) {
     document.getElementById("copy_link").textContent = `https://${window.location.hostname}/members?org=${org}`;
 
     const { data } = await axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${org}`);
-    const { total_students, parents: parentsCount, school_buildings } = data.organization;
+    const { total_students, parents: parentsCount, school_buildings, district_name } = data.organization;
     const studentsLoginLog = data.students_login_log;
     const feedback = data.feedback;
 
+    document.getElementById("org_name").textContent = district_name;
     document.getElementById("total_students").textContent = total_students.toLocaleString();
     document.getElementById("community_registration_goal").textContent = Math.round(total_students * 0.05).toLocaleString();
     document.getElementById("parents").textContent = parentsCount;
