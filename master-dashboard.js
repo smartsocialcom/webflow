@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${organization.parents}</td>
         <td>${percentageToGoal}</td>
         <td>${organization.total_feedbacks}</td>
-        <td><a class="cell_btn" href="https://smartsocial.com/dashboard?as_org=${organization.short_code}" target="_blank">View All Stats</a></td>
+        <td><a href="https://smartsocial.com/dashboard?as_org=${organization.short_code}" target="_blank">View More</a></td>
       </tr>`;
     });
 
