@@ -264,7 +264,7 @@ if (!window.scriptExecuted) {
       
     }
 
-    document.getElementById("download").addEventListener("click", async () => {
+    document.getElementById("download")?.addEventListener("click", async () => {
       const data = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
       const csv = "Email,First Name,Last Name,School Buildings\n" + data.users.map(user => {
         const schoolBuildings = (user.school_buildings_id || []).filter(b => b && b.school_name).map(b => b.school_name).join(', ');
