@@ -15,12 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const orgsList = document.querySelector('.orgs_list');
     const headers = [
       { name: '#', key: 'row_number', type: 'none' },
-      { name: 'School District Name', key: 'district_name', type: 'string' },
-      { name: 'Total Students', key: 'total_students', type: 'number' },
-      { name: 'Registration Goal', key: 'registrationGoal', type: 'number' },
-      { name: 'Current Registrations', key: 'parents', type: 'number' },
+      { name: 'District Name', key: 'district_name', type: 'string' },
+      { name: 'Students', key: 'total_students', type: 'number' },
+      { name: 'Goal', key: 'registrationGoal', type: 'number' },
+      { name: 'Registrations', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
-      { name: 'Total Feedbacks', key: 'total_feedbacks', type: 'number' },
+      { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Dashboard', key: 'dashboard', type: 'none' }
     ];
 
