@@ -22,6 +22,7 @@ if (!window.scriptExecuted) {
     document.getElementById("screen_avoided").textContent = (parentsCount * 0.09).toFixed(0);
     document.getElementById("abuse_avoided").textContent = (parentsCount * 0.088).toFixed(0);
     document.getElementById("total_incidents").textContent = (parentsCount * (0.15 + 0.09 + 0.088)).toFixed(0);
+    document.getElementById("feedback_count").textContent = feedback.length;
 
     if (data.organization.student_access === true) document.getElementById("student_registration_links_lock").classList.add("hide");
     const getTop = (items) => Object.entries(items).map(([key, count]) => ({ key, count })).sort((a, b) => b.count - a.count).slice(0, 10);
