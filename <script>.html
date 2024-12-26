@@ -2,10 +2,7 @@
 <script>
   const url = new URL(window.location.href);
   const searchParams = url.searchParams;
-  let orgValue;
-  let memberData;
-  let orgActive;
-  let actions;
+  let orgValue, memberData, orgActive, actions, orgData;
   
   function setCookie(k, v, d) {
     document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/`;

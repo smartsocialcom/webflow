@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'District Name', key: 'district_name', type: 'string' },
       { name: 'Students', key: 'total_students', type: 'number' },
       { name: 'Goal', key: 'registrationGoal', type: 'number' },
-      { name: 'Registrations', key: 'parents', type: 'number' },
+      { name: 'Regs', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Dashboard', key: 'dashboard', type: 'none' }
