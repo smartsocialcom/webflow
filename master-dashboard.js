@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${org.parents.toLocaleString()}</td>
         <td>${percentageToGoal}%</td>
         <td>${org.total_feedbacks.toLocaleString()}</td>
-        <td><a href="https://smartsocial.com/dashboard?as_org=${org.short_code}" target="_blank">View More</a></td>
+        <td><a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">View More</a></td>
       </tr>`;
     });
 
