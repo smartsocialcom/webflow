@@ -154,7 +154,7 @@ if (!window.scriptExecuted) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
-      
+      document.getElementById('close').click();
     } catch (error) {
       console.error("Error:", error);
     }
