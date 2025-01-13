@@ -153,8 +153,8 @@ if (!window.scriptExecuted) {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-      });
-      document.getElementById('close').click();
+      }); 
+      document.getElementById('close').click(); //close-loader
     } catch (error) {
       console.error("Error:", error);
     }
