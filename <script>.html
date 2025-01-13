@@ -52,7 +52,10 @@
   function emailInUse() {
     const emailFieldSignup = document.getElementById("email");
     const firstNameFieldSignup = document.getElementById("first_name");
-    document.getElementById("login_button_signup").href = `/login?email=${emailFieldSignup.value}`;
+    
+    new MutationObserver(() => {
+      if (document.querySelector('[data-ms-message="error"]')) location.href = `/login?email=${emailFieldSignup.value}`;
+    }).observe(document.body, { childList: true, subtree: true });
 
     mixpanel.identify(emailFieldSignup.value);
     mixpanel.people.set({
