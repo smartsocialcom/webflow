@@ -1,12 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
   let organizations = [];
-  let currentSortColumn = null;
-  let sortAscending = true;
+  let currentSortColumn = 'total_feedbacks';
+  let sortAscending = false;
 
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations')
     .then(response => {
-      organizations = response.data;
-      renderTable(organizations);
+      organizations = response.data.map(org => {
+        const registrationGoal = Math.round(org.total_students * 0.05);
+        const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
+        return { ...org, registrationGoal, percentageToGoal };
+      });
+
+      sortColumn(currentSortColumn);
       document.getElementById('loader').remove();
     })
     .catch(error => console.error("Error:", error));
@@ -18,13 +23,26 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'District Name', key: 'district_name', type: 'string' },
       { name: 'Students', key: 'total_students', type: 'number' },
       { name: 'Goal', key: 'registrationGoal', type: 'number' },
-      { name: 'Regs', key: 'parents', type: 'number' },
+      { name: 'Registrations', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Dashboard', key: 'dashboard', type: 'none' }
     ];
 
-    let html = '<table border="1"><tr>';
+    let html = `
+      <table border="1" style="table-layout: fixed; width: 50%;">
+      <colgroup>
+        <col style="width:5%;">
+        <col style="width:10%;">
+        <col style="width:10%;">
+        <col style="width:10%;">
+        <col style="width:10%;">
+        <col style="width:10%;">
+        <col style="width:10%;">
+        <col style="width:10%;">
+      </colgroup>
+      <tr>`;
+
     headers.forEach(header => {
       if (header.type !== 'none') {
         let headerLabel = header.name;
@@ -33,26 +51,23 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           headerLabel += ' ▲▼';
         }
-        html += `<th data-key="${header.key}" style="cursor:pointer;">${headerLabel}</th>`;
+        html += `<th data-key="${header.key}" style="cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${headerLabel}</th>`;
       } else {
-        html += `<th>${header.name}</th>`;
+        html += `<th style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${header.name}</th>`;
       }
     });
     html += '</tr>';
 
     data.forEach((org, index) => {
-      const registrationGoal = Math.round(org.total_students * 0.05);
-      const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100).toFixed(1);
-
       html += `<tr>
         <td>${index + 1}</td>
         <td>${org.district_name}</td>
         <td>${org.total_students.toLocaleString()}</td>
-        <td>${registrationGoal.toLocaleString()}</td>
+        <td>${org.registrationGoal.toLocaleString()}</td>
         <td>${org.parents.toLocaleString()}</td>
-        <td>${percentageToGoal}%</td>
+        <td>${org.percentageToGoal.toFixed(1)}%</td>
         <td>${org.total_feedbacks.toLocaleString()}</td>
-        <td><a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">View More</a></td>
+        <td><a href="https://smartsocial.com/dashboard?as_org=${org.short_code}" target="_blank">View More</a></td>
       </tr>`;
     });
 
@@ -69,14 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
       sortAscending = !sortAscending;
     } else {
       currentSortColumn = key;
-      sortAscending = true;
+      sortAscending = false; // Default to descending for new column
     }
-
-    organizations = organizations.map(org => {
-      const registrationGoal = Math.round(org.total_students * 0.05);
-      const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
-      return { ...org, registrationGoal, percentageToGoal };
-    });
 
     organizations.sort((a, b) => {
       let valA = a[key];
@@ -95,3 +104,4 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTable(organizations);
   }
 });
+console.log("damn");

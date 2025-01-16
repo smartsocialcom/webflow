@@ -52,10 +52,13 @@
   function emailInUse() {
     const emailFieldSignup = document.getElementById("email");
     const firstNameFieldSignup = document.getElementById("first_name");
-    
-    new MutationObserver(() => {
-      if (document.querySelector('[data-ms-message="error"]')) location.href = `/login?email=${emailFieldSignup.value}`;
-    }).observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => {
+      document.querySelectorAll('#ms-message[data-ms-message-text]').forEach(el => {
+        if (el.textContent.trim() === "The provided email is already taken."){
+          location.href = `/login?email=${emailFieldSignup.value}`;
+        }
+      });
+    }, 2000);
 
     mixpanel.identify(emailFieldSignup.value);
     mixpanel.people.set({
@@ -109,11 +112,10 @@
       if(orgValue) document.querySelectorAll('a:not(.fs-toc_link)').forEach(link => !link.href.includes('org=') && (link.href += (link.href.includes('?') ? '&' : '?') + 'org=' + orgValue)); // add org to all links 
 
       // Handle Signup Button Click
-      document.getElementById("signup_button").addEventListener("click", function () {
+      document.getElementById("ms_signup_button").addEventListener("click", function () {
         setTimeout(function () {
           emailInUse();
         }, 500);
-        document.getElementById("ms_signup_button").click();
       });
       
       // Get Actions Data
