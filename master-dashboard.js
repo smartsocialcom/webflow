@@ -8,6 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
       organizations = response.data;
       renderTable(organizations);
       document.getElementById('loader').remove();
+
+      // Simulate clicking the "Total Feedbacks" column header twice
+      const feedbackColumnHeader = document.querySelector('th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
+      if (feedbackColumnHeader) {
+        feedbackColumnHeader.click();
+        feedbackColumnHeader.click();
+      }
     })
     .catch(error => console.error("Error:", error));
 
