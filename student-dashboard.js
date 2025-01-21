@@ -154,7 +154,7 @@ if (!window.scriptExecuted) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }); 
-      document.getElementById('close').click(); //close-loader
+      document.getElementById('loader').classList.add("hide"); //close-loader
     } catch (error) {
       console.error("Error:", error);
     }
