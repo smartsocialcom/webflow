@@ -10,6 +10,7 @@ if (!window.scriptExecuted) {
     const { total_students, parents: parentsCount, school_buildings, district_name } = data.organization;
     const studentsLoginLog = data.students_login_log;
     const feedback = data.feedback;
+    const top_users = data.top_users;
 
     document.getElementById("org_name").textContent = district_name;
     document.getElementById("total_students").textContent = total_students.toLocaleString();
@@ -282,6 +283,15 @@ if (!window.scriptExecuted) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
+
+    document.querySelector('.leader_board-wrapper').innerHTML += top_users.items.map((user, i) => 
+      `<div class='leader_board-row'>
+         <div>#${i + 1}</div>
+         <div>${user.first_name}</div>
+         <div>${user.organization.district_name.split(' (')[0]}</div>
+         <div>${user.points} points</div>
+       </div>`
+    ).join('');
     
     document.getElementById('close').click();
   } catch (error) {
