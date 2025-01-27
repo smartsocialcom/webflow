@@ -25,7 +25,6 @@ if (!window.scriptExecuted) {
     document.getElementById("total_incidents").textContent = (parentsCount * (0.15 + 0.09 + 0.088)).toFixed(0);
     document.getElementById("feedback_count").textContent = feedback.length;
 
-    if (data.organization.student_access === true) document.getElementById("student_registration_links_lock").classList.add("hide");
     const getTop = (items) => Object.entries(items).map(([key, count]) => ({ key, count })).sort((a, b) => b.count - a.count).slice(0, 10);
   
     document.getElementById("custom_graphics").setAttribute("href", data.organization.custom_graphics);
@@ -93,41 +92,6 @@ if (!window.scriptExecuted) {
       });
     } else {
       document.getElementById("studentLoginsPerMonthChartWrapper").innerHTML = `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated as more parents access. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> to get more parents involved so this graph has accurate data.</h4></div>`
-    }
-    if (studentsLoginLog.length) {
-      const loginData = studentsLoginLog.reduce((acc, { _school_buildings }) => {
-        const name = _school_buildings?.school_name;
-        if (name) acc[name] = (acc[name] || 0) + 1;
-        return acc;
-      }, {});
-    
-      new Chart(document.getElementById("studentLoginsPerBuilding"), {
-        type: "doughnut",
-        data: {
-          labels: Object.keys(loginData),
-          datasets: [{
-            data: Object.values(loginData),
-            backgroundColor: generateColors(studentsLoginLog.length)
-          }]
-        },
-        options: {
-          cutout: "50%",
-          plugins: {
-            title: { display: true, text: "" },
-            legend: { display: true, position: "bottom" },
-            tooltip: {
-              callbacks: {
-                label: ({ raw, dataset }) => {
-                  const total = dataset.data.reduce((a, b) => a + b, 0);
-                  return `${raw}: ${(raw / total * 100).toFixed(2)}%`;
-                }
-              }
-            }
-          }
-        }
-      });
-    } else {
-      document.getElementById("studentLoginsPerBuildingWrapper").innerHTML = `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated as more parents access. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> to get more parents involved so this graph has accurate data.</h4></div>`
     }
 
     //Top Users, Pages, Active Schoolbuildings
@@ -233,7 +197,6 @@ if (!window.scriptExecuted) {
     script.defer = true;
     script.src = "https://cdn.jsdelivr.net/npm/@finsweet/attributes-copyclip@1/copyclip.js";
     document.head.appendChild(script);
-    document.getElementById('student_pin_list').innerHTML = school_buildings.map(school => `<a fs-copyclip-text="https://smartsocial.com/students?pin=${school.student_pin_code}" fs-copyclip-element="click" fs-copyclip-message="Link Copied!" href="#" class="link-list w-button">${school.school_name}<span class="pincode">Pincode: ${school.student_pin_code}</span></a>`).join(''); // List School Buildings Pincodes
     
     const testimonialList = document.querySelector(".testimonial-list");
     feedback.forEach(({ positive_feedback, user, created_at, page_name }) => {
@@ -283,11 +246,11 @@ if (!window.scriptExecuted) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
-
+    console.log(top_users);
     document.querySelector('.leader_board-wrapper').innerHTML += top_users.items.map((user, i) => 
       `<div class='leader_board-row'>
          <div>#${i + 1}</div>
-         <div>${user.first_name}</div>
+         <div>${user.first_name} ${user.last_name}</div>
          <div>${user.organization.district_name.split(' (')[0]}</div>
          <div>${user.points} points</div>
        </div>`
