@@ -293,7 +293,7 @@ if (!window.scriptExecuted) {
        </div>`
     ).join('');
     
-    document.getElementById('close').click();
+    document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
   } catch (error) {
     console.error("Error:", error);
   }
