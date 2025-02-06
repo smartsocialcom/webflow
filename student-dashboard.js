@@ -10,31 +10,34 @@ if (!window.scriptExecuted) {
       const loginLog = data.students_login_log;
       const lessonsLog = data.students_lessons_log;
 
-      // Update org name & custom graphics link
       document.getElementById("org_name").textContent = district_name;
-      if (student_access === true) document.getElementById("student_registration_links_lock").classList.add("hide");
+      if (student_access === true)
+        document.getElementById("student_registration_links_lock").classList.add("hide");
       document.getElementById("custom_graphics").setAttribute("href", custom_graphics);
 
-      // Render student pin list
       document.getElementById("student_pin_list").innerHTML = school_buildings
         .map(s => `<a fs-copyclip-text="https://smartsocial.com/students?pin=${s.student_pin_code}" fs-copyclip-element="click" fs-copyclip-message="Link Copied!" href="#" class="link-list w-button">
                     ${s.school_name}<span class="pincode">Pincode: ${s.student_pin_code}</span>
                   </a>`)
         .join("");
 
-      // Student logins per month chart
+      // Student logins per month (vertical bar chart)
       const monthlyLogins = Array(12).fill(0);
       loginLog.forEach(l => monthlyLogins[new Date(l.created_at).getMonth()]++);
       new Chart(document.getElementById("studentLoginsPerMonthChart"), {
         type: "bar",
         data: {
           labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-          datasets: [{ label: "Student Logins per month", data: monthlyLogins, backgroundColor: "#03afaf" }]
+          datasets: [{
+            label: "Student Logins per month",
+            data: monthlyLogins,
+            backgroundColor: "#02afaf"
+          }]
         },
         options: { scales: { y: { beginAtZero: true } } }
       });
 
-      // Student logins per building chart
+      // Student logins per building (doughnut chart)
       if (loginLog.length) {
         const buildingLogins = loginLog.reduce((acc, { _school_buildings }) => {
           const name = _school_buildings?.school_name;
@@ -71,7 +74,7 @@ if (!window.scriptExecuted) {
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Please check back later.</h4></div>`;
       }
 
-      // Top visited lessons chart
+      // Top visited lessons (horizontal bar chart)
       if (lessonsLog && lessonsLog.length) {
         const lessonCounts = {};
         lessonsLog.forEach(item => {
@@ -92,10 +95,13 @@ if (!window.scriptExecuted) {
             datasets: [{
               label: "Top Visited Lessons",
               data: topLessons.map(item => item.count),
-              backgroundColor: "#EF476F"
+              backgroundColor: "#02afaf"
             }]
           },
-          options: { scales: { y: { beginAtZero: true } } }
+          options: {
+            indexAxis: "y",
+            scales: { x: { beginAtZero: true } }
+          }
         });
       } else {
         document.getElementById("topVisitedLessonsWrapper").innerHTML =
@@ -108,7 +114,6 @@ if (!window.scriptExecuted) {
       cpScript.src = "https://cdn.jsdelivr.net/npm/@finsweet/attributes-copyclip@1/copyclip.js";
       document.head.appendChild(cpScript);
 
-      // Hide loaders
       document.querySelectorAll(".loader").forEach(e => e.classList.add("hide"));
     } catch (err) {
       console.error("Error:", err);
