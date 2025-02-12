@@ -9,11 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
       renderTable(organizations);
       document.getElementById('loader').remove();
 
-      // Simulate clicking the "Total Feedbacks" column header twice
-      const feedbackColumnHeader = document.querySelector('th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
-      if (feedbackColumnHeader) {
-        feedbackColumnHeader.click();
-        feedbackColumnHeader.click();
+      const feedbackHeader = document.querySelector('th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
+      if (feedbackHeader) {
+        feedbackHeader.click();
+        feedbackHeader.click();
       }
     })
     .catch(error => console.error("Error:", error));
@@ -28,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'Regs', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
+      { name: 'Expire', key: 'org_expire_date', type: 'date' },
       { name: 'Dashboard', key: 'dashboard', type: 'none' }
     ];
 
@@ -35,11 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     headers.forEach(header => {
       if (header.type !== 'none') {
         let headerLabel = header.name;
-        if (currentSortColumn === header.key) {
-          headerLabel += sortAscending ? ' ▲' : ' ▼';
-        } else {
-          headerLabel += ' ▲▼';
-        }
+        headerLabel += currentSortColumn === header.key ? (sortAscending ? ' ▲' : ' ▼') : ' ▲▼';
         html += `<th data-key="${header.key}" style="cursor:pointer;">${headerLabel}</th>`;
       } else {
         html += `<th>${header.name}</th>`;
@@ -50,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
     data.forEach((org, index) => {
       const registrationGoal = Math.round(org.total_students * 0.05);
       const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100).toFixed(1);
-
       html += `<tr>
         <td>${index + 1}</td>
         <td>${org.district_name}</td>
@@ -58,47 +53,59 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${registrationGoal.toLocaleString()}</td>
         <td>${org.parents.toLocaleString()}</td>
         <td>${percentageToGoal}%</td>
-        <td>${org.total_feedbacks.toLocaleString()}</td>
-        <td><a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">View More</a></td>
+        <td>${org.total_feedbacks.toLocaleString()}</td>`;
+
+      if (org.org_expire_date) {
+        let expireDate = new Date(org.org_expire_date);
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let diffDays = (expireDate - today) / (1000 * 60 * 60 * 24);
+        let bgColor = diffDays < 0 ? '#f5cbcb' : diffDays >= 90 ? '#d9ead3' : '#fdf2cc';
+        let parts = org.org_expire_date.split('-');
+        let formattedDate = parts[1] + '/' + parts[2] + '/' + parts[0].slice(-2);
+        html += `<td style="background: ${bgColor}">${formattedDate}</td>`;
+      } else {
+        html += `<td></td>`;
+      }
+
+      html += `<td><a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">View More</a></td>
       </tr>`;
     });
-
     html += '</table>';
     orgsList.innerHTML = html;
 
-    orgsList.querySelectorAll('th[data-key]').forEach(th => {
-      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')));
-    });
+    orgsList.querySelectorAll('th[data-key]').forEach(th =>
+      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')))
+    );
   }
 
   function sortColumn(key) {
-    if (currentSortColumn === key) {
-      sortAscending = !sortAscending;
+    if (key === 'org_expire_date') {
+      organizations.sort((a, b) => {
+        let dateA = a.org_expire_date ? new Date(a.org_expire_date) : new Date(0);
+        let dateB = b.org_expire_date ? new Date(b.org_expire_date) : new Date(0);
+        return sortAscending ? dateA - dateB : dateB - dateA;
+      });
     } else {
-      currentSortColumn = key;
-      sortAscending = true;
+      organizations = organizations.map(org => {
+        const registrationGoal = Math.round(org.total_students * 0.05);
+        const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
+        return { ...org, registrationGoal, percentageToGoal };
+      });
+      organizations.sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+        if (typeof valA === 'string') {
+          valA = valA.toLowerCase();
+          valB = valB.toLowerCase();
+        }
+        if (valA < valB) return sortAscending ? -1 : 1;
+        if (valA > valB) return sortAscending ? 1 : -1;
+        return 0;
+      });
     }
-
-    organizations = organizations.map(org => {
-      const registrationGoal = Math.round(org.total_students * 0.05);
-      const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
-      return { ...org, registrationGoal, percentageToGoal };
-    });
-
-    organizations.sort((a, b) => {
-      let valA = a[key];
-      let valB = b[key];
-
-      if (typeof valA === 'string') {
-        valA = valA.toLowerCase();
-        valB = valB.toLowerCase();
-      }
-
-      if (valA < valB) return sortAscending ? -1 : 1;
-      if (valA > valB) return sortAscending ? 1 : -1;
-      return 0;
-    });
-
+    currentSortColumn = key;
+    sortAscending = !sortAscending;
     renderTable(organizations);
   }
 });
