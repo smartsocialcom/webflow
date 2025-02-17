@@ -217,7 +217,7 @@ if (!window.scriptExecuted) {
         `<div class='leader_board-row'>
            <div>#${i + 1}</div>
            <div>${user.first_name} ${user.last_name}</div>
-           <div>${user.organization.district_name.split(" (")[0]}</div>
+           <div>${user.school_buildings_id?.[0]?.school_name || ""}</div>
            <div>${user.points} points</div>
          </div>`
       ).join("");
