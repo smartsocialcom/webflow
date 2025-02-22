@@ -212,6 +212,9 @@ if (!window.scriptExecuted) {
         URL.revokeObjectURL(url);
       });
 
+      // Time
+      document.getElementById("time").textContent=(d=new Date(),m=d.toLocaleString("en-US",{month:"long"}),day=d.getDate(),y=d.getFullYear(),hr=d.getHours()%12||12,mi=(d.getMinutes()<10?"0":"")+d.getMinutes(),ap=d.getHours()<12?"AM":"PM",tz=d.toLocaleTimeString("en-US",{timeZoneName:"short"}).split(" ")[2],`${m} ${day}, ${y} ${hr}:${mi}${ap} ${tz}`);
+
       // Leader Board from API Top Users
       document.querySelector(".leader_board-wrapper").innerHTML += top_users.items.map((user, i) =>
         `<div class='leader_board-row'>

@@ -2,7 +2,7 @@
 <script>
   const url = new URL(window.location.href);
   const searchParams = url.searchParams;
-  let orgValue, memberData, orgActive, actions, orgData;
+  let orgValue, memberData, orgActive, actions, orgData, orgName;
   
   function setCookie(k, v, d) {
     document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/`;
@@ -17,9 +17,11 @@
     document.cookie = `${encodeURIComponent(key)}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
   }
 
-  function applyOrgData(districtName, schoolBuildings) {
-    document.getElementById("district_name").textContent = districtName.includes("free trial") ? districtName : `${districtName} has partnered with Smartsocial.com`;
+  function applyOrgData(districtName) {
+    document.getElementById("district_name_popup").textContent = districtName.includes("free trial") ? districtName : `${districtName} has partnered with Smartsocial.com`;
     document.getElementById("district_name_input").value = districtName;
+    document.querySelectorAll('#district_name').forEach(el => el.textContent = districtName);
+
   }
 
   function getOrg(orgValue) {
@@ -28,10 +30,10 @@
         .then(response => {
           orgData = response.data;
           orgActive = orgData.organization.org_active;
-          
+          orgName = orgData.organization.district_name;
           if(orgActive) {
             setCookie("org", orgValue, 400);
-            applyOrgData(orgData.organization.district_name);
+            applyOrgData(orgName);
             resolve(response.data);
           } else {
             orgNotActive(orgData.organization.short_code);
