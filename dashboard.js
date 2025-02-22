@@ -227,6 +227,28 @@ if (!window.scriptExecuted) {
 
       // Hide loaders
       document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
+
+      // Download Page PDF
+      document.getElementById("screenshot").addEventListener("click", function(){
+        document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(el => el.classList.add("hide"));
+        document.querySelector(".view-more_btn")?.click();
+        setTimeout(() => {
+          html2canvas(document.body, {
+            width: document.body.scrollWidth,
+            height: document.body.scrollHeight,
+            scrollX: 0,
+            scrollY: 0,
+            useCORS: true
+          }).then(canvas => {
+            const { jsPDF } = window.jspdf,
+                  imgData = canvas.toDataURL("image/png"),
+                  pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]);
+            pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+            pdf.save("download.pdf");
+            document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(el => el.classList.remove("hide"));
+          });
+        }, 1000);
+      });
     } catch (err) {
       console.error("Error:", err);
     }
