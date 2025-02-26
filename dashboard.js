@@ -244,7 +244,8 @@ if (!window.scriptExecuted) {
                   imgData = canvas.toDataURL("image/png"),
                   pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]);
             pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-            pdf.save("download.pdf");
+            pdf.save(`${district_name} Parent engagement dashboard download smartsocial.com ${new Date().toLocaleDateString("en-US", { year: "2-digit", month: "numeric", day: "numeric" }).replace(/\//g, ".")
+            }.pdf`);
             document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(el => el.classList.remove("hide"));
           });
         }, 1000);
