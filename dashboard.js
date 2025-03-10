@@ -33,7 +33,11 @@ if (!window.scriptExecuted) {
       setText("total_students", total_students.toLocaleString());
       setText("community_registration_goal", Math.round(total_students * 0.05).toLocaleString());
       setText("parents", parentsCount);
-      setText("percentage_to_goal", ((parentsCount / (total_students * 0.05)) * 100).toFixed(1));
+      const pct = ((parentsCount / (total_students * 0.05)) * 100).toFixed(1);
+      if (pct > 25) {
+        setText("percentage_to_goal", pct + "%");
+        document.getElementById("percentage_to_goal").classList.remove("small");
+      }
       setText("compared_engagement", (parentsCount / (total_students * 0.001)).toFixed(1));
       setText("monthly_engagement", (parentsCount * 4).toLocaleString());
       setText("bullying_avoided", (parentsCount * 0.15).toFixed(0));
