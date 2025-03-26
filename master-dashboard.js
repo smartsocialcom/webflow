@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       html += `<td>
         <a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">Parents</a><br>
-        <a href="https://smartsocial.com/dashboard/students?as_org=${org.short_code}" target="_blank">Students</a>
+        <a href="https://smartsocial.com/dashboard/student?as_org=${org.short_code}" target="_blank">Students</a>
       </td></tr>`;
     });
     html += '</table>';
