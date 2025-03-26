@@ -68,8 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
         html += `<td></td>`;
       }
 
-      html += `<td><a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">View More</a></td>
-      </tr>`;
+      html += `<td>
+        <a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">Parents</a><br>
+        <a href="https://smartsocial.com/dashboard/students?as_org=${org.short_code}" target="_blank">Students</a>
+      </td></tr>`;
     });
     html += '</table>';
     orgsList.innerHTML = html;
