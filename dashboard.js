@@ -45,6 +45,9 @@ if (!window.scriptExecuted) {
       setText("abuse_avoided", (parentsCount * 0.088).toFixed(0));
       setText("total_incidents", (parentsCount * (0.15 + 0.09 + 0.088)).toFixed(0));
       setText("feedback_count", feedback.length);
+      setText("total_students_absent", (total_students * 0.05).toFixed(0));
+      setText("estimated_funding", (total_students * 0.05 * 100).toFixed(0));
+
       document.getElementById("custom_graphics").setAttribute("href", custom_graphics);
 
       // Chart: Users Per Month

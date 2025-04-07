@@ -1,0 +1,147 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Function declarations first for proper scoping
+    function getCookie(name) {
+      const value = "; " + document.cookie;
+      const parts = value.split("; " + name + "=");
+      if (parts.length === 2) return parts.pop().split(";").shift();
+      return '';
+    }
+
+    function setCookie(name, value, days) {
+      let expires = '';
+      if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + value + expires + "; path=/";
+    }
+
+    // Updates the UI based on the current student_session cookie
+    function updateUI() {
+      const student_session = getCookie("student_session");
+      const schoolName = getCookie('school_name');
+      const districtName = getCookie('district_name');
+      
+      if (schoolName) {
+        document.querySelectorAll('#school_name').forEach(function(e) {
+          e.textContent = decodeURIComponent(schoolName);
+        });
+      }
+      
+      if (districtName) {
+        document.querySelectorAll('#district_name').forEach(function(e) {
+          e.textContent = districtName;
+        });
+      }
+      
+      document.querySelector('#logout').classList.remove('hide');
+      document.querySelectorAll('#loggedin-message').forEach(function(e) {
+        e.classList.remove('hide');
+      });
+
+      if (student_session) {
+        document.getElementById('student_login').classList.add('hide');
+        axios.post("https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/students_lessons_log", {
+          pin_code: student_session,
+          page_url: location.href
+        });
+      }
+    }
+
+    function updateLogout() {
+      document.getElementById('student_login').classList.remove('hide');
+      document.querySelectorAll('#school_name').forEach(function(e) { 
+        e.textContent = "";
+      });
+      document.querySelectorAll('#district_name').forEach(function(e) { 
+        e.textContent = "";
+      });
+      document.querySelectorAll('#loggedin-message').forEach(function(e) { 
+        e.classList.add('hide');
+      });
+      document.querySelector('#logout').classList.add('hide');
+    }
+
+    function verifyPin(event) {
+      if (event) event.preventDefault();
+      const pinValue = document.getElementById('pin').value;
+      if (pinValue) {
+        fetchStudentData(pinValue);
+      }
+    }
+
+    function fetchStudentData(pinValue) {
+      // Hide any previous error
+      const errorElement = document.querySelector('.error-text');
+      if (errorElement) {
+        errorElement.classList.add('hide');
+      }
+      
+      axios.get("https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/school_buildings/student_pin_code/" + pinValue)
+        .then(function(response) {
+          setCookie('student_session', pinValue, 30);
+          setCookie('school_name', response.data.school_name, 30);
+          setCookie('district_name', response.data.organization.district_name, 30);
+          updateUI();
+        })
+        .catch(function(error) {
+          if (errorElement) {
+            errorElement.classList.remove('hide');
+          }
+          console.error(error);
+        });
+    }
+
+    // Check URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const pin = urlParams.get('pin');
+    
+    // Check if user is already logged in
+    const student_session = getCookie("student_session");
+    if (student_session) {
+      updateUI();
+    } else {
+      updateLogout();
+      // If a pin is provided in the URL, attempt to fetch student data
+      if (pin) {
+        fetchStudentData(pin);
+      }
+    }
+
+    // Event listeners
+    document.addEventListener('keydown', function(event) {
+      if (document.activeElement.id === 'pin' && event.key === 'Enter') {
+        event.preventDefault();
+        verifyPin();
+      }
+    });
+
+    const submitButton = document.getElementById('submit');
+    if (submitButton) {
+      submitButton.addEventListener('click', verifyPin);
+    }
+
+    const pinForm = document.getElementById('student-pin-code');
+    if (pinForm) {
+      pinForm.addEventListener('submit', verifyPin);
+      pinForm.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+        }
+      });
+    }
+
+    // Handle logout button
+    const logoutButton = document.querySelector('#logout');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', function() {
+        setCookie('student_session', '', -1); // Delete cookie
+        setCookie('school_name', '', -1);
+        setCookie('district_name', '', -1);
+        updateLogout();
+      });
+    }
+  });
+</script> 

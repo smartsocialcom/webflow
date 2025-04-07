@@ -2,7 +2,7 @@
 <script>
   const url = new URL(window.location.href);
   const searchParams = url.searchParams;
-  let orgValue, memberData, orgActive, actions, orgData, orgName, feedbackActive;
+  let orgValue, memberData, orgActive, actions, orgData, districtName, feedbackActive, parentStudentVideoAccess;
   
   function setCookie(k, v, d) {
     document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/`;
@@ -21,7 +21,6 @@
     document.getElementById("district_name_popup").textContent = districtName.includes("free trial") ? districtName : `${districtName} has partnered with Smartsocial.com`;
     document.getElementById("district_name_input").value = districtName;
     document.querySelectorAll('#district_name').forEach(el => el.textContent = districtName);
-
   }
 
   function getOrg(orgValue) {
@@ -30,15 +29,30 @@
         .then(response => {
           orgData = response.data;
           orgActive = orgData.organization.org_active;
-          orgName = orgData.organization.district_name;
+          districtName = orgData.organization.district_name;
           feedbackActive = orgData.organization.feedback_active;
+          parentStudentVideoAccess = orgData.organization.parent_student_video_access;
           
           if(orgActive) {
             setCookie("org", orgValue, 400);
-            applyOrgData(orgName);
+            setCookie("district_name", districtName, 1);
+            applyOrgData(districtName);
+            console.log("orgActive");
+            if(parentStudentVideoAccess) {
+              setCookie("parent_student_video_access", parentStudentVideoAccess, 30);
+              console.log("true");
+            } else {
+              document.cookie = 'parent_student_video_access=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+              console.log("false");
+            }
             resolve(response.data);
-          } else {
-            orgNotActive(orgData.organization.short_code);
+          } else{ 
+            const lastTime = localStorage.getItem("expiredRedirection");
+            const now = Date.now();
+            if (!lastTime || now - parseInt(lastTime) > 600000) {
+              localStorage.setItem("expiredRedirection", now.toString());
+              window.location.href = `/expired?short_code=${orgValue}`;
+            }
           }
       });
     });
@@ -79,10 +93,6 @@
       orgValue = cookie || ms || queryOrg || hashOrg;
   }
 
-  function orgNotActive(short_code){
-    window.location.href = `/expired?short_code=${short_code}`;
-  }
-
   function addPoints(action, points) {
     return axios.put('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/points', { memberid: memberData.id, points: points, action: action });
 
@@ -106,10 +116,18 @@
       	}, 4000);
         	
       } else {
-        axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
-          member_id: memberData.id,
-          page_url: window.location.href
-        });
+        if (!window.location.href.includes("/video-lessons/")) {
+          axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
+            member_id: memberData.id,
+            page_url: window.location.href
+          });
+        } else if (getCookie("student_session")) {
+          console.log("student");
+          axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
+            member_id: memberData.id,
+            page_url: window.location.href
+          });
+        }
       }
       
       document.querySelectorAll(".lang-select").forEach(e => e.onclick = () => setTimeout(() => location.reload(), 500)); // Refresh page on lang switcher click
