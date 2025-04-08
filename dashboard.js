@@ -38,14 +38,14 @@ if (!window.scriptExecuted) {
         setText("percentage_to_goal", pct + "%");
         document.getElementById("percentage_to_goal").classList.remove("small");
       }
-      setText("compared_engagement", (parentsCount / (total_students * 0.001)).toFixed(1));
+      setText("compared_engagement", (parentsCount / (total_students * 0.001)).toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
       setText("monthly_engagement", (parentsCount * 4).toLocaleString());
-      setText("bullying_avoided", (parentsCount * 0.15).toFixed(0));
-      setText("screen_avoided", (parentsCount * 0.09).toFixed(0));
-      setText("abuse_avoided", (parentsCount * 0.088).toFixed(0));
-      setText("total_incidents", (parentsCount * (0.15 + 0.09 + 0.088)).toFixed(0));
+      setText("bullying_avoided", (parentsCount * 0.15).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+      setText("screen_avoided", (parentsCount * 0.09).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+      setText("abuse_avoided", (parentsCount * 0.088).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+      setText("total_incidents", (parentsCount * (0.15 + 0.09 + 0.088)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
       setText("feedback_count", feedback.length);
-      setText("total_students_absent", (total_students * 0.05).toFixed(0));
+      setText("total_students_absent", (total_students * 0.05).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
       setText("estimated_funding", (total_students * 0.05 * 100).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
       document.getElementById("custom_graphics").setAttribute("href", custom_graphics);
 
