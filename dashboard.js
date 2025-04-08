@@ -33,7 +33,7 @@ if (!window.scriptExecuted) {
       setText("total_students", total_students.toLocaleString());
       setText("community_registration_goal", Math.round(total_students * 0.05).toLocaleString());
       setText("parents", parentsCount);
-      const pct = ((parentsCount / (total_students * 0.05)) * 100).toFixed(1);
+      const pct = ((parentsCount / (total_students * 0.05)) * 100).toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       if (pct > 25) {
         setText("percentage_to_goal", pct + "%");
         document.getElementById("percentage_to_goal").classList.remove("small");
