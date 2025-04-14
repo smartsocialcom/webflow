@@ -131,7 +131,7 @@ if (!window.scriptExecuted) {
 
       // Chart: Top Pages
       console.log("toppges "); //log
-      console.log(allLog); //log
+      console.log(log); //log
 
 
       if (topPages.length) {
