@@ -93,10 +93,10 @@ if (!window.scriptExecuted) {
       const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
       const validPaths = ['/events', '/teen-slang', '/app-guide', '/video-games', '/parental-control', '/online-activities', '/offline-activities', '/sex-trafficking', '/post/'];
       const processLog = logs => logs.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
-        if (!user || !user.first_name || !user.last_name ||
+        if (!user || !user.first_name ||
             (school_buildings_id && school_buildings_id.some(s => s?.id === 1)) ||
             !validPaths.some(p => page_url.includes(p))) return acc;
-        const fullName = `${user.first_name} ${user.last_name}`.trim();
+        const fullName = user.last_name ? `${user.first_name} ${user.last_name}`.trim() : user.first_name;
         const path = page_url.split('.com')[1]?.split('?')[0];
         if (path && created_at > thirtyDaysAgo) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
         acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
@@ -172,7 +172,7 @@ if (!window.scriptExecuted) {
       // Feedback Testimonials
       let testimonials = "";
       feedback.forEach(({ positive_feedback, user, created_at, page_name }) => {
-        const name = `${user?.first_name || ""} ${user?.last_name || ""}`;
+        const name = user?.last_name ? `${user.first_name} ${user.last_name}` : user.first_name;
         const schools = user?.school_buildings_id
           ?.filter(s => s?.school_name && s.school_name !== "District Staff")
           .map(s => s.school_name)
@@ -205,7 +205,7 @@ if (!window.scriptExecuted) {
             .filter(b => b?.school_name)
             .map(b => b.school_name)
             .join(", ");
-          return `"${user.email}","${user.first_name}","${user.last_name}","${schools}"`;
+          return `"${user.email}","${user.first_name}","${user.last_name || ''}","${schools}"`;
         }).join("\n");
         const blob = new Blob([csv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
@@ -225,7 +225,7 @@ if (!window.scriptExecuted) {
       document.querySelector(".leader_board-wrapper").innerHTML += top_users.items.map((user, i) =>
         `<div class='leader_board-row'>
            <div>#${i + 1}</div>
-           <div>${user.first_name} ${user.last_name}</div>
+           <div>${user.last_name ? `${user.first_name} ${user.last_name}` : user.first_name}</div>
            <div>${user.school_buildings_id?.[0]?.school_name || ""}</div>
            <div>${user.points} points</div>
          </div>`
