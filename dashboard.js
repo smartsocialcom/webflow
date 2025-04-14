@@ -94,18 +94,51 @@ if (!window.scriptExecuted) {
       const validPaths = ['/events', '/teen-slang', '/app-guide', '/video-games', '/parental-control', '/online-activities', '/offline-activities', '/sex-trafficking', '/post/'];
       console.log("Starting to process logs");
       const processLog = logs => logs.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
-        if (!user || !user.first_name || !user.last_name ||
-            (school_buildings_id && school_buildings_id.some(s => s?.id === 1)) ||
-            !validPaths.some(p => page_url.includes(p))) return acc;
+        console.log("Processing log entry:", { created_at, page_url, user, school_buildings_id });
+        
+        // Check if user exists and has required fields
+        if (!user) {
+          console.log("Skipping: No user data");
+          return acc;
+        }
+        if (!user.first_name || !user.last_name) {
+          console.log("Skipping: Missing first or last name", { first_name: user.first_name, last_name: user.last_name });
+          return acc;
+        }
+
+        // Check if page URL is valid
+        const hasValidPath = validPaths.some(p => page_url?.includes(p));
+        if (!hasValidPath) {
+          console.log("Skipping: Invalid page URL", page_url);
+          return acc;
+        }
+
+        // Check if within 30 days
+        if (created_at <= thirtyDaysAgo) {
+          console.log("Skipping: Entry too old", new Date(created_at));
+          return acc;
+        }
+
         const fullName = `${user.first_name} ${user.last_name}`.trim();
         const path = page_url.split('.com')[1]?.split('?')[0];
-        if (path && created_at > thirtyDaysAgo) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
-        acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
-        school_buildings_id?.forEach(b => { if (b?.school_name) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; });
+        
+        if (path) {
+          acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
+          acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
+          school_buildings_id?.forEach(b => { 
+            if (b?.school_name) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; 
+          });
+        }
+        
         return acc;
       }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
       
       console.log("Original log data:", log);
+      console.log("Log entries count:", log.length);
+      console.log("Log entries with valid paths:", log.filter(l => validPaths.some(p => l.page_url?.includes(p))).length);
+      console.log("Log entries within 30 days:", log.filter(l => l.created_at > thirtyDaysAgo).length);
+      console.log("Log entries with valid users:", log.filter(l => l.user && l.user.first_name && l.user.last_name).length);
+      
       const filteredLog = processLog(log.filter(l => !(l.user?.school_buildings_id?.some(s => s?.id === 1))));
       const allLog = processLog(log);
       const topUsers = getTop(filteredLog.userCounts).map(({ key, count }) => ({ name: key, count }));
