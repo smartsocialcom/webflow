@@ -130,7 +130,7 @@ if (!window.scriptExecuted) {
       }
 
       // Chart: Top Pages
-      console.log("toppges : "+topPages);
+      console.log("toppges : "+topPages); //log
       if (topPages.length) {
         createChart("topPagesChart", "bar", {
           labels: topPages.map(p => p.url),
