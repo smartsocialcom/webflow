@@ -86,7 +86,7 @@ if (!window.scriptExecuted) {
         });
       } else {
         document.getElementById("schoolBuildingsChartWrapper").innerHTML =
-          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
+          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=${org}"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
       // Process Logs for Top Charts
@@ -126,10 +126,11 @@ if (!window.scriptExecuted) {
         }, { indexAxis: "y", scales: { x: { beginAtZero: true } } });
       } else {
         document.getElementById("topUsersChartWrapper").innerHTML =
-          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
+          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=${org}"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
       // Chart: Top Pages
+      console.log("toppges : "+topPages);
       if (topPages.length) {
         createChart("topPagesChart", "bar", {
           labels: topPages.map(p => p.url),
@@ -143,7 +144,7 @@ if (!window.scriptExecuted) {
         }, { indexAxis: "y", scales: { x: { beginAtZero: true } } });
       } else {
         document.getElementById("topPagesChartWrapper").innerHTML =
-          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
+          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=${org}"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
       // Chart: Top School Buildings
@@ -166,7 +167,7 @@ if (!window.scriptExecuted) {
         });
       } else {
         document.getElementById("topSchoolBuildingsWrapper").innerHTML =
-          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
+          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=${org}"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
       // Feedback Testimonials
