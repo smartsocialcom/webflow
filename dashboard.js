@@ -92,6 +92,7 @@ if (!window.scriptExecuted) {
       // Process Logs for Top Charts
       const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
       const validPaths = ['/events', '/teen-slang', '/app-guide', '/video-games', '/parental-control', '/online-activities', '/offline-activities', '/sex-trafficking', '/post/'];
+      console.log("Starting to process logs");
       const processLog = logs => logs.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
         if (!user || !user.first_name || !user.last_name ||
             (school_buildings_id && school_buildings_id.some(s => s?.id === 1)) ||
@@ -104,10 +105,14 @@ if (!window.scriptExecuted) {
         return acc;
       }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
       
+      console.log("Original log data:", log);
       const filteredLog = processLog(log.filter(l => !(l.user?.school_buildings_id?.some(s => s?.id === 1))));
       const allLog = processLog(log);
       const topUsers = getTop(filteredLog.userCounts).map(({ key, count }) => ({ name: key, count }));
       const topPages = getTop(allLog.pageCounts).map(({ key, count }) => ({ url: key, count }));
+      console.log("Processed logs - filteredLog:", filteredLog);
+      console.log("Processed logs - allLog:", allLog);
+      console.log("Top pages:", topPages);
       const topSchoolBuildings = getTop(allLog.schoolCounts)
         .filter(({ key }) => key !== "District Staff")
         .map(({ key, count }) => ({ school_name: key, count }));
@@ -130,10 +135,6 @@ if (!window.scriptExecuted) {
       }
 
       // Chart: Top Pages
-      console.log("toppges "); //log
-      console.log(log); //log
-
-
       if (topPages.length) {
         createChart("topPagesChart", "bar", {
           labels: topPages.map(p => p.url),
