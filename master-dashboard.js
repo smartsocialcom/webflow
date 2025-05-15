@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(error => console.error("Error:", error));
 
   function renderTable(data) {
-    const orgsList = document.querySelector('.orgs_list');
+    const orgsList = document.querySelector('.orgs_list'); //
     const headers = [
       { name: '#', key: 'row_number', type: 'none' },
       { name: 'District Name', key: 'district_name', type: 'string' },
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100).toFixed(1);
       html += `<tr>
         <td>${index + 1}</td>
-        <td>${org.district_name}</td>
+        <td style="${org.org_active === false ? 'color: red;' : ''}">${org.district_name}</td>
         <td>${org.total_students.toLocaleString()}</td>
         <td>${registrationGoal.toLocaleString()}</td>
         <td>${org.parents.toLocaleString()}</td>
