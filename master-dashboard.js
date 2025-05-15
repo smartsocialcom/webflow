@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100).toFixed(1);
       html += `<tr>
         <td>${index + 1}</td>
-        <td style="${org.org_active === false ? 'color: red;' : ''}">${org.district_name}</td>
+        <td${org.org_active === false ? ' style="color:red;"' : ''}>${org.district_name}</td>
         <td>${org.total_students.toLocaleString()}</td>
         <td>${registrationGoal.toLocaleString()}</td>
         <td>${org.parents.toLocaleString()}</td>
