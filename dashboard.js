@@ -237,11 +237,10 @@ if (!window.scriptExecuted) {
       // Download Page PDF
       document.getElementById("screenshot").addEventListener("click",()=>{
         document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.add("hide"));
-        document.querySelector(".view-more_btn")?.click();
         setTimeout(()=>{
           html2canvas(document.body,{width:document.body.scrollWidth,height:document.body.scrollHeight,scrollX:0,scrollY:0,useCORS:!0}).then(c=>{
-            const{jsPDF}=window.jspdf,imgData=c.toDataURL("image/png"),pdf=new jsPDF("p","pt",[c.width,c.height]);
-            pdf.addImage(imgData,"PNG",0,0,c.width,c.height);
+            const{jsPDF}=window.jspdf,imgData=c.toDataURL("image/jpeg",0.7),pdf=new jsPDF("p","pt",[c.width,c.height]);
+            pdf.addImage(imgData,"JPEG",0,0,c.width,c.height);
             pdf.save(`${district_name} Parent engagement dashboard download smartsocial.com ${new Date().toLocaleDateString("en-US",{year:"2-digit",month:"numeric",day:"numeric"}).replace(/\//g,".")}.pdf`);
             document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.remove("hide"));
           });
