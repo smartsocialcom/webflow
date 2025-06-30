@@ -200,12 +200,12 @@ if (!window.scriptExecuted) {
       // Download Feature
       document.getElementById("download")?.addEventListener("click", async () => {
         const dlData = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
-        const csv = "Email,First Name,Last Name,School Buildings\n" + dlData.users.map(user => {
+        const csv = "Email,First Name,Last Name,Mobile Phone,School Buildings\n" + dlData.users.map(user => {
           const schools = (user.school_buildings_id || [])
             .filter(b => b?.school_name)
             .map(b => b.school_name)
             .join(", ");
-          return `"${user.email}","${user.first_name}","${user.last_name || ''}","${schools}"`;
+          return `"${user.email}","${user.first_name}","${user.last_name || ''}","${user.mobile_phone || ''}","${schools}"`;
         }).join("\n");
         const blob = new Blob([csv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
