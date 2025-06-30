@@ -238,9 +238,18 @@ if (!window.scriptExecuted) {
       document.getElementById("screenshot").addEventListener("click",()=>{
         document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.add("hide"));
         setTimeout(()=>{
-          html2canvas(document.body,{width:document.body.scrollWidth,height:document.body.scrollHeight,scrollX:0,scrollY:0,useCORS:!0}).then(c=>{
-            const{jsPDF}=window.jspdf,imgData=c.toDataURL("image/jpeg",0.7),pdf=new jsPDF("p","pt",[c.width,c.height]);
-            pdf.addImage(imgData,"JPEG",0,0,c.width,c.height);
+          const scale = Math.min(1, 1200/document.body.scrollWidth);
+          html2canvas(document.body,{width:document.body.scrollWidth,height:document.body.scrollHeight,scrollX:0,scrollY:0,useCORS:!0,scale,backgroundColor:'#fff'}).then(c=>{
+            const {jsPDF} = window.jspdf;
+            const pdf = new jsPDF("p","pt","a4");
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const ratio = Math.min(pageWidth/c.width, pageHeight/c.height);
+            const scaledWidth = c.width * ratio;
+            const scaledHeight = c.height * ratio;
+            const x = (pageWidth - scaledWidth) / 2;
+            const y = (pageHeight - scaledHeight) / 2;
+            pdf.addImage(c.toDataURL("image/jpeg",0.4),"JPEG",x,y,scaledWidth,scaledHeight,undefined,'MEDIUM');
             pdf.save(`${district_name} Parent engagement dashboard download smartsocial.com ${new Date().toLocaleDateString("en-US",{year:"2-digit",month:"numeric",day:"numeric"}).replace(/\//g,".")}.pdf`);
             document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.remove("hide"));
           });
