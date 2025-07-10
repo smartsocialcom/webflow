@@ -244,11 +244,11 @@ if (!window.scriptExecuted) {
             const pdf = new jsPDF("p","pt","a4");
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
-            const ratio = Math.min(pageWidth/c.width, pageHeight/c.height);
-            const scaledWidth = c.width * ratio;
+            const ratio = pageWidth/c.width;
+            const scaledWidth = pageWidth;
             const scaledHeight = c.height * ratio;
-            const x = (pageWidth - scaledWidth) / 2;
-            const y = (pageHeight - scaledHeight) / 2;
+            const x = 0;
+            const y = 0;
             pdf.addImage(c.toDataURL("image/jpeg",0.4),"JPEG",x,y,scaledWidth,scaledHeight,undefined,'MEDIUM');
             pdf.save(`${district_name} Parent engagement dashboard download smartsocial.com ${new Date().toLocaleDateString("en-US",{year:"2-digit",month:"numeric",day:"numeric"}).replace(/\//g,".")}.pdf`);
             document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.remove("hide"));
