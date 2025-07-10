@@ -240,38 +240,23 @@ if (!window.scriptExecuted) {
         setTimeout(()=>{
           const scale = Math.min(2, 2400/document.body.scrollWidth);
           html2canvas(document.body,{width:document.body.scrollWidth,height:document.body.scrollHeight,scrollX:0,scrollY:0,useCORS:!0,scale,backgroundColor:'#fff'}).then(c=>{
-            const {jsPDF} = window.jspdf;
+                        const {jsPDF} = window.jspdf;
             const pdf = new jsPDF("p","pt","a4");
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const zoomFactor = 2; // 2x zoom to reduce white space
-            const baseRatio = Math.min(pageWidth/c.width, pageHeight/c.height);
-            const ratio = baseRatio * zoomFactor; // Actually zoom in 2x from normal fit
-            const scaledWidth = c.width * ratio;
-            const scaledHeight = c.height * ratio;
+            const [pageWidth,pageHeight] = [pdf.internal.pageSize.getWidth(),pdf.internal.pageSize.getHeight()];
+            const ratio = Math.min(pageWidth/c.width,pageHeight/c.height) * 2;
+            const [scaledWidth,scaledHeight] = [c.width*ratio,c.height*ratio];
+            const pagesNeeded = Math.ceil(scaledHeight/pageHeight);
             
-            // Calculate how many pages we need
-            const pagesNeeded = Math.ceil(scaledHeight / pageHeight);
-            const pageContentHeight = pageHeight;
-            
-                         for (let i = 0; i < pagesNeeded; i++) {
-               if (i > 0) pdf.addPage();
-               
-               const sourceY = (i * pageContentHeight) / ratio;
-               const sourceHeight = Math.min(pageContentHeight / ratio, c.height - sourceY);
-               const destHeight = sourceHeight * ratio;
-              
-              const x = (pageWidth - scaledWidth) / 2;
-              const y = 0;
-              
-              // Create a cropped canvas for this page
+            for(let i=0;i<pagesNeeded;i++){
+              if(i>0)pdf.addPage();
+              const sourceY = i*pageHeight/ratio;
+              const sourceHeight = Math.min(pageHeight/ratio,c.height-sourceY);
               const tempCanvas = document.createElement('canvas');
               const tempCtx = tempCanvas.getContext('2d');
               tempCanvas.width = c.width;
               tempCanvas.height = sourceHeight;
-              tempCtx.drawImage(c, 0, sourceY, c.width, sourceHeight, 0, 0, c.width, sourceHeight);
-              
-              pdf.addImage(tempCanvas.toDataURL("image/jpeg",0.4),"JPEG",x,y,scaledWidth,destHeight,undefined,'MEDIUM');
+              tempCtx.drawImage(c,0,sourceY,c.width,sourceHeight,0,0,c.width,sourceHeight);
+              pdf.addImage(tempCanvas.toDataURL("image/jpeg",0.4),"JPEG",(pageWidth-scaledWidth)/2,0,scaledWidth,sourceHeight*ratio,undefined,'MEDIUM');
             }
             pdf.save(`${district_name} Parent engagement dashboard download smartsocial.com ${new Date().toLocaleDateString("en-US",{year:"2-digit",month:"numeric",day:"numeric"}).replace(/\//g,".")}.pdf`);
             document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.remove("hide"));
