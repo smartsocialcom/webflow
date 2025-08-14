@@ -18,19 +18,27 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(error => console.error("Error:", error));
 
   function renderTable(data) {
+    const orgsList = document.querySelector('.orgs_list');
+    
     // Split organizations into active and inactive
     const activeOrgs = data.filter(org => org.org_active === true);
     const inactiveOrgs = data.filter(org => org.org_active === false);
     
-    // Render both tables
-    renderTableSection(activeOrgs, '#active', 'Active Organizations');
-    renderTableSection(inactiveOrgs, '#inactive', 'Inactive Organizations');
+    // Render both tables in the same container
+    let html = '';
+    html += renderTableSection(activeOrgs, 'Active Organizations');
+    html += '<br><br>';
+    html += renderTableSection(inactiveOrgs, 'Inactive Organizations');
+    
+    orgsList.innerHTML = html;
+    
+    // Add event listeners for both tables
+    orgsList.querySelectorAll('th[data-key]').forEach(th =>
+      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')))
+    );
   }
 
-  function renderTableSection(data, containerId, title) {
-    const container = document.querySelector(containerId);
-    if (!container) return;
-
+  function renderTableSection(data, title) {
     const headers = [
       { name: '#', key: 'row_number', type: 'none' },
       { name: 'District Name', key: 'district_name', type: 'string' },
@@ -86,11 +94,8 @@ document.addEventListener("DOMContentLoaded", () => {
       </td></tr>`;
     });
     html += '</table>';
-    container.innerHTML = html;
-
-    container.querySelectorAll('th[data-key]').forEach(th =>
-      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')))
-    );
+    
+    return html;
   }
 
   function sortColumn(key) {
