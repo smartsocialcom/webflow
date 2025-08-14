@@ -6,38 +6,31 @@ document.addEventListener("DOMContentLoaded", () => {
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations')
     .then(response => {
       organizations = response.data;
-      renderTables(organizations);
+      renderTable(organizations);
       document.getElementById('loader').remove();
 
-      // Default sort both tables by feedback (descending)
-      const activeHeader = document.querySelector('#active th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
-      const inactiveHeader = document.querySelector('#inactive th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
-      if (activeHeader) {
-        activeHeader.click();
-        activeHeader.click();
-      }
-      if (inactiveHeader) {
-        inactiveHeader.click();
-        inactiveHeader.click();
+      const feedbackHeader = document.querySelector('th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
+      if (feedbackHeader) {
+        feedbackHeader.click();
+        feedbackHeader.click();
       }
     })
     .catch(error => console.error("Error:", error));
 
-  function renderTables(data) {
+  function renderTable(data) {
+    // Split organizations into active and inactive
     const activeOrgs = data.filter(org => org.org_active === true);
     const inactiveOrgs = data.filter(org => org.org_active === false);
     
-    renderTable(activeOrgs, '#active', 'active');
-    renderTable(inactiveOrgs, '#inactive', 'inactive');
+    // Render both tables
+    renderTableSection(activeOrgs, '#active', 'Active Organizations');
+    renderTableSection(inactiveOrgs, '#inactive', 'Inactive Organizations');
   }
 
-  function renderTable(data, containerId, tableType) {
+  function renderTableSection(data, containerId, title) {
     const container = document.querySelector(containerId);
-    if (!container) {
-      console.error(`Container ${containerId} not found`);
-      return;
-    }
-    
+    if (!container) return;
+
     const headers = [
       { name: '#', key: 'row_number', type: 'none' },
       { name: 'District Name', key: 'district_name', type: 'string' },
@@ -50,12 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'Dashboard', key: 'dashboard', type: 'none' }
     ];
 
-    let html = '<table border="1"><tr>';
+    let html = `<h3>${title} (${data.length})</h3><table border="1"><tr>`;
     headers.forEach(header => {
       if (header.type !== 'none') {
         let headerLabel = header.name;
         headerLabel += currentSortColumn === header.key ? (sortAscending ? ' ▲' : ' ▼') : ' ▲▼';
-        html += `<th data-key="${header.key}" data-table-type="${tableType}" style="cursor:pointer;">${headerLabel}</th>`;
+        html += `<th data-key="${header.key}" style="cursor:pointer;">${headerLabel}</th>`;
       } else {
         html += `<th>${header.name}</th>`;
       }
@@ -96,28 +89,24 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = html;
 
     container.querySelectorAll('th[data-key]').forEach(th =>
-      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key'), th.getAttribute('data-table-type')))
+      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')))
     );
   }
 
-  function sortColumn(key, tableType) {
-    const activeOrgs = organizations.filter(org => org.org_active === true);
-    const inactiveOrgs = organizations.filter(org => org.org_active === false);
-    let targetOrgs = tableType === 'active' ? activeOrgs : inactiveOrgs;
-    
+  function sortColumn(key) {
     if (key === 'org_expire_date') {
-      targetOrgs.sort((a, b) => {
+      organizations.sort((a, b) => {
         let dateA = a.org_expire_date ? new Date(a.org_expire_date) : new Date(0);
         let dateB = b.org_expire_date ? new Date(b.org_expire_date) : new Date(0);
         return sortAscending ? dateA - dateB : dateB - dateA;
       });
     } else {
-      targetOrgs = targetOrgs.map(org => {
+      organizations = organizations.map(org => {
         const registrationGoal = Math.round(org.total_students * 0.05);
         const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
         return { ...org, registrationGoal, percentageToGoal };
       });
-      targetOrgs.sort((a, b) => {
+      organizations.sort((a, b) => {
         let valA = a[key];
         let valB = b[key];
         if (typeof valA === 'string') {
@@ -129,12 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return 0;
       });
     }
-    
     currentSortColumn = key;
     sortAscending = !sortAscending;
-    
-    // Re-render only the specific table
-    const containerId = tableType === 'active' ? '#active' : '#inactive';
-    renderTable(targetOrgs, containerId, tableType);
+    renderTable(organizations);
   }
 });
