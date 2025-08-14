@@ -6,19 +6,38 @@ document.addEventListener("DOMContentLoaded", () => {
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations')
     .then(response => {
       organizations = response.data;
-      renderTable(organizations);
+      renderTables(organizations);
       document.getElementById('loader').remove();
 
-      const feedbackHeader = document.querySelector('th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
-      if (feedbackHeader) {
-        feedbackHeader.click();
-        feedbackHeader.click();
+      // Default sort both tables by feedback (descending)
+      const activeHeader = document.querySelector('#active th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
+      const inactiveHeader = document.querySelector('#inactive th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
+      if (activeHeader) {
+        activeHeader.click();
+        activeHeader.click();
+      }
+      if (inactiveHeader) {
+        inactiveHeader.click();
+        inactiveHeader.click();
       }
     })
     .catch(error => console.error("Error:", error));
 
-  function renderTable(data) {
-    const orgsList = document.querySelector('.orgs_list'); //
+  function renderTables(data) {
+    const activeOrgs = data.filter(org => org.org_active === true);
+    const inactiveOrgs = data.filter(org => org.org_active === false);
+    
+    renderTable(activeOrgs, '#active', 'active');
+    renderTable(inactiveOrgs, '#inactive', 'inactive');
+  }
+
+  function renderTable(data, containerId, tableType) {
+    const container = document.querySelector(containerId);
+    if (!container) {
+      console.error(`Container ${containerId} not found`);
+      return;
+    }
+    
     const headers = [
       { name: '#', key: 'row_number', type: 'none' },
       { name: 'District Name', key: 'district_name', type: 'string' },
@@ -36,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (header.type !== 'none') {
         let headerLabel = header.name;
         headerLabel += currentSortColumn === header.key ? (sortAscending ? ' ▲' : ' ▼') : ' ▲▼';
-        html += `<th data-key="${header.key}" style="cursor:pointer;">${headerLabel}</th>`;
+        html += `<th data-key="${header.key}" data-table-type="${tableType}" style="cursor:pointer;">${headerLabel}</th>`;
       } else {
         html += `<th>${header.name}</th>`;
       }
@@ -48,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100).toFixed(1);
       html += `<tr>
         <td>${index + 1}</td>
-        <td>${org.district_name}${org.org_active ? '' : ' <span style="color:red;font-size:12px;">[deactivated]</span>'}</td>
+        <td>${org.district_name}</td>
         <td>${org.total_students.toLocaleString()}</td>
         <td>${registrationGoal.toLocaleString()}</td>
         <td>${org.parents.toLocaleString()}</td>
@@ -74,27 +93,31 @@ document.addEventListener("DOMContentLoaded", () => {
       </td></tr>`;
     });
     html += '</table>';
-    orgsList.innerHTML = html;
+    container.innerHTML = html;
 
-    orgsList.querySelectorAll('th[data-key]').forEach(th =>
-      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')))
+    container.querySelectorAll('th[data-key]').forEach(th =>
+      th.addEventListener('click', () => sortColumn(th.getAttribute('data-key'), th.getAttribute('data-table-type')))
     );
   }
 
-  function sortColumn(key) {
+  function sortColumn(key, tableType) {
+    const activeOrgs = organizations.filter(org => org.org_active === true);
+    const inactiveOrgs = organizations.filter(org => org.org_active === false);
+    let targetOrgs = tableType === 'active' ? activeOrgs : inactiveOrgs;
+    
     if (key === 'org_expire_date') {
-      organizations.sort((a, b) => {
+      targetOrgs.sort((a, b) => {
         let dateA = a.org_expire_date ? new Date(a.org_expire_date) : new Date(0);
         let dateB = b.org_expire_date ? new Date(b.org_expire_date) : new Date(0);
         return sortAscending ? dateA - dateB : dateB - dateA;
       });
     } else {
-      organizations = organizations.map(org => {
+      targetOrgs = targetOrgs.map(org => {
         const registrationGoal = Math.round(org.total_students * 0.05);
         const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
         return { ...org, registrationGoal, percentageToGoal };
       });
-      organizations.sort((a, b) => {
+      targetOrgs.sort((a, b) => {
         let valA = a[key];
         let valB = b[key];
         if (typeof valA === 'string') {
@@ -106,8 +129,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return 0;
       });
     }
+    
     currentSortColumn = key;
     sortAscending = !sortAscending;
-    renderTable(organizations);
+    
+    // Re-render only the specific table
+    const containerId = tableType === 'active' ? '#active' : '#inactive';
+    renderTable(targetOrgs, containerId, tableType);
   }
 });
