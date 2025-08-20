@@ -265,6 +265,8 @@ if (!window.scriptExecuted) {
       });
     } catch (err) {
       console.error("Error:", err);
+      document.querySelectorAll('.failed_loader').forEach(e => e.classList.remove('hide'));
+      axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t",{memberid:memberData.id});
     }
   });
 }
