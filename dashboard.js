@@ -28,26 +28,27 @@ if (!window.scriptExecuted) {
       const { total_students, parents: parentsCount, school_buildings, district_name, custom_graphics } = data.organization;
       const { feedback, top_users, users_per_month_arr, log } = data;
 
-      // Stats Update
       setText("org_name", district_name);
-      setText("total_students", total_students.toLocaleString());
-      setText("community_registration_goal", Math.round(total_students * 0.05).toLocaleString());
-      setText("parents", parentsCount);
-      const pct = ((parentsCount / (total_students * 0.05)) * 100).toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      if (pct > 25) {
-        setText("percentage_to_goal", pct + "%");
+      // Format numbers as integers with thousands separators, no decimals
+      const formatNumber = n => Number(Math.round(n)).toLocaleString();
+      setText("total_students", formatNumber(total_students));
+      setText("community_registration_goal", formatNumber(total_students * 0.05));
+      setText("parents", formatNumber(parentsCount));
+      const p = parentsCount / (total_students * 0.05) * 100;
+      if (p > 25) {
+        setText("percentage_to_goal", Math.round(p) + "%");
         document.getElementById("percentage_to_goal").classList.remove("small");
       }
-      setText("compared_engagement", (parentsCount / (total_students * 0.001)).toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-      setText("monthly_engagement", (parentsCount * 4).toLocaleString());
-      setText("bullying_avoided", (parentsCount * 0.15).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-      setText("screen_avoided", (parentsCount * 0.09).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-      setText("abuse_avoided", (parentsCount * 0.088).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-      setText("total_incidents", (parentsCount * (0.15 + 0.09 + 0.088)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-      setText("feedback_count", feedback.length);
-      setText("total_students_absent", (total_students * 0.05).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-      setText("estimated_funding", (total_students * 0.05 * 100).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-      document.getElementById("custom_graphics").setAttribute("href", custom_graphics);
+      setText("compared_engagement", formatNumber(parentsCount / (total_students * 0.001)));
+      setText("monthly_engagement", formatNumber(parentsCount * 4));
+      setText("bullying_avoided", formatNumber(parentsCount * 0.15));
+      setText("screen_avoided", formatNumber(parentsCount * 0.09));
+      setText("abuse_avoided", formatNumber(parentsCount * 0.088));
+      setText("total_incidents", formatNumber(parentsCount * (0.15 + 0.09 + 0.088)));
+      setText("feedback_count", formatNumber(feedback.length));
+      setText("total_students_absent", formatNumber(total_students * 0.05));
+      setText("estimated_funding", formatNumber(total_students * 0.05 * 100));
+      document.getElementById("custom_graphics").href = custom_graphics;
 
       // Chart: Users Per Month
       createChart("usersPerMonthChart", "bar", {
