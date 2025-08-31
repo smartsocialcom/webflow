@@ -34,7 +34,6 @@ if (!window.scriptExecuted) {
       const studentsGoal = total_students * 0.05; 
       setText("total_students", formatNumber(total_students));
       setText("community_registration_goal", formatNumber(studentsGoal));
-      setText("parents", formatNumber(parentsCount));
       const p = parentsCount / (studentsGoal) * 100;
       if (p > 25) {
         setText("percentage_to_goal", Math.round(p) + "%");
@@ -42,6 +41,7 @@ if (!window.scriptExecuted) {
       }
       const updateImpactMetrics = (useStudentsGoal) => {
         const v = useStudentsGoal ? studentsGoal : parentsCount;
+        setText("parents", formatNumber(v));
         setText("compared_engagement", formatNumber(v / (total_students * 0.001)));
         setText("monthly_engagement", formatNumber(v * 4));
         setText("bullying_avoided", formatNumber(v * 0.15));
