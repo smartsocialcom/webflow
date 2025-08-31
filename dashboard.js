@@ -30,25 +30,39 @@ if (!window.scriptExecuted) {
 
       setText("org_name", district_name);
       // Format numbers as integers with thousands separators, no decimals
-      const formatNumber = n => Number(Math.round(n)).toLocaleString();
+      const formatNumber = n => Math.round(n).toLocaleString();
+      const studentsGoal = total_students * 0.05; 
       setText("total_students", formatNumber(total_students));
-      setText("community_registration_goal", formatNumber(total_students * 0.05));
+      setText("community_registration_goal", formatNumber(studentsGoal));
       setText("parents", formatNumber(parentsCount));
-      const p = parentsCount / (total_students * 0.05) * 100;
+      const p = parentsCount / (studentsGoal) * 100;
       if (p > 25) {
         setText("percentage_to_goal", Math.round(p) + "%");
         document.getElementById("percentage_to_goal").classList.remove("small");
       }
-      setText("compared_engagement", formatNumber(parentsCount / (total_students * 0.001)));
-      setText("monthly_engagement", formatNumber(parentsCount * 4));
-      setText("bullying_avoided", formatNumber(parentsCount * 0.15));
-      setText("screen_avoided", formatNumber(parentsCount * 0.09));
-      setText("abuse_avoided", formatNumber(parentsCount * 0.088));
-      setText("total_incidents", formatNumber(parentsCount * (0.15 + 0.09 + 0.088)));
+      const updateImpactMetrics = (useStudentsGoal) => {
+        const v = useStudentsGoal ? studentsGoal : parentsCount;
+        setText("compared_engagement", formatNumber(v / (total_students * 0.001)));
+        setText("monthly_engagement", formatNumber(v * 4));
+        setText("bullying_avoided", formatNumber(v * 0.15));
+        setText("screen_avoided", formatNumber(v * 0.09));
+        setText("abuse_avoided", formatNumber(v * 0.088));
+        setText("total_incidents", formatNumber(v * (0.15 + 0.09 + 0.088)));
+      };
+      updateImpactMetrics(false);
       setText("feedback_count", formatNumber(feedback.length));
-      setText("total_students_absent", formatNumber(total_students * 0.05));
-      setText("estimated_funding", formatNumber(total_students * 0.05 * 100));
+      setText("total_students_absent", formatNumber(studentsGoal));
+      setText("estimated_funding", formatNumber(studentsGoal * 100));
       document.getElementById("custom_graphics").href = custom_graphics;
+      
+      // Toggle
+      (() => {
+        const toggleInput = document.getElementById("use_goal_toggle");
+        if (!toggleInput) return;
+        const sync = () => updateImpactMetrics(toggleInput.checked);
+        toggleInput.addEventListener("change", sync);
+        sync();
+      })();
 
       // Chart: Users Per Month
       createChart("usersPerMonthChart", "bar", {
