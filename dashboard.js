@@ -34,11 +34,7 @@ if (!window.scriptExecuted) {
       const studentsGoal = total_students * 0.05; 
       setText("total_students", formatNumber(total_students));
       setText("community_registration_goal", formatNumber(studentsGoal));
-      const p = parentsCount / (studentsGoal) * 100;
-      if (p > 25) {
-        setText("percentage_to_goal", Math.round(p) + "%");
-        document.getElementById("percentage_to_goal").classList.remove("small");
-      }
+
       const updateImpactMetrics = (useStudentsGoal) => {
         const v = useStudentsGoal ? studentsGoal : parentsCount;
         setText("parents", formatNumber(v));
@@ -48,6 +44,11 @@ if (!window.scriptExecuted) {
         setText("screen_avoided", formatNumber(v * 0.09));
         setText("abuse_avoided", formatNumber(v * 0.088));
         setText("total_incidents", formatNumber(v * (0.15 + 0.09 + 0.088)));
+        const p = v / (studentsGoal) * 100;
+        if (p > 25) {
+          setText("percentage_to_goal", Math.round(p) + "%");
+          document.getElementById("percentage_to_goal").classList.remove("small");
+        }
       };
       updateImpactMetrics(false);
       setText("feedback_count", formatNumber(feedback.length));
