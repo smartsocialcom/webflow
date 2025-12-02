@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const percentageToGoal = rawPercent.toFixed(1);
       const percentStyle = rawPercent < 50 ? 'background: #f5cbcb;' : '';
       const paymentVal = org.payment ? org.payment : 0;
-      const paymentFormatted = (paymentVal / 1000).toFixed(1) + 'K';
+      const paymentFormatted = (paymentVal / 1000).toFixed(0) + 'K';
 
       html += `<tr>
         <td>${index + 1}</td>
