@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'Goal', key: 'registrationGoal', type: 'number' },
       { name: 'Regs', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
+      { name: '💵', key: 'payment', type: 'number' }, // NEW HEADER
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Expire', key: 'org_expire_date', type: 'date' },
       { name: 'Dashboard', key: 'dashboard', type: 'none' }
@@ -65,14 +66,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     data.forEach((org, index) => {
       const registrationGoal = Math.round(org.total_students * 0.05);
-      const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100).toFixed(1);
+      const rawPercent = (org.parents / (org.total_students * 0.05)) * 100;
+      const percentageToGoal = rawPercent.toFixed(1);
+      const percentStyle = rawPercent < 50 ? 'background: #f5cbcb;' : '';
+      const paymentVal = org.payment ? org.payment : 0;
+      const paymentFormatted = (paymentVal / 1000) + 'K';
+
       html += `<tr>
         <td>${index + 1}</td>
         <td>${org.district_name}</td>
         <td>${org.total_students.toLocaleString()}</td>
         <td>${registrationGoal.toLocaleString()}</td>
         <td>${org.parents.toLocaleString()}</td>
-        <td>${percentageToGoal}%</td>
+        <td style="${percentStyle}">${percentageToGoal}%</td>
+        <td>${paymentFormatted}</td>
         <td>${org.total_feedbacks.toLocaleString()}</td>`;
 
       if (org.org_expire_date) {
@@ -114,6 +121,10 @@ document.addEventListener("DOMContentLoaded", () => {
       organizations.sort((a, b) => {
         let valA = a[key];
         let valB = b[key];
+        
+        if (valA === undefined || valA === null) valA = 0;
+        if (valB === undefined || valB === null) valB = 0;
+
         if (typeof valA === 'string') {
           valA = valA.toLowerCase();
           valB = valB.toLowerCase();
