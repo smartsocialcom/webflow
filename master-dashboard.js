@@ -31,12 +31,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const summaryArray = Object.values(summary).sort((a, b) => b.latestCount - a.latestCount);
 
       // Build HTML for Latest Users
-      let latestHtml = `<h3>Latest Users Summary</h3><table border="1">
+      let latestHtml = `<h3>Registrations Summary For The Past 7 Days</h3><table border="1">
         <thead>
           <tr>
             <th>Organization Name</th>
-            <th>Parents</th>
             <th>Latest Registrations</th>
+            <th>Parents</th>
           </tr>
         </thead>
         <tbody>`;
@@ -45,8 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
         latestHtml += `
           <tr>
             <td>${item.name}</td>
-            <td>${item.parents.toLocaleString()}</td>
             <td>${item.latestCount}</td>
+            <td>${item.parents.toLocaleString()}</td>
           </tr>`;
       });
       latestHtml += `</tbody></table>`;
