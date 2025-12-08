@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Generate HTML
-    let html = `<h3>Latest Users Summary</h3>
+    let html = `<h3>Last 7 Days Registrations Summary:</h3>
                 <table border="1">
                   <tr>
                     <th>Organization Name</th>
