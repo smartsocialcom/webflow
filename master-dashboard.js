@@ -67,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <table border="1">
                   <tr>
                     <th>Organization Name</th>
-                    <th>Parents (Total)</th>
                     <th>Latest Registrations</th>
+                    <th>Parents (Total)</th>
                   </tr>`;
 
     // Convert object to array and sort by Latest Registrations (High to Low)
@@ -77,8 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
     sortedSummary.forEach(org => {
       html += `<tr>
                 <td>${org.name}</td>
-                <td>${org.parents.toLocaleString()}</td>
                 <td>${org.latestRegs}</td>
+                <td>${org.parents.toLocaleString()}</td>
                </tr>`;
     });
 
