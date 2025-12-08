@@ -1,21 +1,64 @@
 document.addEventListener("DOMContentLoaded", () => {
   let organizations = [];
+  let latestUsersStats = []; // Store the summary data here
   let currentSortColumn = null;
   let sortAscending = true;
 
-  axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations')
-    .then(response => {
-      organizations = response.data;
-      renderTable(organizations);
-      document.getElementById('loader').remove();
+  // URLs
+  const orgsUrl = 'https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations';
+  const usersUrl = 'https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users';
 
-      const feedbackHeader = document.querySelector('th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
-      if (feedbackHeader) {
-        feedbackHeader.click();
-        feedbackHeader.click();
+  // Fetch both endpoints simultaneously
+  Promise.all([
+    axios.get(orgsUrl),
+    axios.get(usersUrl)
+  ])
+  .then(([orgsResponse, usersResponse]) => {
+    organizations = orgsResponse.data;
+    const latestUsers = usersResponse.data;
+
+    // Process Latest Users Data
+    processLatestUsers(latestUsers, organizations);
+
+    // Initial Render
+    renderTable(organizations);
+    
+    const loader = document.getElementById('loader');
+    if(loader) loader.remove();
+
+    // Default sorting trigger (as per your original code)
+    const feedbackHeader = document.querySelector('th[data-key="total_feedbacks"][style*="cursor:pointer;"]');
+    if (feedbackHeader) {
+      feedbackHeader.click();
+      feedbackHeader.click();
+    }
+  })
+  .catch(error => console.error("Error:", error));
+
+  // Helper: Process the users list to get counts per organization
+  function processLatestUsers(users, orgs) {
+    const counts = {};
+
+    // 1. Count users per organization
+    users.forEach(user => {
+      const orgId = user.organizations_id;
+      if (orgId) {
+        counts[orgId] = (counts[orgId] || 0) + 1;
       }
-    })
-    .catch(error => console.error("Error:", error));
+    });
+
+    // 2. Map counts to organization details
+    // We filter to only show orgs that actually have latest registrations
+    latestUsersStats = Object.keys(counts).map(orgId => {
+      // Find the full org object to get the name and total parents
+      const org = orgs.find(o => o.id === parseInt(orgId));
+      return {
+        name: org ? org.district_name : 'Unknown District',
+        total_parents: org ? org.parents : 0,
+        latest_registrations: counts[orgId]
+      };
+    }).sort((a, b) => b.latest_registrations - a.latest_registrations); // Sort high to low
+  }
 
   function renderTable(data) {
     const orgsList = document.querySelector('.orgs_list');
@@ -24,18 +67,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeOrgs = data.filter(org => org.org_active === true);
     const inactiveOrgs = data.filter(org => org.org_active === false);
     
-    // Render both tables in the same container
     let html = '';
+
+    // --- NEW SECTION: Render Latest Users Summary ---
+    // We render this first
+    if (latestUsersStats.length > 0) {
+      html += renderLatestUsersTable(latestUsersStats);
+      html += '<br><hr style="border: 1px solid #ccc;"><br>';
+    }
+
+    // Render Active/Inactive Tables
     html += renderTableSection(activeOrgs, 'Active Organizations');
     html += '<br><br>';
     html += renderTableSection(inactiveOrgs, 'Inactive Organizations');
     
     orgsList.innerHTML = html;
     
-    // Add event listeners for both tables
+    // Add event listeners for the Active/Inactive table headers
     orgsList.querySelectorAll('th[data-key]').forEach(th =>
       th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')))
     );
+  }
+
+  // Function to generate HTML for the new 3rd list
+  function renderLatestUsersTable(data) {
+    let html = `<div id="latest_users"><h3>Latest User Registrations Summary</h3>
+    <table border="1" style="background-color: #f9f9f9;">
+      <thead>
+        <tr>
+          <th>Organization Name</th>
+          <th>Total Parents</th>
+          <th>Latest Registrations</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    data.forEach(row => {
+      html += `<tr>
+        <td>${row.name}</td>
+        <td>${row.total_parents.toLocaleString()}</td>
+        <td style="font-weight:bold; color:green;">+${row.latest_registrations}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
   }
 
   function renderTableSection(data, title) {
@@ -46,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'Goal', key: 'registrationGoal', type: 'number' },
       { name: 'Regs', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
-      { name: '💵', key: 'payment', type: 'number' }, // NEW HEADER
+      { name: '💵', key: 'payment', type: 'number' },
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Expire', key: 'org_expire_date', type: 'date' },
       { name: 'Dashboard', key: 'dashboard', type: 'none' }
