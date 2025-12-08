@@ -2,73 +2,67 @@ document.addEventListener("DOMContentLoaded", () => {
   let organizations = [];
   let currentSortColumn = null;
   let sortAscending = true;
+  
+  // Store the HTML for the new table here so we can re-render easily
+  let latestUsersHtml = '<div id="latest_users"><h3>Loading Latest Users...</h3></div>';
 
-  // --- NEW CODE START: Fetch and Render Latest Users ---
+  // 1. NEW: Fetch Latest Users
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users')
     .then(response => {
-      renderLatestUsers(response.data);
-    })
-    .catch(error => console.error("Error fetching latest users:", error));
+      const users = response.data;
+      const summary = {};
 
-  function renderLatestUsers(users) {
-    // 1. Ensure the container exists
-    let latestContainer = document.getElementById('latest_users');
-    if (!latestContainer) {
-      // If the user hasn't added the div in HTML, create it and prepend it to the main container or body
-      latestContainer = document.createElement('div');
-      latestContainer.id = 'latest_users';
-      const orgsList = document.querySelector('.orgs_list');
-      if (orgsList) {
-        orgsList.parentNode.insertBefore(latestContainer, orgsList);
-      } else {
-        document.body.prepend(latestContainer);
-      }
-    }
+      // Aggregate data: Group by District Name
+      users.forEach(user => {
+        const distName = user.organization ? user.organization.district_name : 'Unknown District';
+        // Initialize if not exists
+        if (!summary[distName]) {
+          summary[distName] = {
+            name: distName,
+            parents: user.parents || 0, // Grab parents count from the user record
+            latestCount: 0
+          };
+        }
+        // Increment count for this batch
+        summary[distName].latestCount++;
+      });
 
-    // 2. Aggregate data by District Name
-    const aggregation = {};
+      // Convert object to array and sort by Latest Registrations (High to Low)
+      const summaryArray = Object.values(summary).sort((a, b) => b.latestCount - a.latestCount);
 
-    users.forEach(user => {
-      // safe check in case organization object is missing
-      const districtName = user.organization ? user.organization.district_name : "Unknown District";
+      // Build the New Table HTML
+      let newTable = `
+        <h3>Latest Registrations Summary</h3>
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Organization Name</th>
+              <th>Parents</th>
+              <th>Latest Registrations</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      summaryArray.forEach(item => {
+        newTable += `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.parents.toLocaleString()}</td>
+            <td>${item.latestCount}</td>
+          </tr>`;
+      });
+
+      newTable += `</tbody></table><br><br>`;
       
-      if (!aggregation[districtName]) {
-        aggregation[districtName] = {
-          name: districtName,
-          parents: user.parents || 0, // Fallback to 0 if missing
-          latestCount: 0
-        };
-      }
-      aggregation[districtName].latestCount += 1;
-    });
+      // Save to variable and wrap in the requested div ID
+      latestUsersHtml = `<div id="latest_users">${newTable}</div>`;
+      
+      // Trigger a re-render to show the new table immediately
+      renderTable(organizations);
+    })
+    .catch(error => console.error("Error fetching users:", error));
 
-    // Convert object to array for sorting/mapping
-    const tableData = Object.values(aggregation);
-
-    // 3. Render the HTML Table
-    let html = `<h3>Latest User Registrations</h3>
-                <table border="1" style="margin-bottom: 20px;">
-                  <tr>
-                    <th>Organization Name</th>
-                    <th>Parents</th>
-                    <th>Latest Registrations</th>
-                  </tr>`;
-
-    tableData.forEach(row => {
-      html += `<tr>
-                 <td>${row.name}</td>
-                 <td>${row.parents.toLocaleString()}</td>
-                 <td>${row.latestCount.toLocaleString()}</td>
-               </tr>`;
-    });
-
-    html += `</table><hr>`; // Added a horizontal rule to separate from the next lists
-    latestContainer.innerHTML = html;
-  }
-  // --- NEW CODE END ---
-
-  // --- EXISTING CODE BELOW (Untouched Logic) ---
-
+  // 2. EXISTING: Fetch Organizations (Unchanged logic)
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations')
     .then(response => {
       organizations = response.data;
@@ -91,19 +85,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeOrgs = data.filter(org => org.org_active === true);
     const inactiveOrgs = data.filter(org => org.org_active === false);
     
-    // Render both tables in the same container
+    // START EDIT: Construct HTML with the 3 requested containers
     let html = '';
-    html += renderTableSection(activeOrgs, 'Active Organizations');
-    html += '<br><br>';
-    html += renderTableSection(inactiveOrgs, 'Inactive Organizations');
     
+    // 1. The New Latest Users Table (pre-calculated)
+    html += latestUsersHtml;
+
+    // 2. The Active Table (Wrapped in #active)
+    html += `<div id="active">`;
+    html += renderTableSection(activeOrgs, 'Active Organizations');
+    html += `</div><br><br>`;
+
+    // 3. The Inactive Table (Wrapped in #inactive)
+    html += `<div id="inactive">`;
+    html += renderTableSection(inactiveOrgs, 'Inactive Organizations');
+    html += `</div>`;
+    // END EDIT
+
     orgsList.innerHTML = html;
     
-    // Add event listeners for both tables
+    // Add event listeners for both tables (Unchanged)
     orgsList.querySelectorAll('th[data-key]').forEach(th =>
       th.addEventListener('click', () => sortColumn(th.getAttribute('data-key')))
     );
   }
+
+  // --- EXISTING HELPER FUNCTIONS BELOW (UNTOUCHED) ---
 
   function renderTableSection(data, title) {
     const headers = [
