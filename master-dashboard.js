@@ -4,48 +4,67 @@ document.addEventListener("DOMContentLoaded", () => {
   let sortAscending = true;
 
   // ---------------------------------------------------------
-  // 1. NEW FEATURE: Fetch and Render "Latest Users" Summary
+  // 1. UPDATED CODE: Latest Users (1 Day & 7 Day)
   // ---------------------------------------------------------
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users')
     .then(response => {
-      const users = response.data;
+      // Destructure the new response format
+      const oneDayUsers = response.data.result1 || [];
+      const sevenDayUsers = response.data.result2 || [];
+      
       const summary = {};
 
-      // Aggregate data
-      users.forEach(user => {
-        // Handle cases where organization might be null
-        const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        
+      // Helper function to initialize a district object if it doesn't exist
+      const initDistrict = (distName, parents) => {
         if (!summary[distName]) {
           summary[distName] = {
             name: distName,
-            parents: user.parents || 0, // Taking the 'parents' value from the user record
-            latestCount: 0
+            parents: parents || 0,
+            oneDayCount: 0,
+            sevenDayCount: 0
           };
         }
-        // Count how many times this district appears in the latest_users results
-        summary[distName].latestCount++;
+      };
+
+      // 1. Process 7-Day List (result2)
+      // We do this to populate the main "7 Day Registrations" count
+      sevenDayUsers.forEach(user => {
+        const distName = user.organization ? user.organization.district_name : 'Unknown District';
+        initDistrict(distName, user.parents);
+        summary[distName].sevenDayCount++;
       });
 
-      // Sort by Latest Registrations (Highest first)
-      const summaryArray = Object.values(summary).sort((a, b) => b.latestCount - a.latestCount);
+      // 2. Process 1-Day List (result1)
+      // We process this specifically to calculate the "1 Day" column
+      oneDayUsers.forEach(user => {
+        const distName = user.organization ? user.organization.district_name : 'Unknown District';
+        // Ensure district exists (in case a user is in result1 but somehow not result2)
+        initDistrict(distName, user.parents); 
+        summary[distName].oneDayCount++;
+      });
+
+      // Sort by 7 Day Registrations (Highest first) - you can change this to oneDayCount if preferred
+      const summaryArray = Object.values(summary).sort((a, b) => b.sevenDayCount - a.sevenDayCount);
 
       // Build HTML for Latest Users
-      let latestHtml = `<h3>Registrations Summary For The Past 7 Days</h3><table border="1">
+      let latestHtml = `<h3>Registrations Summaries</h3><table border="1">
         <thead>
           <tr>
-            <th>Organization Name</th>
-            <th>Latest Registrations</th>
-            <th>Parents</th>
+            <th>District Name</th>
+            <th>24 Hr Regs</th> <th>7 Day Regs</th>
+            <th>Total Regs</th>
           </tr>
         </thead>
         <tbody>`;
 
       summaryArray.forEach(item => {
+        // Optional: Highlight 24h count if greater than 0
+        const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
+
         latestHtml += `
           <tr>
             <td>${item.name}</td>
-            <td>${item.latestCount}</td>
+            <td style="${oneDayStyle}">${item.oneDayCount}</td> <td>${item.sevenDayCount}</td>
             <td>${item.parents.toLocaleString()}</td>
           </tr>`;
       });
