@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       // 1. Process 7-Day List (result2)
-      // We do this to populate the main "7 Day Registrations" count
       sevenDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
         initDistrict(distName, user.parents);
@@ -35,15 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // 2. Process 1-Day List (result1)
-      // We process this specifically to calculate the "1 Day" column
       oneDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        // Ensure district exists (in case a user is in result1 but somehow not result2)
         initDistrict(distName, user.parents); 
         summary[distName].oneDayCount++;
       });
 
-      // Sort by 7 Day Registrations (Highest first) - you can change this to oneDayCount if preferred
+      // Sort by 7 Day Registrations (Highest first)
       const summaryArray = Object.values(summary).sort((a, b) => b.sevenDayCount - a.sevenDayCount);
 
       // Build HTML for Latest Users
@@ -58,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <tbody>`;
 
       summaryArray.forEach(item => {
-        // Optional: Highlight 24h count if greater than 0
         const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
 
         latestHtml += `
@@ -99,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(error => console.error("Error:", error));
 
   function renderTable(data) {
-    // UPDATED: We target the specific IDs now, not the generic class
     const activeContainer = document.getElementById('active');
     const inactiveContainer = document.getElementById('inactive');
     
@@ -127,6 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTableSection(data, title) {
+    // UPDATED: Removed the 'Dashboard' object from the headers array
     const headers = [
       { name: '#', key: 'row_number', type: 'none' },
       { name: 'District Name', key: 'district_name', type: 'string' },
@@ -136,8 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
       { name: '💵', key: 'payment', type: 'number' }, 
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
-      { name: 'Expire', key: 'org_expire_date', type: 'date' },
-      { name: 'Dashboard', key: 'dashboard', type: 'none' }
+      { name: 'Expire', key: 'org_expire_date', type: 'date' }
     ];
 
     let html = `<h3>${title} (${data.length})</h3><table border="1"><tr>`;
@@ -160,9 +155,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const paymentVal = org.payment ? org.payment : 0;
       const paymentFormatted = (paymentVal / 1000).toFixed(0) + 'K';
 
+      // UPDATED: District Name is now the hyperlink.
       html += `<tr>
         <td>${index + 1}</td>
-        <td>${org.district_name}</td>
+        <td>
+            <a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">
+                ${org.district_name}
+            </a>
+        </td>
         <td>${org.total_students.toLocaleString()}</td>
         <td>${registrationGoal.toLocaleString()}</td>
         <td>${org.parents.toLocaleString()}</td>
@@ -183,10 +183,8 @@ document.addEventListener("DOMContentLoaded", () => {
         html += `<td></td>`;
       }
 
-      html += `<td>
-        <a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">Parents</a><br>
-        <a href="https://smartsocial.com/dashboard/student?as_org=${org.short_code}" target="_blank">Students</a>
-      </td></tr>`;
+      // UPDATED: Removed the standalone Dashboard link <td> block
+      html += `</tr>`;
     });
     html += '</table>';
     
