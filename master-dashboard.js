@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const summaryArray = Object.values(summary).sort((a, b) => b.sevenDayCount - a.sevenDayCount);
 
       // Build HTML for Latest Users
-      let latestHtml = `<h3>Registrations Summaries</h3><table border="1">
+      let latestHtml = `<h3>Registrations Summary</h3><table border="1">
         <thead>
           <tr>
             <th>District Name</th>
