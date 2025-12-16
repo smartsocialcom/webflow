@@ -30,13 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
           feedbackCounts[orgId] = (feedbackCounts[orgId] || 0) + 1;
         }
       });
-      
+
       const summary = {};
 
-      const initDistrict = (distName, parents, orgId) => {
+      // UPDATED: Added shortCode to arguments to store it for the links
+      const initDistrict = (distName, parents, orgId, shortCode) => {
         if (!summary[distName]) {
           summary[distName] = {
             name: distName,
+            shortCode: shortCode || '', // Store the short code
             parents: parents || 0,
             oneDayCount: 0,
             sevenDayCount: 0,
@@ -48,16 +50,18 @@ document.addEventListener("DOMContentLoaded", () => {
       // Process 7-Day List
       sevenDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        const orgId = user.organizations_id; 
-        initDistrict(distName, user.parents, orgId);
+        const shortCode = user.organization ? user.organization.short_code : ''; // Extract short_code
+        const orgId = user.organizations_id;
+        initDistrict(distName, user.parents, orgId, shortCode);
         summary[distName].sevenDayCount++;
       });
 
       // Process 1-Day List
       oneDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        const orgId = user.organizations_id; 
-        initDistrict(distName, user.parents, orgId); 
+        const shortCode = user.organization ? user.organization.short_code : ''; // Extract short_code
+        const orgId = user.organizations_id;
+        initDistrict(distName, user.parents, orgId, shortCode);
         summary[distName].oneDayCount++;
       });
 
@@ -65,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
       latestUsersData = Object.values(summary);
 
       // Initial Sort (Default to 7 Day Regs Descending)
-      sortLatestUsers('sevenDayCount'); 
+      sortLatestUsers('sevenDayCount');
     })
     .catch(error => console.error("Error fetching latest users:", error));
 
@@ -79,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sortAscendingSummary = true; // Default to ascending for new column, usually
       // Optional: If you prefer numbers to default descending, you can add logic here
       if (['oneDayCount', 'sevenDayCount', 'feedbackTotal', 'parents'].includes(key)) {
-         sortAscendingSummary = false; 
+        sortAscendingSummary = false;
       }
     }
 
@@ -114,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     let html = `<h3>Registration Summary</h3><table border="1"><thead><tr>`;
-    
+
     headers.forEach(header => {
       let label = header.name;
       if (currentSortSummaryColumn === header.key) {
@@ -124,14 +128,24 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       html += `<th data-key="${header.key}" style="cursor:pointer;">${label}</th>`;
     });
-    
+
     html += `</tr></thead><tbody>`;
 
     latestUsersData.forEach(item => {
       const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
+      
+      // UPDATED: Generate Links using the stored shortCode
+      let nameCellContent = item.name;
+      if(item.shortCode) {
+         nameCellContent = `
+            <a href="https://smartsocial.com/dashboard/parents?as_org=${item.shortCode}" target="_blank">${item.name}</a>
+            (<a href="https://smartsocial.com/dashboard/student?as_org=${item.shortCode}" target="_blank">🎒</a>)
+         `;
+      }
+
       html += `
         <tr>
-          <td>${item.name}</td>
+          <td>${nameCellContent}</td>
           <td style="${oneDayStyle}">${item.oneDayCount}</td> 
           <td>${item.sevenDayCount}</td>
           <td>${item.feedbackTotal}</td>
@@ -158,16 +172,16 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(response => {
       organizations = response.data;
       renderTable(organizations);
-      
+
       const loader = document.getElementById('loader');
       if (loader) loader.remove();
 
       // Default sort for Active table
       const feedbackHeader = document.querySelector('#active th[data-key="total_feedbacks"]');
       if (feedbackHeader) {
-         // Trigger sort logic manually or reuse function
-         sortColumn('total_feedbacks'); // default sort desc
-         sortColumn('total_feedbacks'); // ensures desc if logic requires double click
+        // Trigger sort logic manually or reuse function
+        sortColumn('total_feedbacks'); // default sort desc
+        sortColumn('total_feedbacks'); // ensures desc if logic requires double click
       }
     })
     .catch(error => console.error("Error:", error));
@@ -175,10 +189,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderTable(data) {
     const activeContainer = document.getElementById('active');
     const inactiveContainer = document.getElementById('inactive');
-    
+
     const activeOrgs = data.filter(org => org.org_active === true);
     const inactiveOrgs = data.filter(org => org.org_active === false);
-    
+
     if (activeContainer) {
       activeContainer.innerHTML = renderTableSection(activeOrgs, 'Active Organizations', 'active');
       activeContainer.querySelectorAll('th[data-key]').forEach(th =>
@@ -202,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'Goal', key: 'registrationGoal', type: 'number' },
       { name: 'Regs', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
-      { name: '💵', key: 'payment', type: 'number' }, 
+      { name: '💵', key: 'payment', type: 'number' },
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Expire', key: 'org_expire_date', type: 'date' }
     ];
@@ -227,12 +241,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const paymentVal = org.payment ? org.payment : 0;
       const paymentFormatted = (paymentVal / 1000).toFixed(0) + 'K';
 
+      // UPDATED: Added the backpack link next to the district name
       html += `<tr>
         <td>${index + 1}</td>
         <td>
             <a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">
                 ${org.district_name}
             </a>
+            (<a href="https://smartsocial.com/dashboard/student?as_org=${org.short_code}" target="_blank">🎒</a>)
         </td>
         <td>${org.total_students.toLocaleString()}</td>
         <td>${registrationGoal.toLocaleString()}</td>
@@ -257,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
       html += `</tr>`;
     });
     html += '</table>';
-    
+
     return html;
   }
 
@@ -272,12 +288,15 @@ document.addEventListener("DOMContentLoaded", () => {
       organizations = organizations.map(org => {
         const registrationGoal = Math.round(org.total_students * 0.05);
         const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
-        return { ...org, registrationGoal, percentageToGoal };
+        return { ...org,
+          registrationGoal,
+          percentageToGoal
+        };
       });
       organizations.sort((a, b) => {
         let valA = a[key];
         let valB = b[key];
-        
+
         if (valA === undefined || valA === null) valA = 0;
         if (valB === undefined || valB === null) valB = 0;
 
