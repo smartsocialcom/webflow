@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users')
     .then(response => {
       // Destructure the new response format
-      const oneDayUsers = response.data.result1 || [];
-      const sevenDayUsers = response.data.result2 || [];
+      const oneDayUsers = response.data.users_1day || [];
+      const sevenDayUsers = response.data.users_7day || [];
       
       const summary = {};
 
@@ -26,14 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
-      // 1. Process 7-Day List (result2)
+      // 1. Process 7-Day List (users_1day)
       sevenDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
         initDistrict(distName, user.parents);
         summary[distName].sevenDayCount++;
       });
 
-      // 2. Process 1-Day List (result1)
+      // 2. Process 1-Day List (users_7day)
       oneDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
         initDistrict(distName, user.parents); 
