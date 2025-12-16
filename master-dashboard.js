@@ -33,12 +33,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const summary = {};
 
-      // UPDATED: Added shortCode to arguments to store it for the links
+      // UPDATED: Now accepts shortCode argument
       const initDistrict = (distName, parents, orgId, shortCode) => {
         if (!summary[distName]) {
           summary[distName] = {
             name: distName,
-            shortCode: shortCode || '', // Store the short code
+            shortCode: shortCode || '', // Store the short code for the link
             parents: parents || 0,
             oneDayCount: 0,
             sevenDayCount: 0,
@@ -50,8 +50,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Process 7-Day List
       sevenDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        const shortCode = user.organization ? user.organization.short_code : ''; // Extract short_code
         const orgId = user.organizations_id;
+        // Capture short_code from user.organization
+        const shortCode = user.organization ? user.organization.short_code : '';
+        
         initDistrict(distName, user.parents, orgId, shortCode);
         summary[distName].sevenDayCount++;
       });
@@ -59,8 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Process 1-Day List
       oneDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        const shortCode = user.organization ? user.organization.short_code : ''; // Extract short_code
         const orgId = user.organizations_id;
+        const shortCode = user.organization ? user.organization.short_code : '';
+
         initDistrict(distName, user.parents, orgId, shortCode);
         summary[distName].oneDayCount++;
       });
@@ -75,13 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function to Sort the Summary Table
   function sortLatestUsers(key) {
-    // Toggle sort order if clicking the same column
     if (currentSortSummaryColumn === key) {
       sortAscendingSummary = !sortAscendingSummary;
     } else {
       currentSortSummaryColumn = key;
-      sortAscendingSummary = true; // Default to ascending for new column, usually
-      // Optional: If you prefer numbers to default descending, you can add logic here
+      sortAscendingSummary = true;
       if (['oneDayCount', 'sevenDayCount', 'feedbackTotal', 'parents'].includes(key)) {
         sortAscendingSummary = false;
       }
@@ -134,18 +135,21 @@ document.addEventListener("DOMContentLoaded", () => {
     latestUsersData.forEach(item => {
       const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
       
-      // UPDATED: Generate Links using the stored shortCode
-      let nameCellContent = item.name;
-      if(item.shortCode) {
-         nameCellContent = `
-            <a href="https://smartsocial.com/dashboard/parents?as_org=${item.shortCode}" target="_blank">${item.name}</a>
-            (<a href="https://smartsocial.com/dashboard/student?as_org=${item.shortCode}" target="_blank">🎒</a>)
-         `;
-      }
+      // Define links
+      const parentLink = item.shortCode 
+        ? `https://smartsocial.com/dashboard/parents?as_org=${item.shortCode}` 
+        : '#';
+      
+      const studentLink = item.shortCode 
+        ? `https://smartsocial.com/dashboard/student?as_org=${item.shortCode}` 
+        : '#';
 
       html += `
         <tr>
-          <td>${nameCellContent}</td>
+          <td>
+            <a href="${parentLink}" target="_blank">${item.name}</a>
+            (<a href="${studentLink}" target="_blank">📚</a>)
+          </td>
           <td style="${oneDayStyle}">${item.oneDayCount}</td> 
           <td>${item.sevenDayCount}</td>
           <td>${item.feedbackTotal}</td>
@@ -156,7 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     latestContainer.innerHTML = html;
 
-    // Add Event Listeners for Sorting
     latestContainer.querySelectorAll('th[data-key]').forEach(th => {
       th.addEventListener('click', () => {
         sortLatestUsers(th.getAttribute('data-key'));
@@ -176,12 +179,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const loader = document.getElementById('loader');
       if (loader) loader.remove();
 
-      // Default sort for Active table
       const feedbackHeader = document.querySelector('#active th[data-key="total_feedbacks"]');
       if (feedbackHeader) {
-        // Trigger sort logic manually or reuse function
-        sortColumn('total_feedbacks'); // default sort desc
-        sortColumn('total_feedbacks'); // ensures desc if logic requires double click
+        sortColumn('total_feedbacks');
+        sortColumn('total_feedbacks');
       }
     })
     .catch(error => console.error("Error:", error));
@@ -241,14 +242,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const paymentVal = org.payment ? org.payment : 0;
       const paymentFormatted = (paymentVal / 1000).toFixed(0) + 'K';
 
-      // UPDATED: Added the backpack link next to the district name
+      // UPDATED HTML for District Name Column
       html += `<tr>
         <td>${index + 1}</td>
         <td>
             <a href="https://smartsocial.com/dashboard/parents?as_org=${org.short_code}" target="_blank">
                 ${org.district_name}
             </a>
-            (<a href="https://smartsocial.com/dashboard/student?as_org=${org.short_code}" target="_blank">🎒</a>)
+            (<a href="https://smartsocial.com/dashboard/student?as_org=${org.short_code}" target="_blank">📚</a>)
         </td>
         <td>${org.total_students.toLocaleString()}</td>
         <td>${registrationGoal.toLocaleString()}</td>
