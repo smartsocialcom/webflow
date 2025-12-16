@@ -10,7 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global Variables for "Registration Summary" Table
   // ---------------------------------------------------------
   let latestUsersData = [];
-  // CHANGE 1: Set this to null so the initial sort function triggers the correct "descending" logic
+  
+  // FIX: Set this to null. 
+  // If you set it to 'sevenDayCount' here, the function below will flip it to Ascending (Low -> High).
+  // By setting it to null, the function defaults to Descending (High -> Low).
   let currentSortSummaryColumn = null; 
   let sortAscendingSummary = false;
 
@@ -70,22 +73,25 @@ document.addEventListener("DOMContentLoaded", () => {
       // Store processed data globally
       latestUsersData = Object.values(summary);
 
-      // Initial Sort (Default to 7 Day Regs Descending)
+      // Initial Sort
+      // Since currentSortSummaryColumn is null, this will apply Default logic (Descending for numbers)
       sortLatestUsers('sevenDayCount');
     })
     .catch(error => console.error("Error fetching latest users:", error));
 
   // Function to Sort the Summary Table
   function sortLatestUsers(key) {
+    // If clicking the SAME column, toggle the order
     if (currentSortSummaryColumn === key) {
       sortAscendingSummary = !sortAscendingSummary;
     } else {
+      // If clicking a NEW column (or first load), set defaults
       currentSortSummaryColumn = key;
-      sortAscendingSummary = true; // Default to ascending for strings
+      sortAscendingSummary = true; // Default to A-Z for strings
       
-      // If numeric column, switch default to Descending (False)
+      // FIX: Ensure numbers start as Descending (High -> Low)
       if (['oneDayCount', 'sevenDayCount', 'feedbackTotal', 'parents'].includes(key)) {
-        sortAscendingSummary = false;
+        sortAscendingSummary = false; 
       }
     }
 
@@ -123,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     headers.forEach(header => {
       let label = header.name;
+      // Add arrow indicators
       if (currentSortSummaryColumn === header.key) {
         label += sortAscendingSummary ? ' ▲' : ' ▼';
       } else {
