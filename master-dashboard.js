@@ -4,39 +4,55 @@ document.addEventListener("DOMContentLoaded", () => {
   let sortAscending = true;
 
   // ---------------------------------------------------------
-  // 1. UPDATED CODE: Latest Users (1 Day & 7 Day)
+  // 1. UPDATED CODE: Latest Users (1 Day & 7 Day) + Feedback
   // ---------------------------------------------------------
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users')
     .then(response => {
       // Destructure the new response format
       const oneDayUsers = response.data.users_1day || [];
       const sevenDayUsers = response.data.users_7day || [];
+      const feedbackList = response.data.organization_feedbacks || [];
+
+      // A. Create a frequency map for Feedbacks by Organization ID
+      const feedbackCounts = {};
+      feedbackList.forEach(item => {
+        // The api returns {"organization": 123}, so we map by that ID
+        const orgId = item.organization;
+        if (orgId) {
+          feedbackCounts[orgId] = (feedbackCounts[orgId] || 0) + 1;
+        }
+      });
       
       const summary = {};
 
       // Helper function to initialize a district object if it doesn't exist
-      const initDistrict = (distName, parents) => {
+      // UPDATED: Now accepts orgId to look up feedback counts
+      const initDistrict = (distName, parents, orgId) => {
         if (!summary[distName]) {
           summary[distName] = {
             name: distName,
             parents: parents || 0,
             oneDayCount: 0,
-            sevenDayCount: 0
+            sevenDayCount: 0,
+            // Retrieve feedback count from our map, or default to 0
+            feedbackTotal: feedbackCounts[orgId] || 0
           };
         }
       };
 
-      // 1. Process 7-Day List (users_1day)
+      // 1. Process 7-Day List (users_7day)
       sevenDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        initDistrict(distName, user.parents);
+        const orgId = user.organizations_id; // Get the ID to link feedback
+        initDistrict(distName, user.parents, orgId);
         summary[distName].sevenDayCount++;
       });
 
-      // 2. Process 1-Day List (users_7day)
+      // 2. Process 1-Day List (users_1day)
       oneDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        initDistrict(distName, user.parents); 
+        const orgId = user.organizations_id; // Get the ID to link feedback
+        initDistrict(distName, user.parents, orgId); 
         summary[distName].oneDayCount++;
       });
 
@@ -44,11 +60,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const summaryArray = Object.values(summary).sort((a, b) => b.sevenDayCount - a.sevenDayCount);
 
       // Build HTML for Latest Users
+      // UPDATED: Added "Feedback" Column Header
       let latestHtml = `<h3>Registration Summary</h3><table border="1">
         <thead>
           <tr>
             <th>District Name</th>
-            <th>24 Hr Regs</th> <th>7 Day Regs</th>
+            <th>24 Hr Regs</th> 
+            <th>7 Day Regs</th>
+            <th>Feedback</th>
             <th>Total Regs</th>
           </tr>
         </thead>
@@ -57,10 +76,13 @@ document.addEventListener("DOMContentLoaded", () => {
       summaryArray.forEach(item => {
         const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
 
+        // UPDATED: Added item.feedbackTotal column
         latestHtml += `
           <tr>
             <td>${item.name}</td>
-            <td style="${oneDayStyle}">${item.oneDayCount}</td> <td>${item.sevenDayCount}</td>
+            <td style="${oneDayStyle}">${item.oneDayCount}</td> 
+            <td>${item.sevenDayCount}</td>
+            <td>${item.feedbackTotal}</td>
             <td>${item.parents.toLocaleString()}</td>
           </tr>`;
       });
@@ -122,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTableSection(data, title) {
-    // UPDATED: Removed the 'Dashboard' object from the headers array
     const headers = [
       { name: '#', key: 'row_number', type: 'none' },
       { name: 'District Name', key: 'district_name', type: 'string' },
@@ -155,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const paymentVal = org.payment ? org.payment : 0;
       const paymentFormatted = (paymentVal / 1000).toFixed(0) + 'K';
 
-      // UPDATED: District Name is now the hyperlink.
       html += `<tr>
         <td>${index + 1}</td>
         <td>
@@ -183,7 +203,6 @@ document.addEventListener("DOMContentLoaded", () => {
         html += `<td></td>`;
       }
 
-      // UPDATED: Removed the standalone Dashboard link <td> block
       html += `</tr>`;
     });
     html += '</table>';
