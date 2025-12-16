@@ -10,8 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global Variables for "Registration Summary" Table
   // ---------------------------------------------------------
   let latestUsersData = [];
-  let currentSortSummaryColumn = 'sevenDayCount'; // Default sort
-  let sortAscendingSummary = false; // Default Descending
+  // CHANGE 1: Set this to null so the initial sort function triggers the correct "descending" logic
+  let currentSortSummaryColumn = null; 
+  let sortAscendingSummary = false;
 
   // ---------------------------------------------------------
   // 1. UPDATED CODE: Latest Users (1 Day & 7 Day) + Feedbacks
@@ -33,12 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const summary = {};
 
-      // UPDATED: Now accepts shortCode argument
       const initDistrict = (distName, parents, orgId, shortCode) => {
         if (!summary[distName]) {
           summary[distName] = {
             name: distName,
-            shortCode: shortCode || '', // Store the short code for the link
+            shortCode: shortCode || '',
             parents: parents || 0,
             oneDayCount: 0,
             sevenDayCount: 0,
@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
       sevenDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
         const orgId = user.organizations_id;
-        // Capture short_code from user.organization
         const shortCode = user.organization ? user.organization.short_code : '';
         
         initDistrict(distName, user.parents, orgId, shortCode);
@@ -82,7 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
       sortAscendingSummary = !sortAscendingSummary;
     } else {
       currentSortSummaryColumn = key;
-      sortAscendingSummary = true;
+      sortAscendingSummary = true; // Default to ascending for strings
+      
+      // If numeric column, switch default to Descending (False)
       if (['oneDayCount', 'sevenDayCount', 'feedbackTotal', 'parents'].includes(key)) {
         sortAscendingSummary = false;
       }
@@ -135,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
     latestUsersData.forEach(item => {
       const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
       
-      // Define links
       const parentLink = item.shortCode 
         ? `https://smartsocial.com/dashboard/parents?as_org=${item.shortCode}` 
         : '#';
@@ -166,7 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-
 
   // ---------------------------------------------------------
   // 2. EXISTING CODE: Active / Inactive Organizations
@@ -242,7 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const paymentVal = org.payment ? org.payment : 0;
       const paymentFormatted = (paymentVal / 1000).toFixed(0) + 'K';
 
-      // UPDATED HTML for District Name Column
       html += `<tr>
         <td>${index + 1}</td>
         <td>
