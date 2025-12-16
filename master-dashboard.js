@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'District Name', key: 'name' },
       { name: '24 Hr Regs', key: 'oneDayCount' },
       { name: '7 Day Regs', key: 'sevenDayCount' },
-      { name: 'Feedback', key: 'feedbackTotal' },
+      { name: '7 Day Feedbacks', key: 'feedbackTotal' },
       { name: 'Total Regs', key: 'parents' }
     ];
 
