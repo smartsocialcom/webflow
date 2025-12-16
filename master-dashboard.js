@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let sortAscendingSummary = false; // Default Descending
 
   // ---------------------------------------------------------
-  // 1. UPDATED CODE: Latest Users (1 Day & 7 Day) + Feedback
+  // 1. UPDATED CODE: Latest Users (1 Day & 7 Day) + Feedbacks
   // ---------------------------------------------------------
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users')
     .then(response => {
