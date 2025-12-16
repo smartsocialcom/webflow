@@ -1,4 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // ---------------------------------------------------------
+  // GLOBAL VARIABLES
+  // ---------------------------------------------------------
+  
+  // Variables for the "Latest Users" (Registration Summary) Table
+  let latestSummaryData = [];
+  let latestSortColumn = 'sevenDayCount'; // Default sort by 7 Day Regs
+  let latestSortAscending = false;        // Default to Descending (High to Low)
+
+  // Variables for the "Active/Inactive" Organizations Tables
   let organizations = [];
   let currentSortColumn = null;
   let sortAscending = true;
@@ -8,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users')
     .then(response => {
-      // Destructure the new response format
       const oneDayUsers = response.data.users_1day || [];
       const sevenDayUsers = response.data.users_7day || [];
       const feedbackList = response.data.organization_feedbacks || [];
@@ -16,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
       // A. Create a frequency map for Feedbacks by Organization ID
       const feedbackCounts = {};
       feedbackList.forEach(item => {
-        // The api returns {"organization": 123}, so we map by that ID
         const orgId = item.organization;
         if (orgId) {
           feedbackCounts[orgId] = (feedbackCounts[orgId] || 0) + 1;
@@ -25,8 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const summary = {};
 
-      // Helper function to initialize a district object if it doesn't exist
-      // UPDATED: Now accepts orgId to look up feedback counts
+      // Helper function to initialize
       const initDistrict = (distName, parents, orgId) => {
         if (!summary[distName]) {
           summary[distName] = {
@@ -34,67 +41,118 @@ document.addEventListener("DOMContentLoaded", () => {
             parents: parents || 0,
             oneDayCount: 0,
             sevenDayCount: 0,
-            // Retrieve feedback count from our map, or default to 0
             feedbackTotal: feedbackCounts[orgId] || 0
           };
         }
       };
 
-      // 1. Process 7-Day List (users_7day)
+      // 1. Process 7-Day List
       sevenDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        const orgId = user.organizations_id; // Get the ID to link feedback
+        const orgId = user.organizations_id;
         initDistrict(distName, user.parents, orgId);
         summary[distName].sevenDayCount++;
       });
 
-      // 2. Process 1-Day List (users_1day)
+      // 2. Process 1-Day List
       oneDayUsers.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        const orgId = user.organizations_id; // Get the ID to link feedback
+        const orgId = user.organizations_id; 
         initDistrict(distName, user.parents, orgId); 
         summary[distName].oneDayCount++;
       });
 
-      // Sort by 7 Day Registrations (Highest first)
-      const summaryArray = Object.values(summary).sort((a, b) => b.sevenDayCount - a.sevenDayCount);
+      // Convert object to array and store in global variable
+      latestSummaryData = Object.values(summary);
 
-      // Build HTML for Latest Users
-      // UPDATED: Added "Feedback" Column Header
-      let latestHtml = `<h3>Registration Summary</h3><table border="1">
-        <thead>
-          <tr>
-            <th>District Name</th>
-            <th>24 Hr Regs</th> 
-            <th>7 Day Regs</th>
-            <th>Feedback</th>
-            <th>Total Regs</th>
-          </tr>
-        </thead>
-        <tbody>`;
-
-      summaryArray.forEach(item => {
-        const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
-
-        // UPDATED: Added item.feedbackTotal column
-        latestHtml += `
-          <tr>
-            <td>${item.name}</td>
-            <td style="${oneDayStyle}">${item.oneDayCount}</td> 
-            <td>${item.sevenDayCount}</td>
-            <td>${item.feedbackTotal}</td>
-            <td>${item.parents.toLocaleString()}</td>
-          </tr>`;
-      });
-      latestHtml += `</tbody></table>`;
-
-      // Render ONLY to the #latest_users div
-      const latestContainer = document.getElementById('latest_users');
-      if (latestContainer) {
-        latestContainer.innerHTML = latestHtml;
-      }
+      // Initial Render
+      renderLatestTable();
     })
     .catch(error => console.error("Error fetching latest users:", error));
+
+  // ---------------------------------------------------------
+  // FUNCTION: Render Latest Users Table
+  // ---------------------------------------------------------
+  function renderLatestTable() {
+    const container = document.getElementById('latest_users');
+    if (!container) return;
+
+    // 1. Sort the data
+    latestSummaryData.sort((a, b) => {
+      let valA = a[latestSortColumn];
+      let valB = b[latestSortColumn];
+
+      if (typeof valA === 'string') {
+        valA = valA.toLowerCase();
+        valB = valB.toLowerCase();
+      }
+
+      if (valA < valB) return latestSortAscending ? -1 : 1;
+      if (valA > valB) return latestSortAscending ? 1 : -1;
+      return 0;
+    });
+
+    // 2. Define Headers
+    const headers = [
+      { label: 'District Name', key: 'name' },
+      { label: '24 Hr Regs', key: 'oneDayCount' },
+      { label: '7 Day Regs', key: 'sevenDayCount' },
+      { label: 'Feedback', key: 'feedbackTotal' },
+      { label: 'Total Regs', key: 'parents' }
+    ];
+
+    // 3. Build HTML
+    let html = `<h3>Registration Summary</h3><table border="1"><thead><tr>`;
+    
+    headers.forEach(header => {
+      let arrow = '';
+      if (latestSortColumn === header.key) {
+        arrow = latestSortAscending ? ' ▲' : ' ▼';
+      } else {
+        arrow = ' ▲▼'; // visual cue that it is sortable
+      }
+      html += `<th data-key="${header.key}" style="cursor:pointer;">${header.label}${arrow}</th>`;
+    });
+    
+    html += `</tr></thead><tbody>`;
+
+    latestSummaryData.forEach(item => {
+      const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
+      html += `
+        <tr>
+          <td>${item.name}</td>
+          <td style="${oneDayStyle}">${item.oneDayCount}</td> 
+          <td>${item.sevenDayCount}</td>
+          <td>${item.feedbackTotal}</td>
+          <td>${item.parents.toLocaleString()}</td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+
+    container.innerHTML = html;
+
+    // 4. Attach Event Listeners for Sorting
+    container.querySelectorAll('th[data-key]').forEach(th => {
+      th.addEventListener('click', () => {
+        sortLatestColumn(th.getAttribute('data-key'));
+      });
+    });
+  }
+
+  // ---------------------------------------------------------
+  // FUNCTION: Sort Latest Users Table
+  // ---------------------------------------------------------
+  function sortLatestColumn(key) {
+    if (latestSortColumn === key) {
+      // Toggle direction if clicking the same column
+      latestSortAscending = !latestSortAscending;
+    } else {
+      // Set new column, default to descending (high numbers on top usually better for stats)
+      latestSortColumn = key;
+      latestSortAscending = false; 
+    }
+    renderLatestTable();
+  }
 
 
   // ---------------------------------------------------------
