@@ -48,7 +48,7 @@
           }
           resolve(response.data);
         } else {
-          if (path.includes("/dashboard") || path.includes("/feedback") || path.includes("/blog")) {
+          if (path.includes("/dashboard")) {
             window.location.href = `/expired?short_code=${orgValue}`;
           }
           // document.querySelectorAll('[ss="!orgActive"]').forEach(element => element.classList.remove('hide'));
