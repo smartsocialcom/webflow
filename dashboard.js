@@ -206,17 +206,17 @@ if (!window.scriptExecuted) {
             </div>
           </div>`;
       });
-      document.querySelector(".testimonial-list").innerHTML = testimonials;
+      document.querySelector("#org_feedback").innerHTML = testimonials;
       if (feedback.length > 3) {
         const btn = document.querySelector('.view-more_btn');
         btn.classList.remove("hide");
-        btn.addEventListener("click", () => document.querySelector(".testimonial-list").classList.remove("max-height"));
+        btn.addEventListener("click", () => document.querySelector("#org_feedback").classList.remove("max-height"));
       }
       
       // Other Feedbacks
       const loadOtherBtn = document.getElementById("load_other_feedbacks");
       if (loadOtherBtn) loadOtherBtn.addEventListener("click", async () => {
-        loadOtherBtn.classList.add("hide");
+        loadOtherBtn.remove();
         const { data } = await axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/feedback/not_org/${org}`);
         document.getElementById("other_feedbacks_list").innerHTML = data.map(({ positive_feedback, page_name, created_at, organization_info }) => `
           <div class="testimonial_card">
