@@ -212,7 +212,24 @@ if (!window.scriptExecuted) {
         btn.classList.remove("hide");
         btn.addEventListener("click", () => document.querySelector(".testimonial-list").classList.remove("max-height"));
       }
-
+      
+      // Other Feedbacks
+      const loadOtherBtn = document.getElementById("load_other_feedbacks");
+      if (loadOtherBtn) loadOtherBtn.addEventListener("click", async () => {
+        loadOtherBtn.classList.add("hide");
+        const { data } = await axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/feedback/not_org/${org}`);
+        document.getElementById("other_feedbacks_list").innerHTML = data.map(({ positive_feedback, page_name, created_at, organization_info }) => `
+          <div class="testimonial_card">
+            <div class="feedback">"${positive_feedback}"</div>
+            <p class="page_name">- ${page_name}</p>
+            <div class="feedback_line-divider"></div>
+            <div>
+              <p class="name">${organization_info.district_name}</p>
+              <p class="created_at">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
+            </div>
+          </div>`).join("");
+      });
+      
       // Download Feature
       document.getElementById("download")?.addEventListener("click", async () => {
         const dlData = await (await fetch(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/shortcode/${org}`)).json();
