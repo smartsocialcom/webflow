@@ -213,7 +213,7 @@ if (!window.scriptExecuted) {
         btn.addEventListener("click", () => document.querySelector("#org_feedbacks_list").classList.remove("max-height"));
       }
       
-      // Other Feedbacks
+      // Other Feedbacks List
       const loadOtherBtn = document.getElementById("load_other_feedbacks");
       if (loadOtherBtn) loadOtherBtn.addEventListener("click", async () => {
         loadOtherBtn.remove();
