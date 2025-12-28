@@ -48,9 +48,6 @@
           }
           resolve(response.data);
         } else {
-          if (path.includes("/dashboard")) {
-            window.location.href = `/expired?short_code=${orgValue}`;
-          }
           // document.querySelectorAll('[ss="!orgActive"]').forEach(element => element.classList.remove('hide'));
         }
       });
@@ -100,10 +97,13 @@
   }
   // On Load
   // url.hash && (window.location.href = url.href.replace('#', ''));
-  document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     (async () => {
       memberData = (await window.$memberstackDom.getCurrentMember()).data;
       getOrgValue();
+      if (memberData?.planConnections?.some(p => p.planId === "pln_district-admin-3b1f0x96") && ["/blog", "/feedback", "/dashboard"].some(p => path.includes(p))) 
+        return window.location.href = `/expired?short_code=${orgValue}`; // Redirect admins of expired Orgs
+
       getOrg(orgValue);
       if (!memberData) {
         getOrg(orgValue).then(getAccess);
