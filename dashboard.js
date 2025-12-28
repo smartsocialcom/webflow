@@ -210,7 +210,10 @@ if (!window.scriptExecuted) {
       if (feedback.length > 3) {
         const btn = document.querySelector('.view-more_btn');
         btn.classList.remove("hide");
-        btn.addEventListener("click", () => document.querySelector("#org_feedbacks_list").classList.remove("max-height"));
+        btn.addEventListener("click", () => {
+            document.querySelector("#org_feedbacks_list").classList.remove("max-height");
+            document.querySelector("#org_feedbacks_list_overlay").classList.add("hide");
+        });
       }
       
       // Other Feedbacks List
