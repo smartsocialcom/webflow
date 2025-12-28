@@ -168,13 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
           document.querySelectorAll('.loader').forEach(el => el.classList.add('hide'));
         }
       }).catch(console.error);
-      // Trigger Mixpanel Event
-      document.querySelectorAll("[mx]").forEach(function(element) {
-        element.addEventListener("click", function() {
-          var mxValue = element.getAttribute("mx");
-          mixpanel.track(mxValue);
-        });
-      });
     })();
   });
 </script>
