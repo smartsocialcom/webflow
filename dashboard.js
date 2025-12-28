@@ -212,7 +212,7 @@ if (!window.scriptExecuted) {
         btn.classList.remove("hide");
         btn.addEventListener("click", () => {
             document.querySelector("#org_feedbacks_list").classList.remove("max-height");
-            document.querySelector("#org_feedbacks_list_overlay").classList.add("hide");
+            document.querySelector("#org_feedbacks_list_overlay").classList.remove("hide");
         });
       }
       
