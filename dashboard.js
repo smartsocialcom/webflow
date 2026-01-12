@@ -1,4 +1,4 @@
-if (!window.scriptExecuted) {
+(!window.scriptExecuted) {
   window.scriptExecuted = true;
   document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -38,8 +38,9 @@ if (!window.scriptExecuted) {
         const options = {
           chart: {
             type: 'bar',
-            height: 350,
-            ...chartTheme
+            height: 320,
+            ...chartTheme,
+            parentHeightOffset: 0
           },
           series: [{
             name: label,
@@ -48,14 +49,16 @@ if (!window.scriptExecuted) {
           xaxis: {
             categories,
             labels: {
-              style: { colors: '#435d60', fontSize: '12px' }
+              style: { colors: '#435d60', fontSize: '11px', fontWeight: 500 },
+              rotate: 0
             },
-            axisBorder: { color: '#e0e0e0' },
-            axisTicks: { color: '#e0e0e0' }
+            axisBorder: { show: false },
+            axisTicks: { show: false }
           },
           yaxis: {
             labels: {
-              style: { colors: '#435d60', fontSize: '12px' }
+              style: { colors: '#435d60', fontSize: '11px' },
+              formatter: val => Math.round(val)
             }
           },
           colors: ['#449997'],
@@ -64,8 +67,8 @@ if (!window.scriptExecuted) {
             gradient: {
               shade: 'light',
               type: 'vertical',
-              shadeIntensity: 0.25,
-              gradientToColors: ['#5ab5b3'],
+              shadeIntensity: 0.2,
+              gradientToColors: ['#6dcfcc'],
               inverseColors: false,
               opacityFrom: 1,
               opacityTo: 0.85,
@@ -74,27 +77,41 @@ if (!window.scriptExecuted) {
           },
           plotOptions: {
             bar: {
-              borderRadius: 6,
-              columnWidth: '60%',
+              borderRadius: 5,
+              columnWidth: '55%',
               dataLabels: { position: 'top' }
             }
           },
           dataLabels: {
             enabled: true,
-            offsetY: -20,
+            offsetY: -22,
             style: {
               fontSize: '11px',
               colors: ['#435d60'],
               fontWeight: 600
-            }
+            },
+            formatter: val => val > 0 ? val : ''
           },
           grid: {
-            borderColor: '#e8e8e8',
-            strokeDashArray: 4
+            borderColor: '#f0f0f0',
+            strokeDashArray: 0,
+            padding: { left: 10, right: 10 }
           },
           tooltip: {
+            enabled: true,
             theme: 'light',
-            y: { formatter: val => val }
+            style: {
+              fontSize: '13px',
+              fontFamily: 'inherit'
+            },
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+              const value = series[seriesIndex][dataPointIndex];
+              const month = w.globals.labels[dataPointIndex];
+              return '<div style="background: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: none;">' +
+                '<div style="color: #435d60; font-size: 13px; font-weight: 600; margin-bottom: 4px;">' + month + '</div>' +
+                '<div style="color: #449997; font-size: 18px; font-weight: 700;">' + value + ' registrations</div>' +
+                '</div>';
+            }
           }
         };
         const chart = new ApexCharts(document.getElementById(id), options);
@@ -107,8 +124,9 @@ if (!window.scriptExecuted) {
         const options = {
           chart: {
             type: 'bar',
-            height: Math.max(300, categories.length * 40),
-            ...chartTheme
+            height: Math.max(350, categories.length * 45),
+            ...chartTheme,
+            parentHeightOffset: 0
           },
           series: [{
             name: label,
@@ -117,10 +135,9 @@ if (!window.scriptExecuted) {
           plotOptions: {
             bar: {
               horizontal: true,
-              borderRadius: 4,
-              barHeight: '70%',
-              distributed: false,
-              dataLabels: { position: 'right' }
+              borderRadius: 6,
+              barHeight: '65%',
+              distributed: false
             }
           },
           colors: ['#449997'],
@@ -129,7 +146,7 @@ if (!window.scriptExecuted) {
             gradient: {
               shade: 'light',
               type: 'horizontal',
-              shadeIntensity: 0.2,
+              shadeIntensity: 0.15,
               gradientToColors: ['#6dcfcc'],
               inverseColors: false,
               opacityFrom: 1,
@@ -139,38 +156,58 @@ if (!window.scriptExecuted) {
           },
           dataLabels: {
             enabled: true,
-            textAnchor: 'start',
+            textAnchor: 'end',
             style: {
               fontSize: '12px',
-              colors: ['#435d60'],
+              colors: ['#fff'],
               fontWeight: 600
             },
             formatter: val => val,
-            offsetX: 5
+            offsetX: -10
           },
           xaxis: {
+            categories: categories,
             labels: {
+              show: true,
               style: { colors: '#435d60', fontSize: '11px' }
             },
-            axisBorder: { color: '#e0e0e0' },
-            axisTicks: { color: '#e0e0e0' }
+            axisBorder: { show: false },
+            axisTicks: { show: false }
           },
           yaxis: {
             labels: {
-              style: { colors: '#435d60', fontSize: '12px' },
-              maxWidth: 180,
-              formatter: val => val.length > 25 ? val.substring(0, 25) + '...' : val
+              show: true,
+              style: { 
+                colors: '#435d60', 
+                fontSize: '12px',
+                fontWeight: 500
+              },
+              maxWidth: 200,
+              offsetX: 0
             }
           },
           grid: {
-            borderColor: '#e8e8e8',
-            strokeDashArray: 4,
-            xaxis: { lines: { show: true } },
-            yaxis: { lines: { show: false } }
+            borderColor: '#f0f0f0',
+            strokeDashArray: 0,
+            xaxis: { lines: { show: false } },
+            yaxis: { lines: { show: false } },
+            padding: { left: 5, right: 15 }
           },
           tooltip: {
+            enabled: true,
             theme: 'light',
-            y: { formatter: val => val + ' visits' }
+            style: {
+              fontSize: '13px',
+              fontFamily: 'inherit'
+            },
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+              const value = series[seriesIndex][dataPointIndex];
+              const name = w.globals.labels[dataPointIndex];
+              return '<div style="background: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: none;">' +
+                '<div style="color: #435d60; font-size: 13px; font-weight: 600; margin-bottom: 4px;">' + name + '</div>' +
+                '<div style="color: #449997; font-size: 18px; font-weight: 700;">' + value + '</div>' +
+                '</div>';
+            }
           }
         };
         const chart = new ApexCharts(document.getElementById(id), options);
@@ -180,10 +217,11 @@ if (!window.scriptExecuted) {
 
       // Create donut chart
       const createDonutChart = (id, labels, series, colors, showLegend = true) => {
+        const total = series.reduce((a, b) => a + b, 0);
         const options = {
           chart: {
             type: 'donut',
-            height: 380,
+            height: showLegend ? 400 : 350,
             fontFamily: 'inherit',
             foreColor: '#435d60',
             animations: {
@@ -197,34 +235,34 @@ if (!window.scriptExecuted) {
           colors,
           stroke: {
             show: true,
-            width: 3,
+            width: 2,
             colors: ['#fff']
           },
           plotOptions: {
             pie: {
               donut: {
-                size: '55%',
+                size: '60%',
                 labels: {
                   show: true,
                   name: {
                     show: true,
-                    fontSize: '14px',
+                    fontSize: '13px',
                     fontWeight: 600,
                     color: '#435d60',
-                    offsetY: -10
+                    offsetY: -8
                   },
                   value: {
                     show: true,
-                    fontSize: '24px',
+                    fontSize: '28px',
                     fontWeight: 700,
                     color: '#449997',
-                    offsetY: 5,
+                    offsetY: 8,
                     formatter: val => Math.round(val)
                   },
                   total: {
                     show: true,
                     label: 'Total',
-                    fontSize: '14px',
+                    fontSize: '13px',
                     fontWeight: 600,
                     color: '#435d60',
                     formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0)
@@ -240,16 +278,16 @@ if (!window.scriptExecuted) {
             show: showLegend,
             position: 'bottom',
             horizontalAlign: 'center',
-            fontSize: '13px',
+            fontSize: '12px',
             fontWeight: 500,
             markers: {
-              width: 12,
-              height: 12,
-              radius: 3
+              width: 10,
+              height: 10,
+              radius: 2
             },
             itemMargin: {
-              horizontal: 12,
-              vertical: 8
+              horizontal: 10,
+              vertical: 6
             },
             labels: {
               colors: '#435d60'
@@ -257,15 +295,15 @@ if (!window.scriptExecuted) {
           },
           tooltip: {
             enabled: true,
-            theme: 'light',
-            fillSeriesColor: false,
-            style: { fontSize: '13px' },
-            y: {
-              formatter: (val, opts) => {
-                const total = opts.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                const percent = ((val / total) * 100).toFixed(1);
-                return `${val} (${percent}%)`;
-              }
+            custom: function({ series, seriesIndex, w }) {
+              const value = series[seriesIndex];
+              const name = w.globals.labels[seriesIndex];
+              const total = series.reduce((a, b) => a + b, 0);
+              const percent = ((value / total) * 100).toFixed(1);
+              return '<div style="background: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: none;">' +
+                '<div style="color: #435d60; font-size: 13px; font-weight: 600; margin-bottom: 4px;">' + name + '</div>' +
+                '<div style="color: #449997; font-size: 18px; font-weight: 700;">' + value + ' <span style="font-size: 13px; color: #435d60; font-weight: 500;">(' + percent + '%)</span></div>' +
+                '</div>';
             }
           },
           responsive: [{
@@ -457,7 +495,7 @@ if (!window.scriptExecuted) {
             <div class="feedback_line-divider"></div>
             <div>
               <p class="name">${organization_info.district_name}</p>
-              <p class="created_at">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
+              <p class="createted_at">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
             </div>
           </div>`).join("");
       });
