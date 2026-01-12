@@ -1,323 +1,63 @@
-(!window.scriptExecuted) {
+if (!window.scriptExecuted) {
   window.scriptExecuted = true;
   document.addEventListener("DOMContentLoaded", async () => {
     try {
+      // Color Palette
+      const colors = {
+        primary: '#449997',
+        primaryLight: '#6AB5B3',
+        primaryDark: '#357A78',
+        text: '#435d60',
+        accent1: '#F4A261',
+        accent2: '#E76F51',
+        accent3: '#2A9D8F',
+        accent4: '#264653',
+        background: '#FFFFFF'
+      };
+
+      // Chart color palette for multi-series
+      const chartPalette = [
+        '#449997', '#2A9D8F', '#264653', '#F4A261', '#E76F51',
+        '#6AB5B3', '#357A78', '#E9C46A', '#8AB17D', '#287271',
+        '#5E9B9A', '#3D5A5A', '#D4A373', '#BC6C47', '#4A9D9B'
+      ];
+
+      // Global ApexCharts defaults
+      window.Apex = {
+        chart: {
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          toolbar: { show: false },
+          animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 800,
+            animateGradually: { enabled: true, delay: 150 },
+            dynamicAnimation: { enabled: true, speed: 350 }
+          }
+        },
+        tooltip: {
+          theme: 'light',
+          style: { fontSize: '13px' },
+          y: { formatter: val => val?.toLocaleString() }
+        },
+        grid: {
+          borderColor: '#e8eef0',
+          strokeDashArray: 4
+        },
+        colors: chartPalette
+      };
+
       // Helpers
       const setText = (id, txt) => {
         const el = document.getElementById(id);
         if (el) el.textContent = txt;
       };
-      
+
       const getTop = items =>
         Object.entries(items)
           .map(([key, count]) => ({ key, count }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 10);
-      
-      // Brand-matching color palette
-      const generateColors = count => [
-        '#449997', '#5ab5b3', '#357a78', '#6dcfcc', '#2d6664',
-        '#7edbd8', '#256260', '#8fe7e4', '#1e4f4d', '#a0f0ed',
-        '#164240', '#b1f7f4', '#0e3534', '#c2fcfa', '#063029'
-      ].slice(0, count);
-
-      // Common chart theme options
-      const chartTheme = {
-        fontFamily: 'inherit',
-        foreColor: '#435d60',
-        toolbar: { show: false },
-        animations: {
-          enabled: true,
-          easing: 'easeinout',
-          speed: 800
-        }
-      };
-
-      // Create vertical bar chart
-      const createBarChart = (id, categories, seriesData, label) => {
-        const options = {
-          chart: {
-            type: 'bar',
-            height: 320,
-            ...chartTheme,
-            parentHeightOffset: 0
-          },
-          series: [{
-            name: label,
-            data: seriesData
-          }],
-          xaxis: {
-            categories,
-            labels: {
-              style: { colors: '#435d60', fontSize: '11px', fontWeight: 500 },
-              rotate: 0
-            },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
-          },
-          yaxis: {
-            labels: {
-              style: { colors: '#435d60', fontSize: '11px' },
-              formatter: val => Math.round(val)
-            }
-          },
-          colors: ['#449997'],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'light',
-              type: 'vertical',
-              shadeIntensity: 0.2,
-              gradientToColors: ['#6dcfcc'],
-              inverseColors: false,
-              opacityFrom: 1,
-              opacityTo: 0.85,
-              stops: [0, 100]
-            }
-          },
-          plotOptions: {
-            bar: {
-              borderRadius: 5,
-              columnWidth: '55%',
-              dataLabels: { position: 'top' }
-            }
-          },
-          dataLabels: {
-            enabled: true,
-            offsetY: -22,
-            style: {
-              fontSize: '11px',
-              colors: ['#435d60'],
-              fontWeight: 600
-            },
-            formatter: val => val > 0 ? val : ''
-          },
-          grid: {
-            borderColor: '#f0f0f0',
-            strokeDashArray: 0,
-            padding: { left: 10, right: 10 }
-          },
-          tooltip: {
-            enabled: true,
-            theme: 'light',
-            style: {
-              fontSize: '13px',
-              fontFamily: 'inherit'
-            },
-            custom: function({ series, seriesIndex, dataPointIndex, w }) {
-              const value = series[seriesIndex][dataPointIndex];
-              const month = w.globals.labels[dataPointIndex];
-              return '<div style="background: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: none;">' +
-                '<div style="color: #435d60; font-size: 13px; font-weight: 600; margin-bottom: 4px;">' + month + '</div>' +
-                '<div style="color: #449997; font-size: 18px; font-weight: 700;">' + value + ' registrations</div>' +
-                '</div>';
-            }
-          }
-        };
-        const chart = new ApexCharts(document.getElementById(id), options);
-        chart.render();
-        return chart;
-      };
-
-      // Create horizontal bar chart
-      const createHorizontalBarChart = (id, categories, seriesData, label) => {
-        const options = {
-          chart: {
-            type: 'bar',
-            height: Math.max(350, categories.length * 45),
-            ...chartTheme,
-            parentHeightOffset: 0
-          },
-          series: [{
-            name: label,
-            data: seriesData
-          }],
-          plotOptions: {
-            bar: {
-              horizontal: true,
-              borderRadius: 6,
-              barHeight: '65%',
-              distributed: false
-            }
-          },
-          colors: ['#449997'],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'light',
-              type: 'horizontal',
-              shadeIntensity: 0.15,
-              gradientToColors: ['#6dcfcc'],
-              inverseColors: false,
-              opacityFrom: 1,
-              opacityTo: 0.9,
-              stops: [0, 100]
-            }
-          },
-          dataLabels: {
-            enabled: true,
-            textAnchor: 'end',
-            style: {
-              fontSize: '12px',
-              colors: ['#fff'],
-              fontWeight: 600
-            },
-            formatter: val => val,
-            offsetX: -10
-          },
-          xaxis: {
-            categories: categories,
-            labels: {
-              show: true,
-              style: { colors: '#435d60', fontSize: '11px' }
-            },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
-          },
-          yaxis: {
-            labels: {
-              show: true,
-              style: { 
-                colors: '#435d60', 
-                fontSize: '12px',
-                fontWeight: 500
-              },
-              maxWidth: 200,
-              offsetX: 0
-            }
-          },
-          grid: {
-            borderColor: '#f0f0f0',
-            strokeDashArray: 0,
-            xaxis: { lines: { show: false } },
-            yaxis: { lines: { show: false } },
-            padding: { left: 5, right: 15 }
-          },
-          tooltip: {
-            enabled: true,
-            theme: 'light',
-            style: {
-              fontSize: '13px',
-              fontFamily: 'inherit'
-            },
-            custom: function({ series, seriesIndex, dataPointIndex, w }) {
-              const value = series[seriesIndex][dataPointIndex];
-              const name = w.globals.labels[dataPointIndex];
-              return '<div style="background: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: none;">' +
-                '<div style="color: #435d60; font-size: 13px; font-weight: 600; margin-bottom: 4px;">' + name + '</div>' +
-                '<div style="color: #449997; font-size: 18px; font-weight: 700;">' + value + '</div>' +
-                '</div>';
-            }
-          }
-        };
-        const chart = new ApexCharts(document.getElementById(id), options);
-        chart.render();
-        return chart;
-      };
-
-      // Create donut chart
-      const createDonutChart = (id, labels, series, colors, showLegend = true) => {
-        const total = series.reduce((a, b) => a + b, 0);
-        const options = {
-          chart: {
-            type: 'donut',
-            height: showLegend ? 400 : 350,
-            fontFamily: 'inherit',
-            foreColor: '#435d60',
-            animations: {
-              enabled: true,
-              easing: 'easeinout',
-              speed: 800
-            }
-          },
-          series,
-          labels,
-          colors,
-          stroke: {
-            show: true,
-            width: 2,
-            colors: ['#fff']
-          },
-          plotOptions: {
-            pie: {
-              donut: {
-                size: '60%',
-                labels: {
-                  show: true,
-                  name: {
-                    show: true,
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#435d60',
-                    offsetY: -8
-                  },
-                  value: {
-                    show: true,
-                    fontSize: '28px',
-                    fontWeight: 700,
-                    color: '#449997',
-                    offsetY: 8,
-                    formatter: val => Math.round(val)
-                  },
-                  total: {
-                    show: true,
-                    label: 'Total',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#435d60',
-                    formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0)
-                  }
-                }
-              }
-            }
-          },
-          dataLabels: {
-            enabled: false
-          },
-          legend: {
-            show: showLegend,
-            position: 'bottom',
-            horizontalAlign: 'center',
-            fontSize: '12px',
-            fontWeight: 500,
-            markers: {
-              width: 10,
-              height: 10,
-              radius: 2
-            },
-            itemMargin: {
-              horizontal: 10,
-              vertical: 6
-            },
-            labels: {
-              colors: '#435d60'
-            }
-          },
-          tooltip: {
-            enabled: true,
-            custom: function({ series, seriesIndex, w }) {
-              const value = series[seriesIndex];
-              const name = w.globals.labels[seriesIndex];
-              const total = series.reduce((a, b) => a + b, 0);
-              const percent = ((value / total) * 100).toFixed(1);
-              return '<div style="background: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: none;">' +
-                '<div style="color: #435d60; font-size: 13px; font-weight: 600; margin-bottom: 4px;">' + name + '</div>' +
-                '<div style="color: #449997; font-size: 18px; font-weight: 700;">' + value + ' <span style="font-size: 13px; color: #435d60; font-weight: 500;">(' + percent + '%)</span></div>' +
-                '</div>';
-            }
-          },
-          responsive: [{
-            breakpoint: 480,
-            options: {
-              chart: { height: 320 },
-              legend: { position: 'bottom' }
-            }
-          }]
-        };
-        const chart = new ApexCharts(document.getElementById(id), options);
-        chart.render();
-        return chart;
-      };
 
       // Member & Data Fetch
       const member = await window.$memberstackDom.getCurrentMember();
@@ -367,23 +107,127 @@
         sync();
       })();
 
-      // Chart: Users Per Month
-      createBarChart(
-        "usersPerMonthChart",
-        ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-        users_per_month_arr,
-        "Registrations per month"
-      );
+      // Chart: Users Per Month (Bar Chart)
+      const usersPerMonthEl = document.getElementById("usersPerMonthChart");
+      if (usersPerMonthEl) {
+        new ApexCharts(usersPerMonthEl, {
+          chart: {
+            type: 'bar',
+            height: 350,
+            background: 'transparent'
+          },
+          series: [{
+            name: 'Registrations',
+            data: users_per_month_arr
+          }],
+          xaxis: {
+            categories: ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            labels: {
+              style: { colors: colors.text, fontSize: '12px', fontWeight: 500 }
+            },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+          },
+          yaxis: {
+            labels: {
+              style: { colors: colors.text, fontSize: '12px' },
+              formatter: val => Math.round(val).toLocaleString()
+            }
+          },
+          plotOptions: {
+            bar: {
+              borderRadius: 8,
+              columnWidth: '60%',
+              distributed: false
+            }
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'light',
+              type: 'vertical',
+              shadeIntensity: 0.2,
+              gradientToColors: [colors.primaryLight],
+              inverseColors: false,
+              opacityFrom: 1,
+              opacityTo: 0.85,
+              stops: [0, 100]
+            }
+          },
+          colors: [colors.primary],
+          dataLabels: { enabled: false },
+          tooltip: {
+            y: { formatter: val => `${val.toLocaleString()} registrations` }
+          }
+        }).render();
+      }
 
-      // Chart: School Buildings
+      // Chart: School Buildings (Donut Chart)
       if (school_buildings.length) {
-        createDonutChart(
-          "schoolBuildingsChart",
-          school_buildings.map(i => i.school_name),
-          school_buildings.map(i => i.registered_school_parents),
-          generateColors(school_buildings.length),
-          false
-        );
+        const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
+        if (schoolBuildingsEl) {
+          const total = school_buildings.reduce((sum, i) => sum + i.registered_school_parents, 0);
+          new ApexCharts(schoolBuildingsEl, {
+            chart: {
+              type: 'donut',
+              height: 380,
+              background: 'transparent'
+            },
+            series: school_buildings.map(i => i.registered_school_parents),
+            labels: school_buildings.map(i => i.school_name),
+            colors: chartPalette.slice(0, school_buildings.length),
+            plotOptions: {
+              pie: {
+                donut: {
+                  size: '65%',
+                  labels: {
+                    show: true,
+                    name: {
+                      show: true,
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: colors.text,
+                      offsetY: -10
+                    },
+                    value: {
+                      show: true,
+                      fontSize: '24px',
+                      fontWeight: 700,
+                      color: colors.primary,
+                      offsetY: 5,
+                      formatter: val => `${((val / total) * 100).toFixed(1)}%`
+                    },
+                    total: {
+                      show: true,
+                      label: 'Total',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: colors.text,
+                      formatter: () => total.toLocaleString()
+                    }
+                  }
+                }
+              }
+            },
+            stroke: { width: 2, colors: ['#fff'] },
+            legend: {
+              show: false,
+              position: 'bottom',
+              fontSize: '13px',
+              labels: { colors: colors.text },
+              markers: { radius: 4 }
+            },
+            dataLabels: { enabled: false },
+            tooltip: {
+              y: {
+                formatter: (val, { seriesIndex }) => {
+                  const pct = ((val / total) * 100).toFixed(1);
+                  return `${val.toLocaleString()} (${pct}%)`;
+                }
+              }
+            }
+          }).render();
+        }
       } else {
         document.getElementById("schoolBuildingsChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
@@ -412,41 +256,209 @@
         .filter(({ key }) => key !== "District Staff")
         .map(({ key, count }) => ({ school_name: key, count }));
 
-      // Chart: Top Users
+      // Chart: Top Users (Horizontal Bar)
       if (topUsers.length > 1) {
-        createHorizontalBarChart(
-          "topUsersChart",
-          topUsers.map(u => u.name),
-          topUsers.map(u => u.count),
-          "Most Active Users"
-        );
+        const topUsersEl = document.getElementById("topUsersChart");
+        if (topUsersEl) {
+          new ApexCharts(topUsersEl, {
+            chart: {
+              type: 'bar',
+              height: Math.max(300, topUsers.length * 40),
+              background: 'transparent'
+            },
+            series: [{
+              name: 'Activity',
+              data: topUsers.map(u => u.count)
+            }],
+            xaxis: {
+              categories: topUsers.map(u => u.name),
+              labels: {
+                style: { colors: colors.text, fontSize: '12px' }
+              },
+              axisBorder: { show: false },
+              axisTicks: { show: false }
+            },
+            yaxis: {
+              labels: {
+                style: { colors: colors.text, fontSize: '12px', fontWeight: 500 },
+                maxWidth: 160
+              }
+            },
+            plotOptions: {
+              bar: {
+                horizontal: true,
+                borderRadius: 6,
+                barHeight: '65%',
+                distributed: false,
+                dataLabels: { position: 'top' }
+              }
+            },
+            fill: {
+              type: 'gradient',
+              gradient: {
+                shade: 'light',
+                type: 'horizontal',
+                shadeIntensity: 0.15,
+                gradientToColors: [colors.primaryLight],
+                inverseColors: false,
+                opacityFrom: 1,
+                opacityTo: 0.9,
+                stops: [0, 100]
+              }
+            },
+            colors: [colors.primary],
+            dataLabels: {
+              enabled: true,
+              textAnchor: 'start',
+              style: { colors: ['#fff'], fontSize: '11px', fontWeight: 600 },
+              formatter: val => val.toLocaleString(),
+              offsetX: 5
+            },
+            tooltip: {
+              y: { formatter: val => `${val.toLocaleString()} activities` }
+            }
+          }).render();
+        }
       } else {
         document.getElementById("topUsersChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
-      // Chart: Top Pages
+      // Chart: Top Pages (Horizontal Bar)
       if (topPages.length) {
-        createHorizontalBarChart(
-          "topPagesChart",
-          topPages.map(p => p.url),
-          topPages.map(p => p.count),
-          "Top Visited Pages"
-        );
+        const topPagesEl = document.getElementById("topPagesChart");
+        if (topPagesEl) {
+          new ApexCharts(topPagesEl, {
+            chart: {
+              type: 'bar',
+              height: Math.max(300, topPages.length * 40),
+              background: 'transparent'
+            },
+            series: [{
+              name: 'Visits',
+              data: topPages.map(p => p.count)
+            }],
+            xaxis: {
+              categories: topPages.map(p => p.url.length > 30 ? p.url.substring(0, 30) + '...' : p.url),
+              labels: {
+                style: { colors: colors.text, fontSize: '12px' }
+              },
+              axisBorder: { show: false },
+              axisTicks: { show: false }
+            },
+            yaxis: {
+              labels: {
+                style: { colors: colors.text, fontSize: '11px', fontWeight: 500 },
+                maxWidth: 180
+              }
+            },
+            plotOptions: {
+              bar: {
+                horizontal: true,
+                borderRadius: 6,
+                barHeight: '65%',
+                distributed: false,
+                dataLabels: { position: 'top' }
+              }
+            },
+            fill: {
+              type: 'gradient',
+              gradient: {
+                shade: 'light',
+                type: 'horizontal',
+                shadeIntensity: 0.15,
+                gradientToColors: [colors.accent3],
+                inverseColors: false,
+                opacityFrom: 1,
+                opacityTo: 0.9,
+                stops: [0, 100]
+              }
+            },
+            colors: [colors.accent3],
+            dataLabels: {
+              enabled: true,
+              textAnchor: 'start',
+              style: { colors: ['#fff'], fontSize: '11px', fontWeight: 600 },
+              formatter: val => val.toLocaleString(),
+              offsetX: 5
+            },
+            tooltip: {
+              y: { formatter: val => `${val.toLocaleString()} visits` }
+            }
+          }).render();
+        }
       } else {
         document.getElementById("topPagesChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
-      // Chart: Top School Buildings
+      // Chart: Top School Buildings (Donut)
       if (topSchoolBuildings.length) {
-        createDonutChart(
-          "topSchoolBuildings",
-          topSchoolBuildings.map(i => i.school_name),
-          topSchoolBuildings.map(i => i.count),
-          generateColors(topSchoolBuildings.length),
-          true
-        );
+        const topSchoolBuildingsEl = document.getElementById("topSchoolBuildings");
+        if (topSchoolBuildingsEl) {
+          const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
+          new ApexCharts(topSchoolBuildingsEl, {
+            chart: {
+              type: 'donut',
+              height: 400,
+              background: 'transparent'
+            },
+            series: topSchoolBuildings.map(i => i.count),
+            labels: topSchoolBuildings.map(i => i.school_name),
+            colors: chartPalette.slice(0, topSchoolBuildings.length),
+            plotOptions: {
+              pie: {
+                donut: {
+                  size: '65%',
+                  labels: {
+                    show: true,
+                    name: {
+                      show: true,
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: colors.text,
+                      offsetY: -10
+                    },
+                    value: {
+                      show: true,
+                      fontSize: '24px',
+                      fontWeight: 700,
+                      color: colors.primary,
+                      offsetY: 5,
+                      formatter: val => `${((val / total) * 100).toFixed(1)}%`
+                    },
+                    total: {
+                      show: true,
+                      label: 'Total Activity',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: colors.text,
+                      formatter: () => total.toLocaleString()
+                    }
+                  }
+                }
+              }
+            },
+            stroke: { width: 2, colors: ['#fff'] },
+            legend: {
+              show: true,
+              position: 'bottom',
+              fontSize: '13px',
+              labels: { colors: colors.text },
+              markers: { radius: 4 },
+              itemMargin: { horizontal: 10, vertical: 5 }
+            },
+            dataLabels: { enabled: false },
+            tooltip: {
+              y: {
+                formatter: val => {
+                  const pct = ((val / total) * 100).toFixed(1);
+                  return `${val.toLocaleString()} (${pct}%)`;
+                }
+              }
+            }
+          }).render();
+        }
       } else {
         document.getElementById("topSchoolBuildingsWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
@@ -477,9 +489,9 @@
       if (feedback.length > 3) {
         const btn = document.querySelector('.view-more_btn');
         btn.classList.remove("hide");
-        document.querySelector("#org_feedbacks_list_overlay").classList.remove("hide");
         btn.addEventListener("click", () => {
             document.querySelector("#org_feedbacks_list").classList.remove("max-height");
+            document.querySelector("#org_feedbacks_list_overlay").classList.remove("hide");
         });
       }
       
@@ -495,7 +507,7 @@
             <div class="feedback_line-divider"></div>
             <div>
               <p class="name">${organization_info.district_name}</p>
-              <p class="createted_at">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
+              <p class="created_at">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
             </div>
           </div>`).join("");
       });
