@@ -2,233 +2,284 @@ if (!window.scriptExecuted) {
   window.scriptExecuted = true;
   document.addEventListener("DOMContentLoaded", async () => {
     try {
-      // =============================================
-      // MODERN CHART CONFIGURATION
-      // =============================================
-      
-      // Brand Colors
-      const COLORS = {
-        primary: '#449997',
-        primaryLight: '#5bb8b6',
-        primaryDark: '#367a78',
-        text: '#435d60',
-        textLight: '#6b8a8d',
-        background: '#ffffff',
-        gridLine: 'rgba(67, 93, 96, 0.08)',
-        tooltipBg: '#2d4a4c',
-      };
-
-      // Modern color palette that complements the brand
-      const CHART_PALETTE = [
-        '#449997', // Primary teal
-        '#5bb8b6', // Light teal
-        '#7ecbc9', // Lighter teal
-        '#367a78', // Dark teal
-        '#6b8a8d', // Muted teal-gray
-        '#89a5a7', // Soft sage
-        '#4db6ac', // Bright teal
-        '#26a69a', // Deep teal
-        '#80cbc4', // Pastel teal
-        '#b2dfdb', // Very light teal
-        '#e0f2f1', // Near white teal
-        '#00897b', // Bold teal
-        '#00796b', // Forest teal
-        '#004d40', // Very dark teal
-        '#a7d7d5', // Soft aqua
-      ];
-
-      // Global Chart.js defaults for modern look
-      Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      Chart.defaults.font.size = 12;
-      Chart.defaults.font.weight = '500';
-      Chart.defaults.color = COLORS.text;
-      Chart.defaults.plugins.tooltip.backgroundColor = COLORS.tooltipBg;
-      Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: '600' };
-      Chart.defaults.plugins.tooltip.bodyFont = { size: 12, weight: '400' };
-      Chart.defaults.plugins.tooltip.padding = 12;
-      Chart.defaults.plugins.tooltip.cornerRadius = 8;
-      Chart.defaults.plugins.tooltip.displayColors = true;
-      Chart.defaults.plugins.tooltip.boxPadding = 4;
-      Chart.defaults.plugins.legend.labels.usePointStyle = true;
-      Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
-      Chart.defaults.plugins.legend.labels.padding = 20;
-      Chart.defaults.elements.bar.borderRadius = 6;
-      Chart.defaults.elements.bar.borderSkipped = false;
-      Chart.defaults.elements.arc.borderWidth = 0;
-      Chart.defaults.animation.duration = 800;
-      Chart.defaults.animation.easing = 'easeOutQuart';
-
       // Helpers
       const setText = (id, txt) => {
         const el = document.getElementById(id);
         if (el) el.textContent = txt;
       };
-
-      // Create gradient for bar charts
-      const createGradient = (ctx, isHorizontal = false) => {
-        const gradient = isHorizontal 
-          ? ctx.createLinearGradient(0, 0, ctx.canvas.width, 0)
-          : ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
-        gradient.addColorStop(0, COLORS.primary);
-        gradient.addColorStop(1, COLORS.primaryLight);
-        return gradient;
-      };
-
-      // Modern chart creation with enhanced options
-      const createChart = (id, type, data, opts = {}) => {
-        const canvas = document.getElementById(id);
-        if (!canvas) return null;
-        const ctx = canvas.getContext('2d');
-        
-        // Apply gradient to bar charts
-        if (type === 'bar' && data.datasets) {
-          data.datasets = data.datasets.map(dataset => ({
-            ...dataset,
-            backgroundColor: createGradient(ctx, opts.indexAxis === 'y'),
-            hoverBackgroundColor: COLORS.primaryDark,
-            borderRadius: 6,
-            borderSkipped: false,
-          }));
-        }
-        
-        return new Chart(canvas, { type, data, options: opts });
-      };
-
+      
       const getTop = items =>
         Object.entries(items)
           .map(([key, count]) => ({ key, count }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 10);
+      
+      // Brand-matching color palette
+      const generateColors = count => [
+        '#449997', '#5ab5b3', '#357a78', '#6dcfcc', '#2d6664',
+        '#7edbd8', '#256260', '#8fe7e4', '#1e4f4d', '#a0f0ed',
+        '#164240', '#b1f7f4', '#0e3534', '#c2fcfa', '#063029'
+      ].slice(0, count);
 
-      const generateColors = count => CHART_PALETTE.slice(0, Math.min(count, CHART_PALETTE.length));
+      // Common chart theme options
+      const chartTheme = {
+        fontFamily: 'inherit',
+        foreColor: '#435d60',
+        toolbar: { show: false },
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 800
+        }
+      };
 
-      // Modern bar chart options
-      const modernBarOptions = (horizontal = false) => ({
-        indexAxis: horizontal ? 'y' : 'x',
-        responsive: true,
-        maintainAspectRatio: true,
-        layout: {
-          padding: { top: 10, bottom: 10, left: 10, right: 10 }
-        },
-        scales: {
-          x: {
-            beginAtZero: true,
-            grid: {
-              display: !horizontal,
-              color: COLORS.gridLine,
-              drawBorder: false,
-            },
-            border: { display: false },
-            ticks: {
-              color: COLORS.textLight,
-              font: { size: 11, weight: '500' },
-              padding: 8,
-            },
+      // Create vertical bar chart
+      const createBarChart = (id, categories, seriesData, label) => {
+        const options = {
+          chart: {
+            type: 'bar',
+            height: 350,
+            ...chartTheme
           },
-          y: {
-            beginAtZero: true,
-            grid: {
-              display: horizontal,
-              color: COLORS.gridLine,
-              drawBorder: false,
-            },
-            border: { display: false },
-            ticks: {
-              color: COLORS.textLight,
-              font: { size: 11, weight: '500' },
-              padding: 8,
-            },
-          },
-        },
-        plugins: {
-          legend: {
-            display: true,
-            position: 'top',
-            align: 'start',
+          series: [{
+            name: label,
+            data: seriesData
+          }],
+          xaxis: {
+            categories,
             labels: {
-              color: COLORS.text,
-              font: { size: 12, weight: '600' },
-              boxWidth: 12,
-              boxHeight: 12,
-              useBorderRadius: true,
-              borderRadius: 3,
+              style: { colors: '#435d60', fontSize: '12px' }
             },
+            axisBorder: { color: '#e0e0e0' },
+            axisTicks: { color: '#e0e0e0' }
+          },
+          yaxis: {
+            labels: {
+              style: { colors: '#435d60', fontSize: '12px' }
+            }
+          },
+          colors: ['#449997'],
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'light',
+              type: 'vertical',
+              shadeIntensity: 0.25,
+              gradientToColors: ['#5ab5b3'],
+              inverseColors: false,
+              opacityFrom: 1,
+              opacityTo: 0.85,
+              stops: [0, 100]
+            }
+          },
+          plotOptions: {
+            bar: {
+              borderRadius: 6,
+              columnWidth: '60%',
+              dataLabels: { position: 'top' }
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            offsetY: -20,
+            style: {
+              fontSize: '11px',
+              colors: ['#435d60'],
+              fontWeight: 600
+            }
+          },
+          grid: {
+            borderColor: '#e8e8e8',
+            strokeDashArray: 4
           },
           tooltip: {
-            backgroundColor: COLORS.tooltipBg,
-            titleColor: '#ffffff',
-            bodyColor: 'rgba(255, 255, 255, 0.85)',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 1,
-            padding: 14,
-            cornerRadius: 10,
-            titleFont: { size: 13, weight: '600' },
-            bodyFont: { size: 12 },
-            callbacks: {
-              labelColor: () => ({
-                backgroundColor: COLORS.primary,
-                borderColor: COLORS.primary,
-                borderRadius: 3,
-              }),
-            },
-          },
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-      });
+            theme: 'light',
+            y: { formatter: val => val }
+          }
+        };
+        const chart = new ApexCharts(document.getElementById(id), options);
+        chart.render();
+        return chart;
+      };
 
-      // Modern doughnut chart options
-      const modernDoughnutOptions = (showLegend = true, title = '') => ({
-        responsive: true,
-        maintainAspectRatio: true,
-        cutout: '65%',
-        layout: {
-          padding: { top: 20, bottom: 20 }
-        },
-        plugins: {
+      // Create horizontal bar chart
+      const createHorizontalBarChart = (id, categories, seriesData, label) => {
+        const options = {
+          chart: {
+            type: 'bar',
+            height: Math.max(300, categories.length * 40),
+            ...chartTheme
+          },
+          series: [{
+            name: label,
+            data: seriesData
+          }],
+          plotOptions: {
+            bar: {
+              horizontal: true,
+              borderRadius: 4,
+              barHeight: '70%',
+              distributed: false,
+              dataLabels: { position: 'right' }
+            }
+          },
+          colors: ['#449997'],
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'light',
+              type: 'horizontal',
+              shadeIntensity: 0.2,
+              gradientToColors: ['#6dcfcc'],
+              inverseColors: false,
+              opacityFrom: 1,
+              opacityTo: 0.9,
+              stops: [0, 100]
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            textAnchor: 'start',
+            style: {
+              fontSize: '12px',
+              colors: ['#435d60'],
+              fontWeight: 600
+            },
+            formatter: val => val,
+            offsetX: 5
+          },
+          xaxis: {
+            labels: {
+              style: { colors: '#435d60', fontSize: '11px' }
+            },
+            axisBorder: { color: '#e0e0e0' },
+            axisTicks: { color: '#e0e0e0' }
+          },
+          yaxis: {
+            labels: {
+              style: { colors: '#435d60', fontSize: '12px' },
+              maxWidth: 180,
+              formatter: val => val.length > 25 ? val.substring(0, 25) + '...' : val
+            }
+          },
+          grid: {
+            borderColor: '#e8e8e8',
+            strokeDashArray: 4,
+            xaxis: { lines: { show: true } },
+            yaxis: { lines: { show: false } }
+          },
+          tooltip: {
+            theme: 'light',
+            y: { formatter: val => val + ' visits' }
+          }
+        };
+        const chart = new ApexCharts(document.getElementById(id), options);
+        chart.render();
+        return chart;
+      };
+
+      // Create donut chart
+      const createDonutChart = (id, labels, series, colors, showLegend = true) => {
+        const options = {
+          chart: {
+            type: 'donut',
+            height: 380,
+            fontFamily: 'inherit',
+            foreColor: '#435d60',
+            animations: {
+              enabled: true,
+              easing: 'easeinout',
+              speed: 800
+            }
+          },
+          series,
+          labels,
+          colors,
+          stroke: {
+            show: true,
+            width: 3,
+            colors: ['#fff']
+          },
+          plotOptions: {
+            pie: {
+              donut: {
+                size: '55%',
+                labels: {
+                  show: true,
+                  name: {
+                    show: true,
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#435d60',
+                    offsetY: -10
+                  },
+                  value: {
+                    show: true,
+                    fontSize: '24px',
+                    fontWeight: 700,
+                    color: '#449997',
+                    offsetY: 5,
+                    formatter: val => Math.round(val)
+                  },
+                  total: {
+                    show: true,
+                    label: 'Total',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#435d60',
+                    formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0)
+                  }
+                }
+              }
+            }
+          },
+          dataLabels: {
+            enabled: false
+          },
           legend: {
-            display: showLegend,
+            show: showLegend,
             position: 'bottom',
-            labels: {
-              color: COLORS.text,
-              font: { size: 11, weight: '500' },
-              padding: 16,
-              usePointStyle: true,
-              pointStyle: 'circle',
+            horizontalAlign: 'center',
+            fontSize: '13px',
+            fontWeight: 500,
+            markers: {
+              width: 12,
+              height: 12,
+              radius: 3
             },
-          },
-          title: {
-            display: !!title,
-            text: title,
-            color: COLORS.text,
-            font: { size: 14, weight: '600' },
-            padding: { bottom: 20 },
+            itemMargin: {
+              horizontal: 12,
+              vertical: 8
+            },
+            labels: {
+              colors: '#435d60'
+            }
           },
           tooltip: {
-            backgroundColor: COLORS.tooltipBg,
-            titleColor: '#ffffff',
-            bodyColor: 'rgba(255, 255, 255, 0.85)',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 1,
-            padding: 14,
-            cornerRadius: 10,
+            enabled: true,
+            theme: 'light',
+            fillSeriesColor: false,
+            style: { fontSize: '13px' },
+            y: {
+              formatter: (val, opts) => {
+                const total = opts.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                const percent = ((val / total) * 100).toFixed(1);
+                return `${val} (${percent}%)`;
+              }
+            }
           },
-        },
-        elements: {
-          arc: {
-            borderWidth: 3,
-            borderColor: COLORS.background,
-            hoverBorderColor: COLORS.background,
-            hoverOffset: 8,
-          },
-        },
-      });
-
-      // =============================================
-      // DATA FETCHING & PROCESSING
-      // =============================================
+          responsive: [{
+            breakpoint: 480,
+            options: {
+              chart: { height: 320 },
+              legend: { position: 'bottom' }
+            }
+          }]
+        };
+        const chart = new ApexCharts(document.getElementById(id), options);
+        chart.render();
+        return chart;
+      };
 
       // Member & Data Fetch
       const member = await window.$memberstackDom.getCurrentMember();
@@ -242,6 +293,7 @@ if (!window.scriptExecuted) {
       const { feedback, top_users, users_per_month_arr, log } = data;
 
       setText("org_name", district_name);
+      // Format numbers as integers with thousands separators, no decimals
       const formatNumber = n => Math.round(n).toLocaleString();
       const studentsGoal = total_students * 0.05; 
       setText("total_students", formatNumber(total_students));
@@ -277,87 +329,23 @@ if (!window.scriptExecuted) {
         sync();
       })();
 
-      // =============================================
-      // CHARTS
-      // =============================================
+      // Chart: Users Per Month
+      createBarChart(
+        "usersPerMonthChart",
+        ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        users_per_month_arr,
+        "Registrations per month"
+      );
 
-      // Chart: Users Per Month (Vertical Bar)
-      (() => {
-        const canvas = document.getElementById("usersPerMonthChart");
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, canvas.height || 400, 0, 0);
-        gradient.addColorStop(0, COLORS.primary);
-        gradient.addColorStop(1, COLORS.primaryLight);
-
-        new Chart(canvas, {
-          type: 'bar',
-          data: {
-            labels: ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            datasets: [{
-              label: "Registrations per month in your community",
-              data: users_per_month_arr,
-              backgroundColor: gradient,
-              hoverBackgroundColor: COLORS.primaryDark,
-              borderRadius: 8,
-              borderSkipped: false,
-              barThickness: 'flex',
-              maxBarThickness: 50,
-            }]
-          },
-          options: {
-            ...modernBarOptions(false),
-            scales: {
-              ...modernBarOptions(false).scales,
-              x: {
-                ...modernBarOptions(false).scales.x,
-                grid: { display: false },
-              },
-              y: {
-                ...modernBarOptions(false).scales.y,
-                grid: {
-                  color: COLORS.gridLine,
-                  drawBorder: false,
-                },
-              },
-            },
-          },
-        });
-      })();
-
-      // Chart: School Buildings (Doughnut)
+      // Chart: School Buildings
       if (school_buildings.length) {
-        const canvas = document.getElementById("schoolBuildingsChart");
-        if (canvas) {
-          new Chart(canvas, {
-            type: 'doughnut',
-            data: {
-              labels: school_buildings.map(i => i.school_name),
-              datasets: [{
-                data: school_buildings.map(i => i.registered_school_parents),
-                backgroundColor: generateColors(school_buildings.length),
-                hoverOffset: 12,
-              }]
-            },
-            options: {
-              ...modernDoughnutOptions(false, ''),
-              plugins: {
-                ...modernDoughnutOptions(false).plugins,
-                legend: { display: false },
-                tooltip: {
-                  ...modernDoughnutOptions(false).plugins.tooltip,
-                  callbacks: {
-                    label: ctx => {
-                      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                      const percentage = ((ctx.raw / total) * 100).toFixed(1);
-                      return `${ctx.label}: ${ctx.raw.toLocaleString()} (${percentage}%)`;
-                    }
-                  }
-                }
-              }
-            },
-          });
-        }
+        createDonutChart(
+          "schoolBuildingsChart",
+          school_buildings.map(i => i.school_name),
+          school_buildings.map(i => i.registered_school_parents),
+          generateColors(school_buildings.length),
+          false
+        );
       } else {
         document.getElementById("schoolBuildingsChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
@@ -386,156 +374,45 @@ if (!window.scriptExecuted) {
         .filter(({ key }) => key !== "District Staff")
         .map(({ key, count }) => ({ school_name: key, count }));
 
-      // Chart: Top Users (Horizontal Bar)
+      // Chart: Top Users
       if (topUsers.length > 1) {
-        const canvas = document.getElementById("topUsersChart");
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width || 400, 0);
-          gradient.addColorStop(0, COLORS.primary);
-          gradient.addColorStop(1, COLORS.primaryLight);
-
-          new Chart(canvas, {
-            type: 'bar',
-            data: {
-              labels: topUsers.map(u => u.name),
-              datasets: [{
-                label: "Most Active Users",
-                data: topUsers.map(u => u.count),
-                backgroundColor: gradient,
-                hoverBackgroundColor: COLORS.primaryDark,
-                borderRadius: 6,
-                borderSkipped: false,
-                barThickness: 'flex',
-                maxBarThickness: 28,
-              }]
-            },
-            options: {
-              ...modernBarOptions(true),
-              scales: {
-                ...modernBarOptions(true).scales,
-                y: {
-                  ...modernBarOptions(true).scales.y,
-                  grid: { display: false },
-                  ticks: {
-                    ...modernBarOptions(true).scales.y.ticks,
-                    callback: function(value, index) {
-                      const label = this.getLabelForValue(value);
-                      return label.length > 20 ? label.substring(0, 18) + '...' : label;
-                    }
-                  }
-                },
-                x: {
-                  ...modernBarOptions(true).scales.x,
-                  grid: {
-                    color: COLORS.gridLine,
-                    drawBorder: false,
-                  },
-                },
-              },
-            },
-          });
-        }
+        createHorizontalBarChart(
+          "topUsersChart",
+          topUsers.map(u => u.name),
+          topUsers.map(u => u.count),
+          "Most Active Users"
+        );
       } else {
         document.getElementById("topUsersChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
-      // Chart: Top Pages (Horizontal Bar)
+      // Chart: Top Pages
       if (topPages.length) {
-        const canvas = document.getElementById("topPagesChart");
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width || 400, 0);
-          gradient.addColorStop(0, COLORS.primary);
-          gradient.addColorStop(1, COLORS.primaryLight);
-
-          new Chart(canvas, {
-            type: 'bar',
-            data: {
-              labels: topPages.map(p => p.url),
-              datasets: [{
-                label: "Top Visited Pages",
-                data: topPages.map(p => p.count),
-                backgroundColor: gradient,
-                hoverBackgroundColor: COLORS.primaryDark,
-                borderRadius: 6,
-                borderSkipped: false,
-                barThickness: 'flex',
-                maxBarThickness: 28,
-              }]
-            },
-            options: {
-              ...modernBarOptions(true),
-              scales: {
-                ...modernBarOptions(true).scales,
-                y: {
-                  ...modernBarOptions(true).scales.y,
-                  grid: { display: false },
-                  ticks: {
-                    ...modernBarOptions(true).scales.y.ticks,
-                    callback: function(value, index) {
-                      const label = this.getLabelForValue(value);
-                      return label.length > 25 ? label.substring(0, 23) + '...' : label;
-                    }
-                  }
-                },
-                x: {
-                  ...modernBarOptions(true).scales.x,
-                  grid: {
-                    color: COLORS.gridLine,
-                    drawBorder: false,
-                  },
-                },
-              },
-            },
-          });
-        }
+        createHorizontalBarChart(
+          "topPagesChart",
+          topPages.map(p => p.url),
+          topPages.map(p => p.count),
+          "Top Visited Pages"
+        );
       } else {
         document.getElementById("topPagesChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
-      // Chart: Top School Buildings (Doughnut)
+      // Chart: Top School Buildings
       if (topSchoolBuildings.length) {
-        const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
-        const canvas = document.getElementById("topSchoolBuildings");
-        if (canvas) {
-          new Chart(canvas, {
-            type: 'doughnut',
-            data: {
-              labels: topSchoolBuildings.map(i => i.school_name),
-              datasets: [{
-                data: topSchoolBuildings.map(i => i.count),
-                backgroundColor: generateColors(topSchoolBuildings.length),
-                hoverOffset: 12,
-              }]
-            },
-            options: {
-              ...modernDoughnutOptions(true, 'Top School Buildings'),
-              plugins: {
-                ...modernDoughnutOptions(true, 'Top School Buildings').plugins,
-                tooltip: {
-                  ...modernDoughnutOptions(true).plugins.tooltip,
-                  callbacks: {
-                    label: ctx => {
-                      const percentage = ((ctx.raw / total) * 100).toFixed(1);
-                      return `${ctx.label}: ${ctx.raw.toLocaleString()} visits (${percentage}%)`;
-                    }
-                  }
-                }
-              }
-            },
-          });
-        }
+        createDonutChart(
+          "topSchoolBuildings",
+          topSchoolBuildings.map(i => i.school_name),
+          topSchoolBuildings.map(i => i.count),
+          generateColors(topSchoolBuildings.length),
+          true
+        );
       } else {
         document.getElementById("topSchoolBuildingsWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
-
-      // =============================================
-      // TESTIMONIALS & OTHER FEATURES
-      // =============================================
 
       // Feedback Testimonials
       let testimonials = "";
