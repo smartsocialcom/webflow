@@ -2,20 +2,233 @@ if (!window.scriptExecuted) {
   window.scriptExecuted = true;
   document.addEventListener("DOMContentLoaded", async () => {
     try {
+      // =============================================
+      // MODERN CHART CONFIGURATION
+      // =============================================
+      
+      // Brand Colors
+      const COLORS = {
+        primary: '#449997',
+        primaryLight: '#5bb8b6',
+        primaryDark: '#367a78',
+        text: '#435d60',
+        textLight: '#6b8a8d',
+        background: '#ffffff',
+        gridLine: 'rgba(67, 93, 96, 0.08)',
+        tooltipBg: '#2d4a4c',
+      };
+
+      // Modern color palette that complements the brand
+      const CHART_PALETTE = [
+        '#449997', // Primary teal
+        '#5bb8b6', // Light teal
+        '#7ecbc9', // Lighter teal
+        '#367a78', // Dark teal
+        '#6b8a8d', // Muted teal-gray
+        '#89a5a7', // Soft sage
+        '#4db6ac', // Bright teal
+        '#26a69a', // Deep teal
+        '#80cbc4', // Pastel teal
+        '#b2dfdb', // Very light teal
+        '#e0f2f1', // Near white teal
+        '#00897b', // Bold teal
+        '#00796b', // Forest teal
+        '#004d40', // Very dark teal
+        '#a7d7d5', // Soft aqua
+      ];
+
+      // Global Chart.js defaults for modern look
+      Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.font.weight = '500';
+      Chart.defaults.color = COLORS.text;
+      Chart.defaults.plugins.tooltip.backgroundColor = COLORS.tooltipBg;
+      Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: '600' };
+      Chart.defaults.plugins.tooltip.bodyFont = { size: 12, weight: '400' };
+      Chart.defaults.plugins.tooltip.padding = 12;
+      Chart.defaults.plugins.tooltip.cornerRadius = 8;
+      Chart.defaults.plugins.tooltip.displayColors = true;
+      Chart.defaults.plugins.tooltip.boxPadding = 4;
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+      Chart.defaults.plugins.legend.labels.padding = 20;
+      Chart.defaults.elements.bar.borderRadius = 6;
+      Chart.defaults.elements.bar.borderSkipped = false;
+      Chart.defaults.elements.arc.borderWidth = 0;
+      Chart.defaults.animation.duration = 800;
+      Chart.defaults.animation.easing = 'easeOutQuart';
+
       // Helpers
       const setText = (id, txt) => {
         const el = document.getElementById(id);
         if (el) el.textContent = txt;
       };
-      const createChart = (id, type, data, opts) =>
-        new Chart(document.getElementById(id), { type, data, options: opts });
+
+      // Create gradient for bar charts
+      const createGradient = (ctx, isHorizontal = false) => {
+        const gradient = isHorizontal 
+          ? ctx.createLinearGradient(0, 0, ctx.canvas.width, 0)
+          : ctx.createLinearGradient(0, ctx.canvas.height, 0, 0);
+        gradient.addColorStop(0, COLORS.primary);
+        gradient.addColorStop(1, COLORS.primaryLight);
+        return gradient;
+      };
+
+      // Modern chart creation with enhanced options
+      const createChart = (id, type, data, opts = {}) => {
+        const canvas = document.getElementById(id);
+        if (!canvas) return null;
+        const ctx = canvas.getContext('2d');
+        
+        // Apply gradient to bar charts
+        if (type === 'bar' && data.datasets) {
+          data.datasets = data.datasets.map(dataset => ({
+            ...dataset,
+            backgroundColor: createGradient(ctx, opts.indexAxis === 'y'),
+            hoverBackgroundColor: COLORS.primaryDark,
+            borderRadius: 6,
+            borderSkipped: false,
+          }));
+        }
+        
+        return new Chart(canvas, { type, data, options: opts });
+      };
+
       const getTop = items =>
         Object.entries(items)
           .map(([key, count]) => ({ key, count }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 10);
-      const generateColors = count =>
-        ["#EF476F", "#FFD166", "#06D6A0", "#118AB2", "#073B4C", "#FFC6FF", "#9BF6A0", "#A0C4FF", "#BDB2FF", "#FFADAD", "#F94144", "#F3722C", "#F8961E", "#F9C74F", "#90BE6D", "#277DA1", "#577590", "#4D908E", "#43AA8B", "#F9844A", "#8338EC", "#3A86FF", "#EF233C", "#FF6D00", "#FFD500"].slice(0, count);
+
+      const generateColors = count => CHART_PALETTE.slice(0, Math.min(count, CHART_PALETTE.length));
+
+      // Modern bar chart options
+      const modernBarOptions = (horizontal = false) => ({
+        indexAxis: horizontal ? 'y' : 'x',
+        responsive: true,
+        maintainAspectRatio: true,
+        layout: {
+          padding: { top: 10, bottom: 10, left: 10, right: 10 }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: {
+              display: !horizontal,
+              color: COLORS.gridLine,
+              drawBorder: false,
+            },
+            border: { display: false },
+            ticks: {
+              color: COLORS.textLight,
+              font: { size: 11, weight: '500' },
+              padding: 8,
+            },
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: horizontal,
+              color: COLORS.gridLine,
+              drawBorder: false,
+            },
+            border: { display: false },
+            ticks: {
+              color: COLORS.textLight,
+              font: { size: 11, weight: '500' },
+              padding: 8,
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            align: 'start',
+            labels: {
+              color: COLORS.text,
+              font: { size: 12, weight: '600' },
+              boxWidth: 12,
+              boxHeight: 12,
+              useBorderRadius: true,
+              borderRadius: 3,
+            },
+          },
+          tooltip: {
+            backgroundColor: COLORS.tooltipBg,
+            titleColor: '#ffffff',
+            bodyColor: 'rgba(255, 255, 255, 0.85)',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderWidth: 1,
+            padding: 14,
+            cornerRadius: 10,
+            titleFont: { size: 13, weight: '600' },
+            bodyFont: { size: 12 },
+            callbacks: {
+              labelColor: () => ({
+                backgroundColor: COLORS.primary,
+                borderColor: COLORS.primary,
+                borderRadius: 3,
+              }),
+            },
+          },
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+      });
+
+      // Modern doughnut chart options
+      const modernDoughnutOptions = (showLegend = true, title = '') => ({
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '65%',
+        layout: {
+          padding: { top: 20, bottom: 20 }
+        },
+        plugins: {
+          legend: {
+            display: showLegend,
+            position: 'bottom',
+            labels: {
+              color: COLORS.text,
+              font: { size: 11, weight: '500' },
+              padding: 16,
+              usePointStyle: true,
+              pointStyle: 'circle',
+            },
+          },
+          title: {
+            display: !!title,
+            text: title,
+            color: COLORS.text,
+            font: { size: 14, weight: '600' },
+            padding: { bottom: 20 },
+          },
+          tooltip: {
+            backgroundColor: COLORS.tooltipBg,
+            titleColor: '#ffffff',
+            bodyColor: 'rgba(255, 255, 255, 0.85)',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderWidth: 1,
+            padding: 14,
+            cornerRadius: 10,
+          },
+        },
+        elements: {
+          arc: {
+            borderWidth: 3,
+            borderColor: COLORS.background,
+            hoverBorderColor: COLORS.background,
+            hoverOffset: 8,
+          },
+        },
+      });
+
+      // =============================================
+      // DATA FETCHING & PROCESSING
+      // =============================================
 
       // Member & Data Fetch
       const member = await window.$memberstackDom.getCurrentMember();
@@ -29,7 +242,6 @@ if (!window.scriptExecuted) {
       const { feedback, top_users, users_per_month_arr, log } = data;
 
       setText("org_name", district_name);
-      // Format numbers as integers with thousands separators, no decimals
       const formatNumber = n => Math.round(n).toLocaleString();
       const studentsGoal = total_students * 0.05; 
       setText("total_students", formatNumber(total_students));
@@ -65,41 +277,87 @@ if (!window.scriptExecuted) {
         sync();
       })();
 
-      // Chart: Users Per Month
-      createChart("usersPerMonthChart", "bar", {
-        labels: ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-        datasets: [{
-          label: "Registrations per month in your community",
-          data: users_per_month_arr,
-          borderWidth: 1,
-          borderColor: "#03afaf",
-          backgroundColor: "#03afaf"
-        }]
-      }, { scales: { y: { beginAtZero: true } } });
+      // =============================================
+      // CHARTS
+      // =============================================
 
-      // Chart: School Buildings
+      // Chart: Users Per Month (Vertical Bar)
+      (() => {
+        const canvas = document.getElementById("usersPerMonthChart");
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, canvas.height || 400, 0, 0);
+        gradient.addColorStop(0, COLORS.primary);
+        gradient.addColorStop(1, COLORS.primaryLight);
+
+        new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [{
+              label: "Registrations per month in your community",
+              data: users_per_month_arr,
+              backgroundColor: gradient,
+              hoverBackgroundColor: COLORS.primaryDark,
+              borderRadius: 8,
+              borderSkipped: false,
+              barThickness: 'flex',
+              maxBarThickness: 50,
+            }]
+          },
+          options: {
+            ...modernBarOptions(false),
+            scales: {
+              ...modernBarOptions(false).scales,
+              x: {
+                ...modernBarOptions(false).scales.x,
+                grid: { display: false },
+              },
+              y: {
+                ...modernBarOptions(false).scales.y,
+                grid: {
+                  color: COLORS.gridLine,
+                  drawBorder: false,
+                },
+              },
+            },
+          },
+        });
+      })();
+
+      // Chart: School Buildings (Doughnut)
       if (school_buildings.length) {
-        createChart("schoolBuildingsChart", "doughnut", {
-          labels: school_buildings.map(i => i.school_name),
-          datasets: [{
-            data: school_buildings.map(i => i.registered_school_parents),
-            backgroundColor: generateColors(school_buildings.length)
-          }]
-        }, {
-          cutout: "50%",
-          plugins: {
-            title: { display: true, text: "" },
-            legend: { display: false, position: "bottom" },
-            tooltip: {
-              callbacks: {
-                label: ctx => {
-                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                  return `${ctx.label}: ${((ctx.raw / total) * 100).toFixed(2)}%`;
+        const canvas = document.getElementById("schoolBuildingsChart");
+        if (canvas) {
+          new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+              labels: school_buildings.map(i => i.school_name),
+              datasets: [{
+                data: school_buildings.map(i => i.registered_school_parents),
+                backgroundColor: generateColors(school_buildings.length),
+                hoverOffset: 12,
+              }]
+            },
+            options: {
+              ...modernDoughnutOptions(false, ''),
+              plugins: {
+                ...modernDoughnutOptions(false).plugins,
+                legend: { display: false },
+                tooltip: {
+                  ...modernDoughnutOptions(false).plugins.tooltip,
+                  callbacks: {
+                    label: ctx => {
+                      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                      const percentage = ((ctx.raw / total) * 100).toFixed(1);
+                      return `${ctx.label}: ${ctx.raw.toLocaleString()} (${percentage}%)`;
+                    }
+                  }
                 }
               }
-            }
-          }
-        });
+            },
+          });
+        }
       } else {
         document.getElementById("schoolBuildingsChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
@@ -128,62 +386,156 @@ if (!window.scriptExecuted) {
         .filter(({ key }) => key !== "District Staff")
         .map(({ key, count }) => ({ school_name: key, count }));
 
-      // Chart: Top Users
+      // Chart: Top Users (Horizontal Bar)
       if (topUsers.length > 1) {
-        createChart("topUsersChart", "bar", {
-          labels: topUsers.map(u => u.name),
-          datasets: [{
-            label: "Most Active Users",
-            data: topUsers.map(u => u.count),
-            backgroundColor: "#03afaf",
-            borderColor: "#03afaf",
-            borderWidth: 1
-          }]
-        }, { indexAxis: "y", scales: { x: { beginAtZero: true } } });
+        const canvas = document.getElementById("topUsersChart");
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          const gradient = ctx.createLinearGradient(0, 0, canvas.width || 400, 0);
+          gradient.addColorStop(0, COLORS.primary);
+          gradient.addColorStop(1, COLORS.primaryLight);
+
+          new Chart(canvas, {
+            type: 'bar',
+            data: {
+              labels: topUsers.map(u => u.name),
+              datasets: [{
+                label: "Most Active Users",
+                data: topUsers.map(u => u.count),
+                backgroundColor: gradient,
+                hoverBackgroundColor: COLORS.primaryDark,
+                borderRadius: 6,
+                borderSkipped: false,
+                barThickness: 'flex',
+                maxBarThickness: 28,
+              }]
+            },
+            options: {
+              ...modernBarOptions(true),
+              scales: {
+                ...modernBarOptions(true).scales,
+                y: {
+                  ...modernBarOptions(true).scales.y,
+                  grid: { display: false },
+                  ticks: {
+                    ...modernBarOptions(true).scales.y.ticks,
+                    callback: function(value, index) {
+                      const label = this.getLabelForValue(value);
+                      return label.length > 20 ? label.substring(0, 18) + '...' : label;
+                    }
+                  }
+                },
+                x: {
+                  ...modernBarOptions(true).scales.x,
+                  grid: {
+                    color: COLORS.gridLine,
+                    drawBorder: false,
+                  },
+                },
+              },
+            },
+          });
+        }
       } else {
         document.getElementById("topUsersChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
-      // Chart: Top Pages
+      // Chart: Top Pages (Horizontal Bar)
       if (topPages.length) {
-        createChart("topPagesChart", "bar", {
-          labels: topPages.map(p => p.url),
-          datasets: [{
-            label: "Top Visited Pages",
-            data: topPages.map(p => p.count),
-            backgroundColor: "#03afaf",
-            borderColor: "#007bff",
-            borderWidth: 1
-          }]
-        }, { indexAxis: "y", scales: { x: { beginAtZero: true } } });
+        const canvas = document.getElementById("topPagesChart");
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          const gradient = ctx.createLinearGradient(0, 0, canvas.width || 400, 0);
+          gradient.addColorStop(0, COLORS.primary);
+          gradient.addColorStop(1, COLORS.primaryLight);
+
+          new Chart(canvas, {
+            type: 'bar',
+            data: {
+              labels: topPages.map(p => p.url),
+              datasets: [{
+                label: "Top Visited Pages",
+                data: topPages.map(p => p.count),
+                backgroundColor: gradient,
+                hoverBackgroundColor: COLORS.primaryDark,
+                borderRadius: 6,
+                borderSkipped: false,
+                barThickness: 'flex',
+                maxBarThickness: 28,
+              }]
+            },
+            options: {
+              ...modernBarOptions(true),
+              scales: {
+                ...modernBarOptions(true).scales,
+                y: {
+                  ...modernBarOptions(true).scales.y,
+                  grid: { display: false },
+                  ticks: {
+                    ...modernBarOptions(true).scales.y.ticks,
+                    callback: function(value, index) {
+                      const label = this.getLabelForValue(value);
+                      return label.length > 25 ? label.substring(0, 23) + '...' : label;
+                    }
+                  }
+                },
+                x: {
+                  ...modernBarOptions(true).scales.x,
+                  grid: {
+                    color: COLORS.gridLine,
+                    drawBorder: false,
+                  },
+                },
+              },
+            },
+          });
+        }
       } else {
         document.getElementById("topPagesChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
-      // Chart: Top School Buildings
+      // Chart: Top School Buildings (Doughnut)
       if (topSchoolBuildings.length) {
         const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
-        createChart("topSchoolBuildings", "doughnut", {
-          labels: topSchoolBuildings.map(i => i.school_name),
-          datasets: [{
-            data: topSchoolBuildings.map(i => ((i.count / total) * 100).toFixed(2)),
-            backgroundColor: generateColors(topSchoolBuildings.length),
-            hoverOffset: 4
-          }]
-        }, {
-          cutout: "50%",
-          plugins: {
-            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw}%` } },
-            title: { display: true, text: "Top School Buildings" },
-            legend: { display: true, position: "bottom" }
-          }
-        });
+        const canvas = document.getElementById("topSchoolBuildings");
+        if (canvas) {
+          new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+              labels: topSchoolBuildings.map(i => i.school_name),
+              datasets: [{
+                data: topSchoolBuildings.map(i => i.count),
+                backgroundColor: generateColors(topSchoolBuildings.length),
+                hoverOffset: 12,
+              }]
+            },
+            options: {
+              ...modernDoughnutOptions(true, 'Top School Buildings'),
+              plugins: {
+                ...modernDoughnutOptions(true, 'Top School Buildings').plugins,
+                tooltip: {
+                  ...modernDoughnutOptions(true).plugins.tooltip,
+                  callbacks: {
+                    label: ctx => {
+                      const percentage = ((ctx.raw / total) * 100).toFixed(1);
+                      return `${ctx.label}: ${ctx.raw.toLocaleString()} visits (${percentage}%)`;
+                    }
+                  }
+                }
+              }
+            },
+          });
+        }
       } else {
         document.getElementById("topSchoolBuildingsWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
+
+      // =============================================
+      // TESTIMONIALS & OTHER FEATURES
+      // =============================================
 
       // Feedback Testimonials
       let testimonials = "";
