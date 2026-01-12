@@ -1,0 +1,190 @@
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM APEXCHARTS STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Premium Tooltip Styling */
+.apexcharts-tooltip {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafa 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 4px 6px -1px rgba(68, 153, 151, 0.1),
+    0 10px 30px -5px rgba(68, 153, 151, 0.2),
+    0 0 0 1px rgba(68, 153, 151, 0.08) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  animation: tooltipFadeIn 0.2s ease-out !important;
+  transform-origin: center top;
+}
+
+.apexcharts-tooltip-title {
+  background: linear-gradient(135deg, #449997 0%, #357A78 100%) !important;
+  border-bottom: none !important;
+  padding: 12px 18px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  color: #fff !important;
+  letter-spacing: 0.3px;
+}
+
+.apexcharts-tooltip-series-group {
+  padding: 12px 18px !important;
+  background: transparent !important;
+}
+
+.apexcharts-tooltip-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+
+.apexcharts-tooltip-text-y-label {
+  color: #435d60 !important;
+  font-weight: 500 !important;
+}
+
+.apexcharts-tooltip-text-y-value {
+  color: #449997 !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+}
+
+.apexcharts-tooltip-marker {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  margin-right: 10px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Tooltip Animation */
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEGEND STYLING
+   ═══════════════════════════════════════════════════════════════ */
+
+.apexcharts-legend {
+  padding: 16px 8px !important;
+}
+
+.apexcharts-legend-series {
+  margin: 6px 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.apexcharts-legend-series:hover {
+  transform: translateX(4px);
+}
+
+.apexcharts-legend-marker {
+  border-radius: 4px !important;
+  margin-right: 8px !important;
+}
+
+.apexcharts-legend-text {
+  color: #435d60 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHART CONTAINER & EFFECTS
+   ═══════════════════════════════════════════════════════════════ */
+
+.apexcharts-canvas {
+  filter: drop-shadow(0 2px 8px rgba(68, 153, 151, 0.06));
+}
+
+/* Bar Hover Effect */
+.apexcharts-bar-area:hover {
+  filter: brightness(1.08) drop-shadow(0 4px 12px rgba(68, 153, 151, 0.3));
+  transition: filter 0.2s ease;
+}
+
+/* Donut/Pie Hover */
+.apexcharts-pie-area:hover {
+  filter: drop-shadow(0 8px 20px rgba(68, 153, 151, 0.25));
+  transition: filter 0.3s ease;
+}
+
+/* Area Chart Glow */
+.apexcharts-area-series .apexcharts-area {
+  filter: drop-shadow(0 4px 20px rgba(68, 153, 151, 0.2));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA LABELS & GRID
+   ═══════════════════════════════════════════════════════════════ */
+
+.apexcharts-data-labels text,
+.apexcharts-datalabel {
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.apexcharts-gridlines-horizontal line,
+.apexcharts-gridlines-vertical line {
+  stroke: #e8eef0 !important;
+  stroke-dasharray: 6 4 !important;
+}
+
+/* Axis Labels */
+.apexcharts-xaxis-label,
+.apexcharts-yaxis-label {
+  font-weight: 500 !important;
+  fill: #435d60 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TREEMAP STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+.apexcharts-treemap-rect {
+  transition: all 0.3s ease !important;
+}
+
+.apexcharts-treemap-rect:hover {
+  filter: brightness(1.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POLAR AREA & RADIAL BAR
+   ═══════════════════════════════════════════════════════════════ */
+
+.apexcharts-radar-series polygon {
+  transition: all 0.3s ease;
+}
+
+.apexcharts-radialbar-track path {
+  stroke: #f0f5f5 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR (for legends)
+   ═══════════════════════════════════════════════════════════════ */
+
+.apexcharts-legend::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.apexcharts-legend::-webkit-scrollbar-track {
+  background: #f0f5f5;
+  border-radius: 4px;
+}
+
+.apexcharts-legend::-webkit-scrollbar-thumb {
+  background: #449997;
+  border-radius: 4px;
+}
