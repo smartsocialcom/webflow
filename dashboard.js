@@ -18,44 +18,32 @@ if (!window.scriptExecuted) {
         background: '#FFFFFF'
       };
 
-      // 90+ MATTE COLORS for treemap (soft, easy on eyes)
+      // 90+ MATTE COLORS for treemap (soft, easy on eyes) - PRE-SHUFFLED for variety
       const treemapPalette = [
-        // Soft Teals (brand family)
-        '#6B9E9C', '#7AACAA', '#89BAB8', '#5C8F8D', '#8AC4C2',
-        '#73A5A3', '#9DCCCB', '#68A09E', '#7EB5B3', '#A3D4D2',
-        // Dusty Blues
-        '#7B9EB8', '#8BADC4', '#6A8FA8', '#9BBDD1', '#A7C7DA',
-        '#8BA5B8', '#7C98AD', '#9AB4C5', '#A8C3D4', '#B5CFE0',
-        // Muted Purples
-        '#9B8EB5', '#A99DC1', '#8A7DA8', '#B8ADCC', '#A396BA',
-        '#9689AD', '#C4B9D8', '#B0A3C5', '#8C80A0', '#A498B8',
-        // Soft Pinks
-        '#D4A5B0', '#E0B5BF', '#C89BA6', '#EBC5CE', '#D9AFB9',
-        '#CDA1AC', '#E8BDC6', '#DEAEBB', '#C494A0', '#D6A8B3',
-        // Dusty Roses & Reds
-        '#C9A5A5', '#D4B0B0', '#BF9A9A', '#DFBBBB', '#CAA6A6',
-        '#B89494', '#D3ACAC', '#C89F9F', '#BE9090', '#D4B2B2',
-        // Muted Oranges & Terracotta
-        '#CBA58A', '#D8B49A', '#C19B80', '#E4C4AB', '#D1AC92',
-        '#C7A085', '#DDBCA3', '#D4B095', '#BF9679', '#CBAA90',
-        // Soft Yellows & Sand
-        '#D4C99A', '#DFD5AB', '#C9BE8F', '#EAE0BC', '#D9CFA1',
-        '#CEC494', '#E5DBB0', '#DCD2A5', '#C4BA88', '#D0C798',
-        // Sage Greens
-        '#8BAA8E', '#99B89C', '#7D9C80', '#A7C6AA', '#93B296',
-        '#87A68A', '#ABD0AE', '#9DC4A0', '#7F9882', '#8FB092',
-        // Forest & Olive
-        '#7A8F7A', '#889D88', '#6E826E', '#96AB96', '#829782',
-        '#768B76', '#9AB09A', '#8CA38C', '#708570', '#7E937E',
-        // Dusty Cyans
-        '#7AADAD', '#89BCBC', '#6C9F9F', '#98CBCB', '#84B7B7',
-        '#78A8A8', '#A2D3D3', '#92C5C5', '#6E9A9A', '#80ABAB',
-        // Warm Taupes
-        '#B5A899', '#C2B6A8', '#A99C8D', '#CFC4B7', '#BAB0A2',
-        '#AEA496', '#D4CAC0', '#C7BEB2', '#A49A8C', '#B2A99B',
-        // Cool Grays
-        '#9AA3AC', '#A8B1BA', '#8C95A0', '#B6BFC8', '#9EA8B2',
-        '#929CA6', '#C0C9D2', '#ACB6C0', '#8A949E', '#98A2AC'
+        '#6B9E9C', '#9B8EB5', '#CBA58A', '#8BAA8E', '#D4A5B0',
+        '#7B9EB8', '#C9A5A5', '#7AADAD', '#D4C99A', '#7A8F7A',
+        '#B5A899', '#9AA3AC', '#7AACAA', '#A99DC1', '#D8B49A',
+        '#99B89C', '#E0B5BF', '#8BADC4', '#D4B0B0', '#89BCBC',
+        '#DFD5AB', '#889D88', '#C2B6A8', '#A8B1BA', '#89BAB8',
+        '#8A7DA8', '#C19B80', '#7D9C80', '#C89BA6', '#6A8FA8',
+        '#BF9A9A', '#6C9F9F', '#C9BE8F', '#6E826E', '#A99C8D',
+        '#8C95A0', '#5C8F8D', '#B8ADCC', '#E4C4AB', '#A7C6AA',
+        '#EBC5CE', '#9BBDD1', '#DFBBBB', '#98CBCB', '#EAE0BC',
+        '#96AB96', '#CFC4B7', '#B6BFC8', '#8AC4C2', '#A396BA',
+        '#D1AC92', '#93B296', '#D9AFB9', '#A7C7DA', '#CAA6A6',
+        '#84B7B7', '#D9CFA1', '#829782', '#BAB0A2', '#9EA8B2',
+        '#73A5A3', '#9689AD', '#C7A085', '#87A68A', '#CDA1AC',
+        '#8BA5B8', '#B89494', '#78A8A8', '#CEC494', '#768B76',
+        '#AEA496', '#929CA6', '#9DCCCB', '#C4B9D8', '#DDBCA3',
+        '#ABD0AE', '#E8BDC6', '#7C98AD', '#D3ACAC', '#A2D3D3',
+        '#E5DBB0', '#9AB09A', '#D4CAC0', '#C0C9D2', '#68A09E',
+        '#B0A3C5', '#D4B095', '#9DC4A0', '#DEAEBB', '#9AB4C5',
+        '#C89F9F', '#92C5C5', '#DCD2A5', '#8CA38C', '#C7BEB2',
+        '#ACB6C0', '#7EB5B3', '#8C80A0', '#BF9679', '#7F9882',
+        '#C494A0', '#A8C3D4', '#BE9090', '#6E9A9A', '#C4BA88',
+        '#708570', '#A49A8C', '#8A949E', '#A3D4D2', '#A498B8',
+        '#CBAA90', '#8FB092', '#D6A8B3', '#B5CFE0', '#D4B2B2',
+        '#80ABAB', '#D0C798', '#7E937E', '#B2A99B', '#98A2AC'
       ];
 
       // Matte palette for other charts (bar, donut, etc)
@@ -529,9 +517,6 @@ if (!window.scriptExecuted) {
         const topSchoolBuildingsWrapper = document.getElementById("topSchoolBuildingsWrapper");
         if (topSchoolBuildingsEl && topSchoolBuildingsWrapper) {
           const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
-          
-          // Make wrapper relative for absolute legend positioning
-          topSchoolBuildingsWrapper.style.position = 'relative';
           
           // Truncate labels for center display
           const truncatedLabels = topSchoolBuildings.map(i => 
