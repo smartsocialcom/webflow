@@ -33,7 +33,7 @@ if (!window.scriptExecuted) {
       ];
 
       // ═══════════════════════════════════════════════════════════════
-      // GLOBAL APEX DEFAULTS
+      // GLOBAL APEX DEFAULTS (LARGER FONTS)
       // ═══════════════════════════════════════════════════════════════
       window.Apex = {
         chart: {
@@ -47,7 +47,7 @@ if (!window.scriptExecuted) {
         },
         tooltip: {
           theme: 'light',
-          style: { fontSize: '13px' }
+          style: { fontSize: '14px' }
         },
         grid: {
           borderColor: '#e8f0f0',
@@ -120,7 +120,7 @@ if (!window.scriptExecuted) {
       })();
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 1: REGISTRATIONS PER MONTH (Area Chart - Clean)
+      // CHART 1: REGISTRATIONS PER MONTH (Area - Larger Fonts)
       // ═══════════════════════════════════════════════════════════════
       const usersPerMonthEl = document.getElementById("usersPerMonthChart");
       if (usersPerMonthEl) {
@@ -138,14 +138,14 @@ if (!window.scriptExecuted) {
           xaxis: {
             categories: ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
             labels: {
-              style: { colors: colors.text, fontSize: '12px', fontWeight: 500 }
+              style: { colors: colors.text, fontSize: '14px', fontWeight: 600 }
             },
             axisBorder: { show: false },
             axisTicks: { show: false }
           },
           yaxis: {
             labels: {
-              style: { colors: colors.textLight, fontSize: '11px' },
+              style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 },
               formatter: val => Math.round(val).toLocaleString()
             }
           },
@@ -165,83 +165,104 @@ if (!window.scriptExecuted) {
           colors: [colors.primary],
           dataLabels: { enabled: false },
           markers: {
-            size: 4,
+            size: 5,
             colors: [colors.primary],
             strokeColors: '#fff',
             strokeWidth: 2,
-            hover: { size: 6 }
+            hover: { size: 7 }
           },
           tooltip: {
+            style: { fontSize: '14px' },
             y: { formatter: val => `${val.toLocaleString()} registrations` }
           }
         }).render();
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 2: SCHOOL BUILDINGS (Donut - Clean & Readable)
+      // CHART 2: SCHOOL BUILDINGS (Horizontal Bar - LARGE TEXT)
       // ═══════════════════════════════════════════════════════════════
       if (school_buildings.length) {
         const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
         if (schoolBuildingsEl) {
-          const total = school_buildings.reduce((sum, i) => sum + i.registered_school_parents, 0);
+          // Sort and limit to top 12 schools
+          const sortedSchools = [...school_buildings]
+            .sort((a, b) => b.registered_school_parents - a.registered_school_parents)
+            .slice(0, 12);
+          
+          const total = sortedSchools.reduce((sum, i) => sum + i.registered_school_parents, 0);
           
           new ApexCharts(schoolBuildingsEl, {
             chart: {
-              type: 'donut',
-              height: 380,
+              type: 'bar',
+              height: Math.max(480, sortedSchools.length * 42),
               background: 'transparent'
             },
-            series: school_buildings.map(i => i.registered_school_parents),
-            labels: school_buildings.map(i => i.school_name),
-            colors: chartPalette,
+            series: [{
+              name: 'Registered Parents',
+              data: sortedSchools.map(i => i.registered_school_parents)
+            }],
+            xaxis: {
+              categories: sortedSchools.map(i => i.school_name),
+              labels: {
+                style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 }
+              },
+              axisBorder: { show: false },
+              axisTicks: { show: false }
+            },
+            yaxis: {
+              labels: {
+                style: { 
+                  colors: colors.text, 
+                  fontSize: '14px', 
+                  fontWeight: 600 
+                },
+                maxWidth: 200
+              }
+            },
             plotOptions: {
-              pie: {
-                donut: {
-                  size: '60%',
-                  labels: {
-                    show: true,
-                    name: {
-                      show: true,
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: colors.text
-                    },
-                    value: {
-                      show: true,
-                      fontSize: '22px',
-                      fontWeight: 700,
-                      color: colors.primary,
-                      formatter: val => parseInt(val).toLocaleString()
-                    },
-                    total: {
-                      show: true,
-                      label: 'Total',
-                      fontSize: '13px',
-                      color: colors.textLight,
-                      formatter: () => total.toLocaleString()
-                    }
-                  }
-                }
+              bar: {
+                horizontal: true,
+                borderRadius: 6,
+                barHeight: '65%',
+                dataLabels: { position: 'top' }
               }
             },
-            stroke: { width: 2, colors: ['#fff'] },
-            legend: {
-              show: true,
-              position: 'bottom',
-              fontSize: '12px',
-              fontWeight: 500,
-              labels: { colors: colors.text },
-              markers: { width: 10, height: 10, radius: 2 },
-              itemMargin: { horizontal: 8, vertical: 4 },
-              formatter: (name, opts) => {
-                const val = opts.w.globals.series[opts.seriesIndex];
+            fill: {
+              type: 'gradient',
+              gradient: {
+                shade: 'light',
+                type: 'horizontal',
+                shadeIntensity: 0.25,
+                gradientToColors: [colors.light],
+                inverseColors: false,
+                opacityFrom: 1,
+                opacityTo: 0.85,
+                stops: [0, 100]
+              }
+            },
+            colors: [colors.primary],
+            dataLabels: {
+              enabled: true,
+              textAnchor: 'start',
+              formatter: (val, opts) => {
                 const pct = ((val / total) * 100).toFixed(1);
-                const shortName = name.length > 20 ? name.substring(0, 18) + '...' : name;
-                return `${shortName} (${pct}%)`;
+                return `${val.toLocaleString()} (${pct}%)`;
+              },
+              offsetX: 8,
+              style: {
+                colors: [colors.dark],
+                fontSize: '14px',
+                fontWeight: 700
               }
             },
-            dataLabels: { enabled: false },
+            grid: {
+              borderColor: '#e8f0f0',
+              xaxis: { lines: { show: true } },
+              yaxis: { lines: { show: false } },
+              padding: { left: 10, right: 25 }
+            },
             tooltip: {
+              style: { fontSize: '14px' },
               y: {
                 formatter: val => {
                   const pct = ((val / total) * 100).toFixed(1);
@@ -282,7 +303,7 @@ if (!window.scriptExecuted) {
         .map(({ key, count }) => ({ school_name: key, count }));
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 3: TOP USERS (Horizontal Bar - Labels Outside)
+      // CHART 3: TOP USERS (Horizontal Bar - LARGE TEXT)
       // ═══════════════════════════════════════════════════════════════
       if (topUsers.length > 1) {
         const topUsersEl = document.getElementById("topUsersChart");
@@ -290,7 +311,7 @@ if (!window.scriptExecuted) {
           new ApexCharts(topUsersEl, {
             chart: {
               type: 'bar',
-              height: Math.max(300, topUsers.length * 38),
+              height: Math.max(360, topUsers.length * 42),
               background: 'transparent'
             },
             series: [{
@@ -300,22 +321,26 @@ if (!window.scriptExecuted) {
             xaxis: {
               categories: topUsers.map(u => u.name),
               labels: {
-                style: { colors: colors.textLight, fontSize: '11px' }
+                style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 }
               },
               axisBorder: { show: false },
               axisTicks: { show: false }
             },
             yaxis: {
               labels: {
-                style: { colors: colors.text, fontSize: '12px', fontWeight: 500 },
-                maxWidth: 150
+                style: { 
+                  colors: colors.text, 
+                  fontSize: '14px', 
+                  fontWeight: 600 
+                },
+                maxWidth: 180
               }
             },
             plotOptions: {
               bar: {
                 horizontal: true,
-                borderRadius: 4,
-                barHeight: '60%',
+                borderRadius: 6,
+                barHeight: '65%',
                 dataLabels: { position: 'top' }
               }
             },
@@ -328,19 +353,21 @@ if (!window.scriptExecuted) {
               enabled: true,
               textAnchor: 'start',
               formatter: val => val.toLocaleString(),
-              offsetX: 5,
+              offsetX: 8,
               style: {
                 colors: [colors.dark],
-                fontSize: '12px',
-                fontWeight: 600
+                fontSize: '14px',
+                fontWeight: 700
               }
             },
             grid: {
               borderColor: '#e8f0f0',
               xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } }
+              yaxis: { lines: { show: false } },
+              padding: { left: 10, right: 20 }
             },
             tooltip: {
+              style: { fontSize: '14px' },
               y: { formatter: val => `${val.toLocaleString()} activities` }
             }
           }).render();
@@ -351,7 +378,7 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 4: TOP PAGES (Horizontal Bar - Labels Outside)
+      // CHART 4: TOP PAGES (Horizontal Bar - LARGE TEXT)
       // ═══════════════════════════════════════════════════════════════
       if (topPages.length) {
         const topPagesEl = document.getElementById("topPagesChart");
@@ -359,7 +386,7 @@ if (!window.scriptExecuted) {
           new ApexCharts(topPagesEl, {
             chart: {
               type: 'bar',
-              height: Math.max(300, topPages.length * 38),
+              height: Math.max(360, topPages.length * 42),
               background: 'transparent'
             },
             series: [{
@@ -370,25 +397,29 @@ if (!window.scriptExecuted) {
               categories: topPages.map(p => {
                 // Clean URL for display
                 let url = p.url.replace('/post/', '').replace(/-/g, ' ');
-                return url.length > 22 ? url.substring(0, 20) + '...' : url;
+                return url.length > 28 ? url.substring(0, 26) + '...' : url;
               }),
               labels: {
-                style: { colors: colors.textLight, fontSize: '11px' }
+                style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 }
               },
               axisBorder: { show: false },
               axisTicks: { show: false }
             },
             yaxis: {
               labels: {
-                style: { colors: colors.text, fontSize: '11px', fontWeight: 500 },
-                maxWidth: 160
+                style: { 
+                  colors: colors.text, 
+                  fontSize: '13px', 
+                  fontWeight: 600 
+                },
+                maxWidth: 200
               }
             },
             plotOptions: {
               bar: {
                 horizontal: true,
-                borderRadius: 4,
-                barHeight: '60%',
+                borderRadius: 6,
+                barHeight: '65%',
                 dataLabels: { position: 'top' }
               }
             },
@@ -401,19 +432,21 @@ if (!window.scriptExecuted) {
               enabled: true,
               textAnchor: 'start',
               formatter: val => val.toLocaleString(),
-              offsetX: 5,
+              offsetX: 8,
               style: {
                 colors: [colors.dark],
-                fontSize: '12px',
-                fontWeight: 600
+                fontSize: '14px',
+                fontWeight: 700
               }
             },
             grid: {
               borderColor: '#e8f0f0',
               xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } }
+              yaxis: { lines: { show: false } },
+              padding: { left: 10, right: 20 }
             },
             tooltip: {
+              style: { fontSize: '14px' },
               y: { formatter: val => `${val.toLocaleString()} visits` }
             }
           }).render();
@@ -424,7 +457,7 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Clean)
+      // CHART 5: TOP SCHOOL BUILDINGS (Donut - LARGE TEXT)
       // ═══════════════════════════════════════════════════════════════
       if (topSchoolBuildings.length) {
         const topSchoolBuildingsEl = document.getElementById("topSchoolBuildings");
@@ -434,7 +467,7 @@ if (!window.scriptExecuted) {
           new ApexCharts(topSchoolBuildingsEl, {
             chart: {
               type: 'donut',
-              height: 380,
+              height: 420,
               background: 'transparent'
             },
             series: topSchoolBuildings.map(i => i.count),
@@ -448,13 +481,13 @@ if (!window.scriptExecuted) {
                     show: true,
                     name: {
                       show: true,
-                      fontSize: '13px',
+                      fontSize: '15px',
                       fontWeight: 600,
                       color: colors.text
                     },
                     value: {
                       show: true,
-                      fontSize: '20px',
+                      fontSize: '24px',
                       fontWeight: 700,
                       color: colors.primary,
                       formatter: val => {
@@ -465,7 +498,8 @@ if (!window.scriptExecuted) {
                     total: {
                       show: true,
                       label: 'Total Activity',
-                      fontSize: '12px',
+                      fontSize: '14px',
+                      fontWeight: 600,
                       color: colors.textLight,
                       formatter: () => total.toLocaleString()
                     }
@@ -473,21 +507,22 @@ if (!window.scriptExecuted) {
                 }
               }
             },
-            stroke: { width: 2, colors: ['#fff'] },
+            stroke: { width: 3, colors: ['#fff'] },
             legend: {
               show: true,
               position: 'bottom',
-              fontSize: '12px',
+              fontSize: '13px',
               fontWeight: 500,
               labels: { colors: colors.text },
-              markers: { width: 10, height: 10, radius: 2 },
-              itemMargin: { horizontal: 8, vertical: 4 },
+              markers: { width: 12, height: 12, radius: 3 },
+              itemMargin: { horizontal: 10, vertical: 6 },
               formatter: (name) => {
-                return name.length > 22 ? name.substring(0, 20) + '...' : name;
+                return name.length > 24 ? name.substring(0, 22) + '...' : name;
               }
             },
             dataLabels: { enabled: false },
             tooltip: {
+              style: { fontSize: '14px' },
               y: {
                 formatter: val => {
                   const pct = ((val / total) * 100).toFixed(1);
