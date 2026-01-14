@@ -281,11 +281,12 @@
 }
 
 #topSchoolBuildings {
-  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 #topSchoolBuildings .apexcharts-canvas {
-  float: right;
+  margin-right: 0 !important;
 }
 
 .donut-overlay-legend::-webkit-scrollbar {
