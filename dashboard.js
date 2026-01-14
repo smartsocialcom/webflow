@@ -522,22 +522,27 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Matte Colors, Side Legend)
+      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Full Width + Overlay Legend)
       // ═══════════════════════════════════════════════════════════════
       if (topSchoolBuildings.length) {
         const topSchoolBuildingsEl = document.getElementById("topSchoolBuildings");
-        if (topSchoolBuildingsEl) {
+        const topSchoolBuildingsWrapper = document.getElementById("topSchoolBuildingsWrapper");
+        if (topSchoolBuildingsEl && topSchoolBuildingsWrapper) {
           const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
+          
+          // Make wrapper relative for absolute legend positioning
+          topSchoolBuildingsWrapper.style.position = 'relative';
           
           // Truncate labels for center display
           const truncatedLabels = topSchoolBuildings.map(i => 
             i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
           );
           
-          new ApexCharts(topSchoolBuildingsEl, {
+          const chart5 = new ApexCharts(topSchoolBuildingsEl, {
             chart: {
               type: 'donut',
-              height: 380,
+              height: 400,
+              width: '100%',
               background: 'transparent'
             },
             series: topSchoolBuildings.map(i => i.count),
@@ -546,7 +551,7 @@ if (!window.scriptExecuted) {
             plotOptions: {
               pie: {
                 donut: {
-                  size: '65%',
+                  size: '60%',
                   labels: {
                     show: true,
                     name: {
@@ -579,22 +584,7 @@ if (!window.scriptExecuted) {
               }
             },
             stroke: { width: 2, colors: ['#fff'] },
-            legend: {
-              show: true,
-              position: 'right',
-              fontSize: '13px',
-              fontWeight: 500,
-              width: 180,
-              labels: { colors: colors.text },
-              markers: { width: 10, height: 10, radius: 3 },
-              itemMargin: { horizontal: 5, vertical: 5 },
-              formatter: (name, opts) => {
-                // Show truncated name with value
-                const val = opts.w.globals.series[opts.seriesIndex];
-                const shortName = name.length > 15 ? name.substring(0, 13) + '..' : name;
-                return `${shortName} (${val})`;
-              }
-            },
+            legend: { show: false }, // Hide built-in legend
             dataLabels: { enabled: false },
             tooltip: {
               custom: ({ seriesIndex, w }) => {
@@ -613,7 +603,38 @@ if (!window.scriptExecuted) {
                 `;
               }
             }
-          }).render();
+          });
+          chart5.render();
+          
+          // Create custom overlay legend on left
+          const legendHtml = `
+            <div class="donut-overlay-legend">
+              ${topSchoolBuildings.map((item, idx) => `
+                <div class="donut-legend-item" data-index="${idx}">
+                  <span class="donut-legend-marker" style="background-color: ${treemapPalette[idx % treemapPalette.length]};"></span>
+                  <span class="donut-legend-text">${item.school_name}</span>
+                  <span class="donut-legend-value">${item.count}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          const legendContainer = document.createElement('div');
+          legendContainer.innerHTML = legendHtml;
+          topSchoolBuildingsWrapper.appendChild(legendContainer.firstElementChild);
+          
+          // Add hover interaction
+          document.querySelectorAll('.donut-legend-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+              const idx = parseInt(item.dataset.index);
+              chart5.toggleDataPointSelection(idx);
+              item.classList.add('active');
+            });
+            item.addEventListener('mouseleave', () => {
+              const idx = parseInt(item.dataset.index);
+              chart5.toggleDataPointSelection(idx);
+              item.classList.remove('active');
+            });
+          });
         }
       } else {
         document.getElementById("topSchoolBuildingsWrapper").innerHTML =
