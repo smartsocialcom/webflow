@@ -518,6 +518,9 @@ if (!window.scriptExecuted) {
         if (topSchoolBuildingsEl && topSchoolBuildingsWrapper) {
           const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
           
+          // Ensure wrapper can contain absolute legend
+          topSchoolBuildingsWrapper.style.position = 'relative';
+          
           // Truncate labels for center display
           const truncatedLabels = topSchoolBuildings.map(i => 
             i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
