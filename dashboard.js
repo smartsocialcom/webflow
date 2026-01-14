@@ -18,18 +18,18 @@ if (!window.scriptExecuted) {
         background: '#FFFFFF'
       };
 
-      // Monochromatic palette for multi-series (dark to light)
+      // Extended palette for 90+ items treemap
+      const treemapPalette = [
+        '#449997', '#5AADAB', '#357A78', '#7EC8C8', '#2D5A5A',
+        '#6BBAB8', '#4A8A8A', '#8CD0CE', '#3D6B6B', '#5C9E9C',
+        '#A3DADA', '#4E9694', '#6FA8A6', '#3A7F7D', '#82C4C2',
+        '#528E8C', '#7AB8B6', '#467C7A', '#94CCCB', '#5EA2A0'
+      ];
+
+      // Monochromatic palette for other charts
       const chartPalette = [
-        '#449997',
-        '#357A78',
-        '#5AADAB',
-        '#2D5A5A',
-        '#7EC8C8',
-        '#3D6B6B',
-        '#6BBAB8',
-        '#4A8A8A',
-        '#8CD0CE',
-        '#5C9E9C'
+        '#449997', '#357A78', '#5AADAB', '#2D5A5A', '#7EC8C8',
+        '#3D6B6B', '#6BBAB8', '#4A8A8A', '#8CD0CE', '#5C9E9C'
       ];
 
       // ═══════════════════════════════════════════════════════════════
@@ -47,7 +47,7 @@ if (!window.scriptExecuted) {
         },
         tooltip: {
           theme: 'light',
-          style: { fontSize: '14px' }
+          style: { fontSize: '15px' }
         },
         grid: {
           borderColor: '#e8f0f0',
@@ -120,7 +120,7 @@ if (!window.scriptExecuted) {
       })();
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 1: REGISTRATIONS PER MONTH (Area - Larger Fonts)
+      // CHART 1: REGISTRATIONS PER MONTH (Area Chart)
       // ═══════════════════════════════════════════════════════════════
       const usersPerMonthEl = document.getElementById("usersPerMonthChart");
       if (usersPerMonthEl) {
@@ -145,7 +145,7 @@ if (!window.scriptExecuted) {
           },
           yaxis: {
             labels: {
-              style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 },
+              style: { colors: colors.textLight, fontSize: '13px' },
               formatter: val => Math.round(val).toLocaleString()
             }
           },
@@ -172,102 +172,102 @@ if (!window.scriptExecuted) {
             hover: { size: 7 }
           },
           tooltip: {
-            style: { fontSize: '14px' },
             y: { formatter: val => `${val.toLocaleString()} registrations` }
           }
         }).render();
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 2: SCHOOL BUILDINGS (Horizontal Bar - LARGE TEXT)
+      // CHART 2: SCHOOL BUILDINGS (Treemap - Smart Labels for 90+ items)
       // ═══════════════════════════════════════════════════════════════
       if (school_buildings.length) {
         const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
         if (schoolBuildingsEl) {
-          // Sort and limit to top 12 schools
-          const sortedSchools = [...school_buildings]
-            .sort((a, b) => b.registered_school_parents - a.registered_school_parents)
-            .slice(0, 12);
+          const total = school_buildings.reduce((sum, i) => sum + i.registered_school_parents, 0);
           
-          const total = sortedSchools.reduce((sum, i) => sum + i.registered_school_parents, 0);
+          // Sort by value for better visual hierarchy
+          const sortedBuildings = [...school_buildings].sort((a, b) => 
+            b.registered_school_parents - a.registered_school_parents
+          );
           
+          // Prepare treemap data with rank
+          const treemapData = sortedBuildings.map((b, idx) => ({
+            x: b.school_name,
+            y: b.registered_school_parents,
+            rank: idx + 1
+          }));
+
           new ApexCharts(schoolBuildingsEl, {
             chart: {
-              type: 'bar',
-              height: Math.max(480, sortedSchools.length * 42),
-              background: 'transparent'
+              type: 'treemap',
+              height: 500,
+              background: 'transparent',
+              animations: {
+                enabled: true,
+                speed: 600
+              }
             },
             series: [{
-              name: 'Registered Parents',
-              data: sortedSchools.map(i => i.registered_school_parents)
+              data: treemapData
             }],
-            xaxis: {
-              categories: sortedSchools.map(i => i.school_name),
-              labels: {
-                style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 }
-              },
-              axisBorder: { show: false },
-              axisTicks: { show: false }
-            },
-            yaxis: {
-              labels: {
-                style: { 
-                  colors: colors.text, 
-                  fontSize: '14px', 
-                  fontWeight: 600 
-                },
-                maxWidth: 200
-              }
-            },
+            colors: treemapPalette,
             plotOptions: {
-              bar: {
-                horizontal: true,
-                borderRadius: 6,
-                barHeight: '65%',
-                dataLabels: { position: 'top' }
+              treemap: {
+                distributed: true,
+                enableShades: true,
+                shadeIntensity: 0.3
               }
             },
-            fill: {
-              type: 'gradient',
-              gradient: {
-                shade: 'light',
-                type: 'horizontal',
-                shadeIntensity: 0.25,
-                gradientToColors: [colors.light],
-                inverseColors: false,
-                opacityFrom: 1,
-                opacityTo: 0.85,
-                stops: [0, 100]
-              }
-            },
-            colors: [colors.primary],
             dataLabels: {
               enabled: true,
-              textAnchor: 'start',
-              formatter: (val, opts) => {
-                const pct = ((val / total) * 100).toFixed(1);
-                return `${val.toLocaleString()} (${pct}%)`;
-              },
-              offsetX: 8,
               style: {
-                colors: [colors.dark],
-                fontSize: '14px',
-                fontWeight: 700
-              }
-            },
-            grid: {
-              borderColor: '#e8f0f0',
-              xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } },
-              padding: { left: 10, right: 25 }
-            },
-            tooltip: {
-              style: { fontSize: '14px' },
-              y: {
-                formatter: val => {
-                  const pct = ((val / total) * 100).toFixed(1);
-                  return `${val.toLocaleString()} parents (${pct}%)`;
+                fontSize: '16px',
+                fontWeight: 700,
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              },
+              formatter: (text, op) => {
+                const pct = (op.value / total) * 100;
+                // Only show text on boxes with enough space
+                if (pct < 0.8) return ''; // Hide on tiny boxes
+                if (pct < 1.5) {
+                  // Very small - just show 2-3 letter abbreviation
+                  const abbrev = text.split(' ').map(w => w[0]).join('').substring(0, 3);
+                  return abbrev;
                 }
+                if (pct < 2.5) {
+                  // Small - show short name only
+                  const shortName = text.length > 12 ? text.substring(0, 10) + '..' : text;
+                  return shortName;
+                }
+                // Medium/Large - show name and percentage
+                const shortName = text.length > 18 ? text.substring(0, 16) + '..' : text;
+                return [shortName, `${pct.toFixed(1)}%`];
+              },
+              offsetY: 0
+            },
+            stroke: {
+              width: 2,
+              colors: ['#fff']
+            },
+            legend: { show: false },
+            tooltip: {
+              custom: ({ seriesIndex, dataPointIndex, w }) => {
+                const item = treemapData[dataPointIndex];
+                const name = item.x;
+                const value = item.y;
+                const rank = item.rank;
+                const pct = ((value / total) * 100).toFixed(1);
+                return `
+                  <div style="padding:16px 20px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);min-width:220px;">
+                    <div style="font-size:12px;color:#5A7A7A;margin-bottom:6px;font-weight:600;">#${rank} of ${treemapData.length} schools</div>
+                    <div style="font-size:17px;font-weight:700;color:#2D5A5A;margin-bottom:12px;line-height:1.3;">${name}</div>
+                    <div style="display:flex;align-items:baseline;gap:12px;">
+                      <span style="font-size:28px;font-weight:700;color:#449997;">${value.toLocaleString()}</span>
+                      <span style="font-size:15px;color:#5A7A7A;">parents</span>
+                    </div>
+                    <div style="margin-top:8px;font-size:14px;color:#fff;background:#449997;padding:6px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}% of total</div>
+                  </div>
+                `;
               }
             }
           }).render();
@@ -303,7 +303,7 @@ if (!window.scriptExecuted) {
         .map(({ key, count }) => ({ school_name: key, count }));
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 3: TOP USERS (Horizontal Bar - LARGE TEXT)
+      // CHART 3: TOP USERS (Horizontal Bar - Large Text)
       // ═══════════════════════════════════════════════════════════════
       if (topUsers.length > 1) {
         const topUsersEl = document.getElementById("topUsersChart");
@@ -311,7 +311,7 @@ if (!window.scriptExecuted) {
           new ApexCharts(topUsersEl, {
             chart: {
               type: 'bar',
-              height: Math.max(360, topUsers.length * 42),
+              height: Math.max(320, topUsers.length * 42),
               background: 'transparent'
             },
             series: [{
@@ -321,18 +321,14 @@ if (!window.scriptExecuted) {
             xaxis: {
               categories: topUsers.map(u => u.name),
               labels: {
-                style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 }
+                style: { colors: colors.textLight, fontSize: '13px' }
               },
               axisBorder: { show: false },
               axisTicks: { show: false }
             },
             yaxis: {
               labels: {
-                style: { 
-                  colors: colors.text, 
-                  fontSize: '14px', 
-                  fontWeight: 600 
-                },
+                style: { colors: colors.text, fontSize: '14px', fontWeight: 600 },
                 maxWidth: 180
               }
             },
@@ -363,11 +359,9 @@ if (!window.scriptExecuted) {
             grid: {
               borderColor: '#e8f0f0',
               xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } },
-              padding: { left: 10, right: 20 }
+              yaxis: { lines: { show: false } }
             },
             tooltip: {
-              style: { fontSize: '14px' },
               y: { formatter: val => `${val.toLocaleString()} activities` }
             }
           }).render();
@@ -378,7 +372,7 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 4: TOP PAGES (Horizontal Bar - LARGE TEXT)
+      // CHART 4: TOP PAGES (Horizontal Bar - Large Text)
       // ═══════════════════════════════════════════════════════════════
       if (topPages.length) {
         const topPagesEl = document.getElementById("topPagesChart");
@@ -386,7 +380,7 @@ if (!window.scriptExecuted) {
           new ApexCharts(topPagesEl, {
             chart: {
               type: 'bar',
-              height: Math.max(360, topPages.length * 42),
+              height: Math.max(320, topPages.length * 42),
               background: 'transparent'
             },
             series: [{
@@ -397,22 +391,18 @@ if (!window.scriptExecuted) {
               categories: topPages.map(p => {
                 // Clean URL for display
                 let url = p.url.replace('/post/', '').replace(/-/g, ' ');
-                return url.length > 28 ? url.substring(0, 26) + '...' : url;
+                return url.length > 25 ? url.substring(0, 23) + '..' : url;
               }),
               labels: {
-                style: { colors: colors.textLight, fontSize: '13px', fontWeight: 500 }
+                style: { colors: colors.textLight, fontSize: '13px' }
               },
               axisBorder: { show: false },
               axisTicks: { show: false }
             },
             yaxis: {
               labels: {
-                style: { 
-                  colors: colors.text, 
-                  fontSize: '13px', 
-                  fontWeight: 600 
-                },
-                maxWidth: 200
+                style: { colors: colors.text, fontSize: '13px', fontWeight: 600 },
+                maxWidth: 180
               }
             },
             plotOptions: {
@@ -442,11 +432,9 @@ if (!window.scriptExecuted) {
             grid: {
               borderColor: '#e8f0f0',
               xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } },
-              padding: { left: 10, right: 20 }
+              yaxis: { lines: { show: false } }
             },
             tooltip: {
-              style: { fontSize: '14px' },
               y: { formatter: val => `${val.toLocaleString()} visits` }
             }
           }).render();
@@ -457,7 +445,7 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 5: TOP SCHOOL BUILDINGS (Donut - LARGE TEXT)
+      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Large Text)
       // ═══════════════════════════════════════════════════════════════
       if (topSchoolBuildings.length) {
         const topSchoolBuildingsEl = document.getElementById("topSchoolBuildings");
@@ -467,7 +455,7 @@ if (!window.scriptExecuted) {
           new ApexCharts(topSchoolBuildingsEl, {
             chart: {
               type: 'donut',
-              height: 420,
+              height: 400,
               background: 'transparent'
             },
             series: topSchoolBuildings.map(i => i.count),
@@ -499,7 +487,6 @@ if (!window.scriptExecuted) {
                       show: true,
                       label: 'Total Activity',
                       fontSize: '14px',
-                      fontWeight: 600,
                       color: colors.textLight,
                       formatter: () => total.toLocaleString()
                     }
@@ -507,27 +494,35 @@ if (!window.scriptExecuted) {
                 }
               }
             },
-            stroke: { width: 3, colors: ['#fff'] },
+            stroke: { width: 2, colors: ['#fff'] },
             legend: {
               show: true,
               position: 'bottom',
-              fontSize: '13px',
+              fontSize: '14px',
               fontWeight: 500,
               labels: { colors: colors.text },
               markers: { width: 12, height: 12, radius: 3 },
               itemMargin: { horizontal: 10, vertical: 6 },
               formatter: (name) => {
-                return name.length > 24 ? name.substring(0, 22) + '...' : name;
+                return name.length > 22 ? name.substring(0, 20) + '..' : name;
               }
             },
             dataLabels: { enabled: false },
             tooltip: {
-              style: { fontSize: '14px' },
-              y: {
-                formatter: val => {
-                  const pct = ((val / total) * 100).toFixed(1);
-                  return `${val.toLocaleString()} visits (${pct}%)`;
-                }
+              custom: ({ seriesIndex, w }) => {
+                const name = topSchoolBuildings[seriesIndex].school_name;
+                const value = topSchoolBuildings[seriesIndex].count;
+                const pct = ((value / total) * 100).toFixed(1);
+                return `
+                  <div style="padding:14px 18px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);">
+                    <div style="font-size:16px;font-weight:700;color:#2D5A5A;margin-bottom:10px;">${name}</div>
+                    <div style="display:flex;align-items:baseline;gap:10px;">
+                      <span style="font-size:26px;font-weight:700;color:#449997;">${value.toLocaleString()}</span>
+                      <span style="font-size:14px;color:#5A7A7A;">visits</span>
+                    </div>
+                    <div style="margin-top:8px;font-size:14px;color:#fff;background:#449997;padding:5px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}%</div>
+                  </div>
+                `;
               }
             }
           }).render();
