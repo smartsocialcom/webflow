@@ -67,75 +67,96 @@
 
 .apexcharts-treemap-rect:hover {
   filter: brightness(1.15) !important;
-  stroke-width: 3px !important;
-}
-
-/* Hide any treemap data labels */
-.apexcharts-treemap .apexcharts-datalabel,
-.apexcharts-treemap .apexcharts-data-labels {
-  display: none !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   TREEMAP LEGEND - Scrollable with Hover Highlight
+   CUSTOM TREEMAP LEGEND
    ───────────────────────────────────────────────────────────────── */
 
-/* Legend container - scrollable */
-.apexcharts-legend {
-  padding: 16px 8px !important;
-  overflow-y: auto !important;
+.treemap-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 12px 8px;
+  margin-top: 12px;
+  background: #f8fafa;
+  border-radius: 10px;
   scrollbar-width: thin;
-  scrollbar-color: #449997 #e8f0f0;
+  scrollbar-color: #449997 #e0e8e8;
 }
 
-/* Webkit scrollbar styling */
-.apexcharts-legend::-webkit-scrollbar {
-  width: 6px;
+.treemap-legend::-webkit-scrollbar {
+  width: 8px;
 }
 
-.apexcharts-legend::-webkit-scrollbar-track {
-  background: #e8f0f0;
-  border-radius: 3px;
+.treemap-legend::-webkit-scrollbar-track {
+  background: #e0e8e8;
+  border-radius: 4px;
 }
 
-.apexcharts-legend::-webkit-scrollbar-thumb {
+.treemap-legend::-webkit-scrollbar-thumb {
   background: #449997;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
-.apexcharts-legend::-webkit-scrollbar-thumb:hover {
+.treemap-legend::-webkit-scrollbar-thumb:hover {
   background: #357A78;
 }
 
-/* Legend items */
-.apexcharts-legend-series {
-  margin: 4px 8px !important;
-  padding: 6px 10px !important;
-  border-radius: 6px !important;
-  transition: all 0.15s ease !important;
-  cursor: pointer !important;
+.treemap-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #fff;
+  font-size: 13px;
 }
 
-.apexcharts-legend-series:hover {
-  background: rgba(68, 153, 151, 0.1) !important;
-  transform: translateX(4px);
+.treemap-legend-item:hover {
+  background: #e8f4f4;
+  transform: translateX(2px);
 }
 
-/* Legend marker */
-.apexcharts-legend-marker {
-  border-radius: 4px !important;
-  margin-right: 10px !important;
-  width: 14px !important;
-  height: 14px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+.treemap-legend-item.legend-active {
+  background: #d0eded;
+  box-shadow: 0 2px 8px rgba(68, 153, 151, 0.25);
 }
 
-/* Legend text */
-.apexcharts-legend-text {
-  color: #2D5A5A !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  line-height: 1.4 !important;
+.treemap-legend-item .legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.treemap-legend-item .legend-name {
+  flex: 1;
+  font-weight: 500;
+  color: #2D5A5A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.treemap-legend-item .legend-value {
+  font-weight: 700;
+  color: #449997;
+  min-width: 50px;
+  text-align: right;
+}
+
+.treemap-legend-item .legend-pct {
+  font-weight: 600;
+  color: #888;
+  min-width: 45px;
+  text-align: right;
+  font-size: 12px;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -226,17 +247,9 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   ACTIVE/INACTIVE STATES (for legend hover highlight)
+   ACTIVE/INACTIVE STATES
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-series-collapsed {
   opacity: 0.25 !important;
-}
-
-.apexcharts-treemap-rect.apexcharts-inactive {
-  opacity: 0.3 !important;
-}
-
-.apexcharts-treemap-rect.apexcharts-active {
-  filter: brightness(1.2) drop-shadow(0 4px 12px rgba(68, 153, 151, 0.4)) !important;
 }
