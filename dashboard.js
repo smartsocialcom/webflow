@@ -18,47 +18,50 @@ if (!window.scriptExecuted) {
         background: '#FFFFFF'
       };
 
-      // 90+ DISTINCT COLORS for treemap (rainbow variety)
+      // 90+ MATTE COLORS for treemap (soft, easy on eyes)
       const treemapPalette = [
-        // Teals (brand)
-        '#449997', '#2A9D8F', '#17A398', '#0F9B8E', '#3D8B87',
-        // Blues
-        '#4361EE', '#4895EF', '#4CC9F0', '#00B4D8', '#0077B6',
-        '#023E8A', '#3A86FF', '#5E7CE2', '#7B93DB', '#90B0E0',
-        // Purples
-        '#7209B7', '#9B5DE5', '#B185DB', '#C77DFF', '#A855F7',
-        '#8B5CF6', '#6D28D9', '#7C3AED', '#9333EA', '#A78BFA',
-        // Pinks
-        '#F72585', '#FF006E', '#FF5C8A', '#FF85A2', '#F9A8D4',
-        '#EC4899', '#DB2777', '#BE185D', '#FF69B4', '#FF1493',
-        // Reds
-        '#EF476F', '#E63946', '#D90429', '#FF4D4D', '#FF6B6B',
-        '#FA8072', '#E57373', '#FF7043', '#FF5722', '#F44336',
-        // Oranges
-        '#FF9F1C', '#FFB627', '#FFC857', '#FFAA00', '#FF8C00',
-        '#F4A261', '#E9C46A', '#FFB347', '#FFA07A', '#FF8A65',
-        // Yellows
-        '#FFD60A', '#FFE066', '#FFF176', '#FFEE58', '#FDD835',
-        '#F9A825', '#FFD700', '#FFCA28', '#FFB300', '#FFC107',
-        // Greens
-        '#06D6A0', '#00C49A', '#52B788', '#40916C', '#2D6A4F',
-        '#1B4332', '#74C69D', '#95D5B2', '#8BC34A', '#7CB342',
-        '#689F38', '#558B2F', '#33691E', '#4CAF50', '#66BB6A',
-        // Cyans
-        '#00CED1', '#20B2AA', '#48D1CC', '#40E0D0', '#7FFFD4',
-        '#5F9EA0', '#008B8B', '#00BFFF', '#1E90FF', '#87CEEB',
-        // Browns/Earth
-        '#BC6C25', '#DDA15E', '#A0522D', '#8B4513', '#CD853F',
-        '#D2691E', '#B8860B', '#DAA520', '#C9A227', '#BDB76B',
-        // Grays/Neutrals
-        '#6B7280', '#9CA3AF', '#78909C', '#607D8B', '#546E7A',
-        '#455A64', '#37474F', '#708090', '#696969', '#808080'
+        // Soft Teals (brand family)
+        '#6B9E9C', '#7AACAA', '#89BAB8', '#5C8F8D', '#8AC4C2',
+        '#73A5A3', '#9DCCCB', '#68A09E', '#7EB5B3', '#A3D4D2',
+        // Dusty Blues
+        '#7B9EB8', '#8BADC4', '#6A8FA8', '#9BBDD1', '#A7C7DA',
+        '#8BA5B8', '#7C98AD', '#9AB4C5', '#A8C3D4', '#B5CFE0',
+        // Muted Purples
+        '#9B8EB5', '#A99DC1', '#8A7DA8', '#B8ADCC', '#A396BA',
+        '#9689AD', '#C4B9D8', '#B0A3C5', '#8C80A0', '#A498B8',
+        // Soft Pinks
+        '#D4A5B0', '#E0B5BF', '#C89BA6', '#EBC5CE', '#D9AFB9',
+        '#CDA1AC', '#E8BDC6', '#DEAEBB', '#C494A0', '#D6A8B3',
+        // Dusty Roses & Reds
+        '#C9A5A5', '#D4B0B0', '#BF9A9A', '#DFBBBB', '#CAA6A6',
+        '#B89494', '#D3ACAC', '#C89F9F', '#BE9090', '#D4B2B2',
+        // Muted Oranges & Terracotta
+        '#CBA58A', '#D8B49A', '#C19B80', '#E4C4AB', '#D1AC92',
+        '#C7A085', '#DDBCA3', '#D4B095', '#BF9679', '#CBAA90',
+        // Soft Yellows & Sand
+        '#D4C99A', '#DFD5AB', '#C9BE8F', '#EAE0BC', '#D9CFA1',
+        '#CEC494', '#E5DBB0', '#DCD2A5', '#C4BA88', '#D0C798',
+        // Sage Greens
+        '#8BAA8E', '#99B89C', '#7D9C80', '#A7C6AA', '#93B296',
+        '#87A68A', '#ABD0AE', '#9DC4A0', '#7F9882', '#8FB092',
+        // Forest & Olive
+        '#7A8F7A', '#889D88', '#6E826E', '#96AB96', '#829782',
+        '#768B76', '#9AB09A', '#8CA38C', '#708570', '#7E937E',
+        // Dusty Cyans
+        '#7AADAD', '#89BCBC', '#6C9F9F', '#98CBCB', '#84B7B7',
+        '#78A8A8', '#A2D3D3', '#92C5C5', '#6E9A9A', '#80ABAB',
+        // Warm Taupes
+        '#B5A899', '#C2B6A8', '#A99C8D', '#CFC4B7', '#BAB0A2',
+        '#AEA496', '#D4CAC0', '#C7BEB2', '#A49A8C', '#B2A99B',
+        // Cool Grays
+        '#9AA3AC', '#A8B1BA', '#8C95A0', '#B6BFC8', '#9EA8B2',
+        '#929CA6', '#C0C9D2', '#ACB6C0', '#8A949E', '#98A2AC'
       ];
 
-      // Teal palette for other charts (bar, donut, etc)
+      // Matte palette for other charts (bar, donut, etc)
       const chartPalette = [
-        '#449997', '#357A78', '#5AADAB', '#2D5A5A', '#7EC8C8',
-        '#3D6B6B', '#6BBAB8', '#4A8A8A', '#8CD0CE', '#5C9E9C'
+        '#6B9E9C', '#7B9EB8', '#9B8EB5', '#D4A5B0', '#C9A5A5',
+        '#CBA58A', '#D4C99A', '#8BAA8E', '#7AADAD', '#B5A899'
       ];
 
       // ═══════════════════════════════════════════════════════════════
@@ -519,7 +522,7 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Large Text)
+      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Matte Colors)
       // ═══════════════════════════════════════════════════════════════
       if (topSchoolBuildings.length) {
         const topSchoolBuildingsEl = document.getElementById("topSchoolBuildings");
@@ -534,7 +537,7 @@ if (!window.scriptExecuted) {
             },
             series: topSchoolBuildings.map(i => i.count),
             labels: topSchoolBuildings.map(i => i.school_name),
-            colors: chartPalette,
+            colors: treemapPalette,
             plotOptions: {
               pie: {
                 donut: {
