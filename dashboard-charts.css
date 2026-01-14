@@ -1,98 +1,153 @@
 /* ═══════════════════════════════════════════════════════════════
-   APEXCHARTS - CLEAN & READABLE STYLES
-   Monochromatic Teal Theme
+   APEXCHARTS - READABLE STYLES (Minimum 16px text)
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────────────────────────
-   TOOLTIP STYLING
+   TOOLTIP STYLING (Large & Readable)
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-tooltip {
   background: #ffffff !important;
-  border: 1px solid #e0eaea !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 16px rgba(45, 90, 90, 0.12) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(45, 90, 90, 0.18) !important;
   padding: 0 !important;
-  overflow: hidden;
+  overflow: visible !important;
+  font-size: 15px !important;
 }
 
 .apexcharts-tooltip-title {
   background: #449997 !important;
   border-bottom: none !important;
-  padding: 10px 14px !important;
+  padding: 12px 18px !important;
   font-weight: 600 !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
   color: #fff !important;
+  border-radius: 12px 12px 0 0 !important;
 }
 
 .apexcharts-tooltip-series-group {
-  padding: 10px 14px !important;
+  padding: 14px 18px !important;
   background: #fff !important;
 }
 
 .apexcharts-tooltip-text {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
 }
 
 .apexcharts-tooltip-text-y-label {
   color: #5A7A7A !important;
   font-weight: 500 !important;
+  font-size: 14px !important;
 }
 
 .apexcharts-tooltip-text-y-value {
   color: #2D5A5A !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
 }
 
 .apexcharts-tooltip-marker {
-  width: 10px !important;
-  height: 10px !important;
-  border-radius: 3px !important;
-  margin-right: 8px !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 4px !important;
+  margin-right: 10px !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   LEGEND STYLING
+   TREEMAP SPECIFIC STYLES
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-treemap-rect {
+  transition: opacity 0.2s ease !important;
+}
+
+.apexcharts-treemap-rect:hover {
+  opacity: 0.9 !important;
+}
+
+/* Treemap data labels - enforce minimum size */
+.apexcharts-treemap .apexcharts-datalabel,
+.apexcharts-treemap .apexcharts-data-labels text {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  fill: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   LEGEND STYLING (Large & Readable)
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-legend {
-  padding: 12px 8px !important;
+  padding: 16px 12px !important;
 }
 
 .apexcharts-legend-series {
-  margin: 4px 8px !important;
+  margin: 6px 10px !important;
 }
 
 .apexcharts-legend-marker {
-  border-radius: 3px !important;
-  margin-right: 6px !important;
+  border-radius: 4px !important;
+  margin-right: 8px !important;
+  width: 12px !important;
+  height: 12px !important;
 }
 
 .apexcharts-legend-text {
   color: #2D5A5A !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   DATA LABELS
+   DATA LABELS (Minimum 14px)
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-data-labels text,
 .apexcharts-datalabel {
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+}
+
+/* Bar chart data labels */
+.apexcharts-bar-series .apexcharts-datalabel {
+  font-size: 14px !important;
   fill: #2D5A5A !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   AXIS LABELS
+   AXIS LABELS (Minimum 13px)
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-xaxis-label,
 .apexcharts-yaxis-label {
   font-weight: 500 !important;
   fill: #5A7A7A !important;
+  font-size: 13px !important;
+}
+
+/* Y-axis labels for horizontal bars (names) */
+.apexcharts-yaxis-label tspan {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   DONUT CENTER LABELS (Large)
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-datalabel-label {
+  fill: #5A7A7A !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.apexcharts-datalabel-value {
+  fill: #449997 !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -105,33 +160,21 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   DONUT CENTER LABELS
-   ───────────────────────────────────────────────────────────────── */
-
-.apexcharts-datalabel-label {
-  fill: #5A7A7A !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-}
-
-.apexcharts-datalabel-value {
-  fill: #449997 !important;
-  font-size: 22px !important;
-  font-weight: 700 !important;
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   SUBTLE HOVER EFFECTS
+   HOVER EFFECTS
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-bar-area {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease !important;
 }
 
 .apexcharts-bar-area:hover {
-  opacity: 0.85;
+  opacity: 0.85 !important;
 }
 
 .apexcharts-pie-area {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease !important;
+}
+
+.apexcharts-pie-area:hover {
+  transform: scale(1.02) !important;
 }
