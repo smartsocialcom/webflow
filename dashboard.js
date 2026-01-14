@@ -522,39 +522,46 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Matte Colors)
+      // CHART 5: TOP SCHOOL BUILDINGS (Donut - Matte Colors, Side Legend)
       // ═══════════════════════════════════════════════════════════════
       if (topSchoolBuildings.length) {
         const topSchoolBuildingsEl = document.getElementById("topSchoolBuildings");
         if (topSchoolBuildingsEl) {
           const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
           
+          // Truncate labels for center display
+          const truncatedLabels = topSchoolBuildings.map(i => 
+            i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
+          );
+          
           new ApexCharts(topSchoolBuildingsEl, {
             chart: {
               type: 'donut',
-              height: 400,
+              height: 380,
               background: 'transparent'
             },
             series: topSchoolBuildings.map(i => i.count),
-            labels: topSchoolBuildings.map(i => i.school_name),
+            labels: truncatedLabels,
             colors: treemapPalette,
             plotOptions: {
               pie: {
                 donut: {
-                  size: '60%',
+                  size: '65%',
                   labels: {
                     show: true,
                     name: {
                       show: true,
-                      fontSize: '15px',
+                      fontSize: '13px',
                       fontWeight: 600,
-                      color: colors.text
+                      color: colors.text,
+                      offsetY: -8
                     },
                     value: {
                       show: true,
-                      fontSize: '24px',
+                      fontSize: '22px',
                       fontWeight: 700,
                       color: colors.primary,
+                      offsetY: 4,
                       formatter: val => {
                         const pct = ((parseInt(val) / total) * 100).toFixed(1);
                         return `${pct}%`;
@@ -562,8 +569,8 @@ if (!window.scriptExecuted) {
                     },
                     total: {
                       show: true,
-                      label: 'Total Activity',
-                      fontSize: '14px',
+                      label: 'Total',
+                      fontSize: '12px',
                       color: colors.textLight,
                       formatter: () => total.toLocaleString()
                     }
@@ -574,14 +581,18 @@ if (!window.scriptExecuted) {
             stroke: { width: 2, colors: ['#fff'] },
             legend: {
               show: true,
-              position: 'bottom',
-              fontSize: '14px',
+              position: 'right',
+              fontSize: '13px',
               fontWeight: 500,
+              width: 180,
               labels: { colors: colors.text },
-              markers: { width: 12, height: 12, radius: 3 },
-              itemMargin: { horizontal: 10, vertical: 6 },
-              formatter: (name) => {
-                return name.length > 22 ? name.substring(0, 20) + '..' : name;
+              markers: { width: 10, height: 10, radius: 3 },
+              itemMargin: { horizontal: 5, vertical: 5 },
+              formatter: (name, opts) => {
+                // Show truncated name with value
+                const val = opts.w.globals.series[opts.seriesIndex];
+                const shortName = name.length > 15 ? name.substring(0, 13) + '..' : name;
+                return `${shortName} (${val})`;
               }
             },
             dataLabels: { enabled: false },
@@ -592,12 +603,12 @@ if (!window.scriptExecuted) {
                 const pct = ((value / total) * 100).toFixed(1);
                 return `
                   <div style="padding:14px 18px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);">
-                    <div style="font-size:16px;font-weight:700;color:#2D5A5A;margin-bottom:10px;">${name}</div>
+                    <div style="font-size:15px;font-weight:700;color:#2D5A5A;margin-bottom:10px;">${name}</div>
                     <div style="display:flex;align-items:baseline;gap:10px;">
-                      <span style="font-size:26px;font-weight:700;color:#449997;">${value.toLocaleString()}</span>
-                      <span style="font-size:14px;color:#5A7A7A;">visits</span>
+                      <span style="font-size:24px;font-weight:700;color:#6B9E9C;">${value.toLocaleString()}</span>
+                      <span style="font-size:13px;color:#5A7A7A;">visits</span>
                     </div>
-                    <div style="margin-top:8px;font-size:14px;color:#fff;background:#449997;padding:5px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}%</div>
+                    <div style="margin-top:8px;font-size:13px;color:#fff;background:#6B9E9C;padding:5px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}%</div>
                   </div>
                 `;
               }
