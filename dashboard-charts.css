@@ -255,12 +255,12 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   DONUT OVERLAY LEGEND (Left-side absolute)
+   DONUT OVERLAY LEGEND (Left-side, chart on right)
    ───────────────────────────────────────────────────────────────── */
 
 .donut-overlay-legend {
   position: absolute;
-  left: 15px;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.95);
@@ -272,6 +272,11 @@
   max-height: 340px;
   overflow-y: auto;
   z-index: 10;
+}
+
+/* Push chart to the right */
+#topSchoolBuildings .apexcharts-canvas {
+  margin-left: auto !important;
 }
 
 .donut-overlay-legend::-webkit-scrollbar {
@@ -323,4 +328,43 @@
   font-weight: 700;
   color: #6B9E9C;
   margin-left: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   RESPONSIVE: Mobile layout for donut chart
+   ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .donut-overlay-legend {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    max-height: none;
+    width: 100%;
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .donut-legend-item {
+    flex: 0 0 auto;
+    padding: 5px 10px;
+    white-space: nowrap;
+  }
+
+  .donut-legend-text {
+    font-size: 12px;
+  }
+
+  .donut-legend-value {
+    font-size: 12px;
+  }
+
+  #topSchoolBuildings .apexcharts-canvas {
+    margin-left: 0 !important;
+    margin: 0 auto !important;
+  }
 }
