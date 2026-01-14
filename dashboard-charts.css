@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   APEXCHARTS - READABLE STYLES (Minimum 16px text)
+   APEXCHARTS - CLEAN & READABLE STYLES
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────────────────────────
@@ -57,53 +57,99 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   TREEMAP SPECIFIC STYLES
+   TREEMAP - CLEAN BOXES (No text labels)
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-treemap-rect {
-  transition: opacity 0.2s ease !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer;
 }
 
 .apexcharts-treemap-rect:hover {
-  opacity: 0.9 !important;
+  filter: brightness(1.15) !important;
+  stroke-width: 3px !important;
 }
 
-/* Treemap data labels - enforce minimum size */
+/* Hide any treemap data labels */
 .apexcharts-treemap .apexcharts-datalabel,
-.apexcharts-treemap .apexcharts-data-labels text {
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  fill: #ffffff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+.apexcharts-treemap .apexcharts-data-labels {
+  display: none !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   LEGEND STYLING (Large & Readable)
+   TREEMAP LEGEND - Scrollable with Hover Highlight
    ───────────────────────────────────────────────────────────────── */
 
+/* Legend container - scrollable */
 .apexcharts-legend {
-  padding: 16px 12px !important;
+  padding: 16px 8px !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: #449997 #e8f0f0;
 }
 
+/* Webkit scrollbar styling */
+.apexcharts-legend::-webkit-scrollbar {
+  width: 6px;
+}
+
+.apexcharts-legend::-webkit-scrollbar-track {
+  background: #e8f0f0;
+  border-radius: 3px;
+}
+
+.apexcharts-legend::-webkit-scrollbar-thumb {
+  background: #449997;
+  border-radius: 3px;
+}
+
+.apexcharts-legend::-webkit-scrollbar-thumb:hover {
+  background: #357A78;
+}
+
+/* Legend items */
 .apexcharts-legend-series {
-  margin: 6px 10px !important;
+  margin: 4px 8px !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
 }
 
+.apexcharts-legend-series:hover {
+  background: rgba(68, 153, 151, 0.1) !important;
+  transform: translateX(4px);
+}
+
+/* Legend marker */
 .apexcharts-legend-marker {
   border-radius: 4px !important;
-  margin-right: 8px !important;
-  width: 12px !important;
-  height: 12px !important;
+  margin-right: 10px !important;
+  width: 14px !important;
+  height: 14px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
 }
 
+/* Legend text */
 .apexcharts-legend-text {
   color: #2D5A5A !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
+  line-height: 1.4 !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   DATA LABELS (Minimum 14px)
+   GENERAL LEGEND STYLING
+   ───────────────────────────────────────────────────────────────── */
+
+/* For other charts (donut, etc) */
+.apexcharts-pie .apexcharts-legend-series,
+.apexcharts-donut .apexcharts-legend-series {
+  margin: 5px 10px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   DATA LABELS
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-data-labels text,
@@ -118,7 +164,7 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   AXIS LABELS (Minimum 13px)
+   AXIS LABELS
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-xaxis-label,
@@ -135,7 +181,7 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   DONUT CENTER LABELS (Large)
+   DONUT CENTER LABELS
    ───────────────────────────────────────────────────────────────── */
 
 .apexcharts-datalabel-label {
@@ -177,4 +223,20 @@
 
 .apexcharts-pie-area:hover {
   transform: scale(1.02) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   ACTIVE/INACTIVE STATES (for legend hover highlight)
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-series-collapsed {
+  opacity: 0.25 !important;
+}
+
+.apexcharts-treemap-rect.apexcharts-inactive {
+  opacity: 0.3 !important;
+}
+
+.apexcharts-treemap-rect.apexcharts-active {
+  filter: brightness(1.2) drop-shadow(0 4px 12px rgba(68, 153, 151, 0.4)) !important;
 }
