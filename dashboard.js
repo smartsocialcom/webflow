@@ -178,7 +178,7 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 2: SCHOOL BUILDINGS (Treemap - Smart Labels for 90+ items)
+      // CHART 2: SCHOOL BUILDINGS (Clean Treemap + Legend with Hover)
       // ═══════════════════════════════════════════════════════════════
       if (school_buildings.length) {
         const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
@@ -200,7 +200,7 @@ if (!window.scriptExecuted) {
           new ApexCharts(schoolBuildingsEl, {
             chart: {
               type: 'treemap',
-              height: 500,
+              height: 450,
               background: 'transparent',
               animations: {
                 enabled: true,
@@ -215,41 +215,68 @@ if (!window.scriptExecuted) {
               treemap: {
                 distributed: true,
                 enableShades: true,
-                shadeIntensity: 0.3
+                shadeIntensity: 0.25
               }
             },
+            // NO TEXT ON BOXES - clean visual
             dataLabels: {
-              enabled: true,
-              style: {
-                fontSize: '16px',
-                fontWeight: 700,
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              },
-              formatter: (text, op) => {
-                const pct = (op.value / total) * 100;
-                // Only show text on boxes with enough space
-                if (pct < 0.8) return ''; // Hide on tiny boxes
-                if (pct < 1.5) {
-                  // Very small - just show 2-3 letter abbreviation
-                  const abbrev = text.split(' ').map(w => w[0]).join('').substring(0, 3);
-                  return abbrev;
-                }
-                if (pct < 2.5) {
-                  // Small - show short name only
-                  const shortName = text.length > 12 ? text.substring(0, 10) + '..' : text;
-                  return shortName;
-                }
-                // Medium/Large - show name and percentage
-                const shortName = text.length > 18 ? text.substring(0, 16) + '..' : text;
-                return [shortName, `${pct.toFixed(1)}%`];
-              },
-              offsetY: 0
+              enabled: false
             },
             stroke: {
               width: 2,
               colors: ['#fff']
             },
-            legend: { show: false },
+            // LEGEND with hover highlighting
+            legend: {
+              show: true,
+              position: 'bottom',
+              height: 140,
+              fontSize: '13px',
+              fontWeight: 500,
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              labels: {
+                colors: colors.text
+              },
+              markers: {
+                width: 12,
+                height: 12,
+                radius: 3
+              },
+              itemMargin: {
+                horizontal: 12,
+                vertical: 6
+              },
+              onItemHover: {
+                highlightDataSeries: true
+              },
+              onItemClick: {
+                toggleDataSeries: false
+              },
+              formatter: (name, opts) => {
+                const idx = opts.seriesIndex;
+                const item = treemapData[idx];
+                if (!item) return name;
+                const val = item.y;
+                const pct = ((val / total) * 100).toFixed(1);
+                // Max 28 chars for name
+                const shortName = name.length > 28 ? name.substring(0, 26) + '..' : name;
+                return `${shortName} — ${val.toLocaleString()} (${pct}%)`;
+              }
+            },
+            states: {
+              hover: {
+                filter: {
+                  type: 'lighten',
+                  value: 0.15
+                }
+              },
+              active: {
+                filter: {
+                  type: 'darken',
+                  value: 0.1
+                }
+              }
+            },
             tooltip: {
               custom: ({ seriesIndex, dataPointIndex, w }) => {
                 const item = treemapData[dataPointIndex];
@@ -258,14 +285,14 @@ if (!window.scriptExecuted) {
                 const rank = item.rank;
                 const pct = ((value / total) * 100).toFixed(1);
                 return `
-                  <div style="padding:16px 20px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);min-width:220px;">
+                  <div style="padding:16px 20px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(45,90,90,0.18);min-width:240px;">
                     <div style="font-size:12px;color:#5A7A7A;margin-bottom:6px;font-weight:600;">#${rank} of ${treemapData.length} schools</div>
-                    <div style="font-size:17px;font-weight:700;color:#2D5A5A;margin-bottom:12px;line-height:1.3;">${name}</div>
+                    <div style="font-size:18px;font-weight:700;color:#2D5A5A;margin-bottom:12px;line-height:1.3;">${name}</div>
                     <div style="display:flex;align-items:baseline;gap:12px;">
-                      <span style="font-size:28px;font-weight:700;color:#449997;">${value.toLocaleString()}</span>
+                      <span style="font-size:32px;font-weight:700;color:#449997;">${value.toLocaleString()}</span>
                       <span style="font-size:15px;color:#5A7A7A;">parents</span>
                     </div>
-                    <div style="margin-top:8px;font-size:14px;color:#fff;background:#449997;padding:6px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}% of total</div>
+                    <div style="margin-top:10px;font-size:14px;color:#fff;background:#449997;padding:6px 14px;border-radius:20px;display:inline-block;font-weight:600;">${pct}% of total</div>
                   </div>
                 `;
               }
