@@ -3,7 +3,7 @@ if (!window.scriptExecuted) {
   document.addEventListener("DOMContentLoaded", async () => {
     try {
       // ═══════════════════════════════════════════════════════════════
-      // MONOCHROMATIC TEAL PALETTE (Readable & Cohesive)
+      // COLOR PALETTES
       // ═══════════════════════════════════════════════════════════════
       const colors = {
         primary: '#449997',
@@ -18,15 +18,44 @@ if (!window.scriptExecuted) {
         background: '#FFFFFF'
       };
 
-      // Extended palette for 90+ items treemap
+      // 90+ DISTINCT COLORS for treemap (rainbow variety)
       const treemapPalette = [
-        '#449997', '#5AADAB', '#357A78', '#7EC8C8', '#2D5A5A',
-        '#6BBAB8', '#4A8A8A', '#8CD0CE', '#3D6B6B', '#5C9E9C',
-        '#A3DADA', '#4E9694', '#6FA8A6', '#3A7F7D', '#82C4C2',
-        '#528E8C', '#7AB8B6', '#467C7A', '#94CCCB', '#5EA2A0'
+        // Teals (brand)
+        '#449997', '#2A9D8F', '#17A398', '#0F9B8E', '#3D8B87',
+        // Blues
+        '#4361EE', '#4895EF', '#4CC9F0', '#00B4D8', '#0077B6',
+        '#023E8A', '#3A86FF', '#5E7CE2', '#7B93DB', '#90B0E0',
+        // Purples
+        '#7209B7', '#9B5DE5', '#B185DB', '#C77DFF', '#A855F7',
+        '#8B5CF6', '#6D28D9', '#7C3AED', '#9333EA', '#A78BFA',
+        // Pinks
+        '#F72585', '#FF006E', '#FF5C8A', '#FF85A2', '#F9A8D4',
+        '#EC4899', '#DB2777', '#BE185D', '#FF69B4', '#FF1493',
+        // Reds
+        '#EF476F', '#E63946', '#D90429', '#FF4D4D', '#FF6B6B',
+        '#FA8072', '#E57373', '#FF7043', '#FF5722', '#F44336',
+        // Oranges
+        '#FF9F1C', '#FFB627', '#FFC857', '#FFAA00', '#FF8C00',
+        '#F4A261', '#E9C46A', '#FFB347', '#FFA07A', '#FF8A65',
+        // Yellows
+        '#FFD60A', '#FFE066', '#FFF176', '#FFEE58', '#FDD835',
+        '#F9A825', '#FFD700', '#FFCA28', '#FFB300', '#FFC107',
+        // Greens
+        '#06D6A0', '#00C49A', '#52B788', '#40916C', '#2D6A4F',
+        '#1B4332', '#74C69D', '#95D5B2', '#8BC34A', '#7CB342',
+        '#689F38', '#558B2F', '#33691E', '#4CAF50', '#66BB6A',
+        // Cyans
+        '#00CED1', '#20B2AA', '#48D1CC', '#40E0D0', '#7FFFD4',
+        '#5F9EA0', '#008B8B', '#00BFFF', '#1E90FF', '#87CEEB',
+        // Browns/Earth
+        '#BC6C25', '#DDA15E', '#A0522D', '#8B4513', '#CD853F',
+        '#D2691E', '#B8860B', '#DAA520', '#C9A227', '#BDB76B',
+        // Grays/Neutrals
+        '#6B7280', '#9CA3AF', '#78909C', '#607D8B', '#546E7A',
+        '#455A64', '#37474F', '#708090', '#696969', '#808080'
       ];
 
-      // Monochromatic palette for other charts
+      // Teal palette for other charts (bar, donut, etc)
       const chartPalette = [
         '#449997', '#357A78', '#5AADAB', '#2D5A5A', '#7EC8C8',
         '#3D6B6B', '#6BBAB8', '#4A8A8A', '#8CD0CE', '#5C9E9C'
@@ -178,7 +207,7 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 2: SCHOOL BUILDINGS (Clean Treemap + Legend with Hover)
+      // CHART 2: SCHOOL BUILDINGS (Treemap + Custom HTML Legend)
       // ═══════════════════════════════════════════════════════════════
       if (school_buildings.length) {
         const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
@@ -190,21 +219,34 @@ if (!window.scriptExecuted) {
             b.registered_school_parents - a.registered_school_parents
           );
           
-          // Prepare treemap data with rank
+          // Prepare treemap data with rank and color
           const treemapData = sortedBuildings.map((b, idx) => ({
             x: b.school_name,
             y: b.registered_school_parents,
-            rank: idx + 1
+            rank: idx + 1,
+            fillColor: treemapPalette[idx % treemapPalette.length]
           }));
 
-          new ApexCharts(schoolBuildingsEl, {
+          const treemapChart = new ApexCharts(schoolBuildingsEl, {
             chart: {
               type: 'treemap',
-              height: 450,
+              height: 400,
               background: 'transparent',
               animations: {
                 enabled: true,
                 speed: 600
+              },
+              events: {
+                dataPointMouseEnter: (event, chartContext, config) => {
+                  // Highlight corresponding legend item
+                  const legendItem = document.querySelector(`[data-legend-idx="${config.dataPointIndex}"]`);
+                  if (legendItem) legendItem.classList.add('legend-active');
+                },
+                dataPointMouseLeave: (event, chartContext, config) => {
+                  // Remove highlight from legend item
+                  const legendItem = document.querySelector(`[data-legend-idx="${config.dataPointIndex}"]`);
+                  if (legendItem) legendItem.classList.remove('legend-active');
+                }
               }
             },
             series: [{
@@ -214,11 +256,9 @@ if (!window.scriptExecuted) {
             plotOptions: {
               treemap: {
                 distributed: true,
-                enableShades: true,
-                shadeIntensity: 0.25
+                enableShades: false
               }
             },
-            // NO TEXT ON BOXES - clean visual
             dataLabels: {
               enabled: false
             },
@@ -226,54 +266,14 @@ if (!window.scriptExecuted) {
               width: 2,
               colors: ['#fff']
             },
-            // LEGEND with hover highlighting
             legend: {
-              show: true,
-              position: 'bottom',
-              height: 140,
-              fontSize: '13px',
-              fontWeight: 500,
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              labels: {
-                colors: colors.text
-              },
-              markers: {
-                width: 12,
-                height: 12,
-                radius: 3
-              },
-              itemMargin: {
-                horizontal: 12,
-                vertical: 6
-              },
-              onItemHover: {
-                highlightDataSeries: true
-              },
-              onItemClick: {
-                toggleDataSeries: false
-              },
-              formatter: (name, opts) => {
-                const idx = opts.seriesIndex;
-                const item = treemapData[idx];
-                if (!item) return name;
-                const val = item.y;
-                const pct = ((val / total) * 100).toFixed(1);
-                // Max 28 chars for name
-                const shortName = name.length > 28 ? name.substring(0, 26) + '..' : name;
-                return `${shortName} — ${val.toLocaleString()} (${pct}%)`;
-              }
+              show: false
             },
             states: {
               hover: {
                 filter: {
                   type: 'lighten',
-                  value: 0.15
-                }
-              },
-              active: {
-                filter: {
-                  type: 'darken',
-                  value: 0.1
+                  value: 0.12
                 }
               }
             },
@@ -283,21 +283,68 @@ if (!window.scriptExecuted) {
                 const name = item.x;
                 const value = item.y;
                 const rank = item.rank;
+                const color = item.fillColor;
                 const pct = ((value / total) * 100).toFixed(1);
                 return `
-                  <div style="padding:16px 20px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(45,90,90,0.18);min-width:240px;">
-                    <div style="font-size:12px;color:#5A7A7A;margin-bottom:6px;font-weight:600;">#${rank} of ${treemapData.length} schools</div>
-                    <div style="font-size:18px;font-weight:700;color:#2D5A5A;margin-bottom:12px;line-height:1.3;">${name}</div>
+                  <div style="padding:16px 20px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.18);min-width:240px;">
+                    <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:600;">#${rank} of ${treemapData.length} schools</div>
+                    <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:12px;line-height:1.3;">${name}</div>
                     <div style="display:flex;align-items:baseline;gap:12px;">
-                      <span style="font-size:32px;font-weight:700;color:#449997;">${value.toLocaleString()}</span>
-                      <span style="font-size:15px;color:#5A7A7A;">parents</span>
+                      <span style="font-size:30px;font-weight:700;color:${color};">${value.toLocaleString()}</span>
+                      <span style="font-size:14px;color:#666;">parents</span>
                     </div>
-                    <div style="margin-top:10px;font-size:14px;color:#fff;background:#449997;padding:6px 14px;border-radius:20px;display:inline-block;font-weight:600;">${pct}% of total</div>
+                    <div style="margin-top:10px;font-size:13px;color:#fff;background:${color};padding:5px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}% of total</div>
                   </div>
                 `;
               }
             }
-          }).render();
+          });
+          
+          treemapChart.render();
+
+          // CREATE CUSTOM HTML LEGEND
+          const legendContainer = document.createElement('div');
+          legendContainer.className = 'treemap-legend';
+          legendContainer.innerHTML = treemapData.map((item, idx) => {
+            const pct = ((item.y / total) * 100).toFixed(1);
+            const shortName = item.x.length > 30 ? item.x.substring(0, 28) + '..' : item.x;
+            return `
+              <div class="treemap-legend-item" data-legend-idx="${idx}">
+                <span class="legend-color" style="background:${item.fillColor}"></span>
+                <span class="legend-name">${shortName}</span>
+                <span class="legend-value">${item.y.toLocaleString()}</span>
+                <span class="legend-pct">${pct}%</span>
+              </div>
+            `;
+          }).join('');
+          
+          // Insert legend after chart
+          schoolBuildingsEl.parentNode.insertBefore(legendContainer, schoolBuildingsEl.nextSibling);
+
+          // Add hover interactions to legend
+          legendContainer.querySelectorAll('.treemap-legend-item').forEach((item, idx) => {
+            item.addEventListener('mouseenter', () => {
+              // Highlight the treemap box
+              const rects = schoolBuildingsEl.querySelectorAll('.apexcharts-treemap-rect');
+              rects.forEach((rect, i) => {
+                if (i === idx) {
+                  rect.style.filter = 'brightness(1.3) drop-shadow(0 0 8px rgba(0,0,0,0.3))';
+                  rect.style.strokeWidth = '4px';
+                } else {
+                  rect.style.opacity = '0.4';
+                }
+              });
+            });
+            item.addEventListener('mouseleave', () => {
+              // Reset all treemap boxes
+              const rects = schoolBuildingsEl.querySelectorAll('.apexcharts-treemap-rect');
+              rects.forEach(rect => {
+                rect.style.filter = '';
+                rect.style.strokeWidth = '';
+                rect.style.opacity = '';
+              });
+            });
+          });
         }
       } else {
         document.getElementById("schoolBuildingsChartWrapper").innerHTML =
