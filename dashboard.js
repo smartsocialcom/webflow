@@ -526,11 +526,15 @@ if (!window.scriptExecuted) {
             i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
           );
           
+          // Style the chart container to push chart right
+          topSchoolBuildingsEl.style.display = 'flex';
+          topSchoolBuildingsEl.style.justifyContent = 'flex-end';
+          
           const chart5 = new ApexCharts(topSchoolBuildingsEl, {
             chart: {
               type: 'donut',
               height: 400,
-              width: '100%',
+              width: 400,
               background: 'transparent'
             },
             series: topSchoolBuildings.map(i => i.count),
@@ -593,6 +597,15 @@ if (!window.scriptExecuted) {
             }
           });
           chart5.render();
+          
+          // Force chart to align right after render
+          setTimeout(() => {
+            const chartWrapper = topSchoolBuildingsEl.querySelector('.apexcharts-canvas');
+            if (chartWrapper) {
+              chartWrapper.style.marginLeft = 'auto';
+              chartWrapper.style.marginRight = '0';
+            }
+          }, 100);
           
           // Create custom overlay legend on left
           const legendHtml = `
