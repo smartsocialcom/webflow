@@ -280,9 +280,8 @@
   z-index: 10;
 }
 
-#topSchoolBuildings {
-  display: flex;
-  justify-content: flex-end;
+#topSchoolBuildings > div {
+  margin-left: auto;
 }
 
 .donut-overlay-legend::-webkit-scrollbar {
