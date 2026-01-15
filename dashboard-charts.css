@@ -281,11 +281,8 @@
 }
 
 #topSchoolBuildings {
-  text-align: right;
-}
-
-#topSchoolBuildings > div {
-  display: inline-block !important;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .donut-overlay-legend::-webkit-scrollbar {
