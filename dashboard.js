@@ -18,38 +18,28 @@ if (!window.scriptExecuted) {
         background: '#FFFFFF'
       };
 
-      // 100 VIBRANT BUT PLEASANT COLORS - PRE-SHUFFLED for variety
+      // 100 VIBRANT BUT PLEASANT COLORS - SHUFFLED for variety
       const treemapPalette = [
-        // Vibrant corals & warm reds
-        '#E8907C', '#F4A08C', '#E58068', '#F0967A', '#DC7862',
-        '#F2988A', '#E68A74', '#EE9480', '#DA7660', '#F09C8E',
-        // Rich teals & turquoise
-        '#4AADA8', '#5CC4BE', '#42A09B', '#52B8B2', '#3A9994',
-        '#58C0BA', '#4EB4AE', '#54BCB6', '#46A8A2', '#5AC2BC',
-        // Warm golds & amber
-        '#E8C468', '#F2D078', '#DEB858', '#ECC86E', '#D4AC4A',
-        '#F0CE76', '#E6C264', '#EECC72', '#DCBA56', '#E4C060',
-        // Lively greens & emerald
-        '#5EAE72', '#6EC082', '#4EA264', '#64B878', '#46985C',
-        '#6ABC80', '#5AB270', '#66BA7A', '#52A668', '#5EB476',
-        // Sky blues & ocean
-        '#5A9EC8', '#6AAED8', '#4A90BC', '#60A6D0', '#4288B4',
-        '#68ACD6', '#5EA2CC', '#64A8D2', '#5698C2', '#62A4CE',
-        // Rich purples & violet
-        '#8E7CB8', '#9E8CC8', '#806EAA', '#9484C0', '#7866A2',
-        '#9C8AC6', '#8A78B4', '#9680BC', '#8472B0', '#9886C2',
-        // Vibrant pinks & rose
-        '#E07A98', '#EC8AA8', '#D46C8A', '#E88298', '#CC647E',
-        '#EA88A4', '#DE7894', '#E680A0', '#D87088', '#E4869E',
-        // Warm oranges & tangerine
-        '#F0A060', '#F8AC70', '#E89452', '#F4A868', '#E08C4A',
-        '#F6AA6E', '#EE9E5E', '#F2A664', '#E69658', '#F0A262',
-        // Fresh limes & chartreuse
-        '#98C45A', '#A6D06A', '#8CB84C', '#A0CA60', '#84B044',
-        '#A4CE68', '#9AC258', '#A2CC64', '#90BC52', '#9CC65C',
-        // Soft plums & mauve
-        '#B888A8', '#C698B8', '#AA7A9A', '#C090B0', '#A27292',
-        '#C496B6', '#B686A6', '#BE8EB0', '#AE809E', '#C294B4'
+        '#5EAE72', '#E8907C', '#8E7CB8', '#E8C468', '#4AADA8',
+        '#E07A98', '#F0A060', '#98C45A', '#B888A8', '#5A9EC8',
+        '#F4A08C', '#6EC082', '#9E8CC8', '#F2D078', '#5CC4BE',
+        '#EC8AA8', '#F8AC70', '#A6D06A', '#C698B8', '#6AAED8',
+        '#E58068', '#4EA264', '#806EAA', '#DEB858', '#42A09B',
+        '#D46C8A', '#E89452', '#8CB84C', '#AA7A9A', '#4A90BC',
+        '#F0967A', '#64B878', '#9484C0', '#ECC86E', '#52B8B2',
+        '#E88298', '#F4A868', '#A0CA60', '#C090B0', '#60A6D0',
+        '#DC7862', '#46985C', '#7866A2', '#D4AC4A', '#3A9994',
+        '#CC647E', '#E08C4A', '#84B044', '#A27292', '#4288B4',
+        '#F2988A', '#6ABC80', '#9C8AC6', '#F0CE76', '#58C0BA',
+        '#EA88A4', '#F6AA6E', '#A4CE68', '#C496B6', '#68ACD6',
+        '#E68A74', '#5AB270', '#8A78B4', '#E6C264', '#4EB4AE',
+        '#DE7894', '#EE9E5E', '#9AC258', '#B686A6', '#5EA2CC',
+        '#EE9480', '#66BA7A', '#9680BC', '#EECC72', '#54BCB6',
+        '#E680A0', '#F2A664', '#A2CC64', '#BE8EB0', '#64A8D2',
+        '#DA7660', '#52A668', '#8472B0', '#DCBA56', '#46A8A2',
+        '#D87088', '#E69658', '#90BC52', '#AE809E', '#5698C2',
+        '#F09C8E', '#5EB476', '#9886C2', '#E4C060', '#5AC2BC',
+        '#E4869E', '#F0A262', '#9CC65C', '#C294B4', '#62A4CE'
       ];
 
       // Matte palette for other charts (bar, donut, etc)
