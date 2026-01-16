@@ -18,32 +18,28 @@ if (!window.scriptExecuted) {
         background: '#FFFFFF'
       };
 
-      // 90+ MATTE COLORS for treemap (soft, easy on eyes) - PRE-SHUFFLED for variety
+      // 90+ SOFT DESATURATED COLORS for treemap (gentle on eyes) - PRE-SHUFFLED for variety
       const treemapPalette = [
-        '#6B9E9C', '#9B8EB5', '#CBA58A', '#8BAA8E', '#D4A5B0',
-        '#7B9EB8', '#C9A5A5', '#7AADAD', '#D4C99A', '#7A8F7A',
-        '#B5A899', '#9AA3AC', '#7AACAA', '#A99DC1', '#D8B49A',
-        '#99B89C', '#E0B5BF', '#8BADC4', '#D4B0B0', '#89BCBC',
-        '#DFD5AB', '#889D88', '#C2B6A8', '#A8B1BA', '#89BAB8',
-        '#8A7DA8', '#C19B80', '#7D9C80', '#C89BA6', '#6A8FA8',
-        '#BF9A9A', '#6C9F9F', '#C9BE8F', '#6E826E', '#A99C8D',
-        '#8C95A0', '#5C8F8D', '#B8ADCC', '#E4C4AB', '#A7C6AA',
-        '#EBC5CE', '#9BBDD1', '#DFBBBB', '#98CBCB', '#EAE0BC',
-        '#96AB96', '#CFC4B7', '#B6BFC8', '#8AC4C2', '#A396BA',
-        '#D1AC92', '#93B296', '#D9AFB9', '#A7C7DA', '#CAA6A6',
-        '#84B7B7', '#D9CFA1', '#829782', '#BAB0A2', '#9EA8B2',
-        '#73A5A3', '#9689AD', '#C7A085', '#87A68A', '#CDA1AC',
-        '#8BA5B8', '#B89494', '#78A8A8', '#CEC494', '#768B76',
-        '#AEA496', '#929CA6', '#9DCCCB', '#C4B9D8', '#DDBCA3',
-        '#ABD0AE', '#E8BDC6', '#7C98AD', '#D3ACAC', '#A2D3D3',
-        '#E5DBB0', '#9AB09A', '#D4CAC0', '#C0C9D2', '#68A09E',
-        '#B0A3C5', '#D4B095', '#9DC4A0', '#DEAEBB', '#9AB4C5',
-        '#C89F9F', '#92C5C5', '#DCD2A5', '#8CA38C', '#C7BEB2',
-        '#ACB6C0', '#7EB5B3', '#8C80A0', '#BF9679', '#7F9882',
-        '#C494A0', '#A8C3D4', '#BE9090', '#6E9A9A', '#C4BA88',
-        '#708570', '#A49A8C', '#8A949E', '#A3D4D2', '#A498B8',
-        '#CBAA90', '#8FB092', '#D6A8B3', '#B5CFE0', '#D4B2B2',
-        '#80ABAB', '#D0C798', '#7E937E', '#B2A99B', '#98A2AC'
+        '#B8B5AF', '#C5BCC0', '#B5BCB3', '#C9C5BE', '#B3B8BC',
+        '#C4BFBA', '#D1C8CC', '#C4C9C1', '#D2CDCA', '#C2C7CA',
+        '#BDB8B3', '#C8C3BE', '#BAC0BD', '#CCC8C3', '#B7BCBF',
+        '#C7C2BD', '#D4CBCF', '#C7CCC9', '#D5D0CD', '#C5CACD',
+        '#C0BBB6', '#CBC6C1', '#BDC3C0', '#CFCBC6', '#BAC0C3',
+        '#CAC5C0', '#D7CED2', '#CACFCC', '#D8D3D0', '#C8CDD0',
+        '#B5B0AB', '#C3BEB9', '#B8BEB9', '#C6C2BD', '#B5BABD',
+        '#C2BDB8', '#CFCACA', '#C2C7C4', '#D0CBCA', '#C0C5C8',
+        '#BCB7B2', '#C6C1BC', '#BBC1BC', '#C9C5C0', '#B8BDC0',
+        '#C5C0BB', '#D2C9CD', '#C5CAC6', '#D3CECA', '#C3C8CB',
+        '#B3AEA9', '#C1BCB7', '#B6BCB7', '#C4C0BB', '#B3B8BB',
+        '#C0BBB6', '#CDC4C8', '#C0C5C2', '#CEC9C6', '#BEC3C6',
+        '#BAB5B0', '#C4BFBA', '#B9BFBA', '#C7C3BE', '#B6BBBD',
+        '#C3BEB9', '#D0C7CB', '#C3C8C5', '#D1CCC9', '#C1C6C9',
+        '#B6B1AC', '#C2BDB8', '#B7BDB8', '#C5C1BC', '#B4B9BC',
+        '#C1BCB7', '#CEC5C9', '#C1C6C3', '#CFC9C7', '#BFC4C7',
+        '#B9B4AF', '#C5C0BB', '#BAC0BB', '#C8C4BF', '#B7BCBE',
+        '#C4BFBA', '#D1C8CC', '#C4C9C6', '#D2CDC9', '#C2C7CA',
+        '#B4AFA9', '#C0BBB6', '#B5BBB6', '#C3BFBA', '#B2B7BA',
+        '#BFBAB5', '#CCC3C7', '#BFC4C1', '#CDC8C5', '#BDC2C5'
       ];
 
       // Matte palette for other charts (bar, donut, etc)
