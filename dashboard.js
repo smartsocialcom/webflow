@@ -602,7 +602,7 @@ if (!window.scriptExecuted) {
           
           // Create custom overlay legend on left
           const legendHtml = `
-            <div class="donut-overlay-legend">
+            <div class="donut-overlay-legend" id="topSchoolBuildingsLegend">
               ${topSchoolBuildings.map((item, idx) => `
                 <div class="donut-legend-item" data-index="${idx}">
                   <span class="donut-legend-marker" style="background-color: ${treemapPalette[idx % treemapPalette.length]};"></span>
@@ -617,7 +617,7 @@ if (!window.scriptExecuted) {
           topSchoolBuildingsWrapper.appendChild(legendContainer.firstElementChild);
           
           // Add hover interaction
-          document.querySelectorAll('.donut-legend-item').forEach(item => {
+          document.querySelectorAll('#topSchoolBuildingsLegend .donut-legend-item').forEach(item => {
             item.addEventListener('mouseenter', () => {
               const idx = parseInt(item.dataset.index);
               chart5.toggleDataPointSelection(idx);
