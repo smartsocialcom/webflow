@@ -198,73 +198,137 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 2: SCHOOL BUILDINGS (Horizontal Bar Chart)
+      // CHART 2: SCHOOL BUILDINGS (Donut - Full Width + Overlay Legend)
       // ═══════════════════════════════════════════════════════════════
       if (school_buildings.length) {
         const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
-        if (schoolBuildingsEl) {
+        const schoolBuildingsWrapper = document.getElementById("schoolBuildingsChartWrapper");
+        if (schoolBuildingsEl && schoolBuildingsWrapper) {
           // Sort by value for better visual hierarchy
           const sortedBuildings = [...school_buildings].sort((a, b) => 
             b.registered_school_parents - a.registered_school_parents
           );
-
-          new ApexCharts(schoolBuildingsEl, {
+          
+          const total = sortedBuildings.reduce((sum, b) => sum + b.registered_school_parents, 0);
+          
+          // Ensure wrapper can contain absolute legend
+          schoolBuildingsWrapper.style.position = 'relative';
+          
+          // Truncate labels for center display
+          const truncatedLabels = sortedBuildings.map(b => 
+            b.school_name.length > 18 ? b.school_name.substring(0, 16) + '..' : b.school_name
+          );
+          
+          // Style the chart container to push chart right
+          schoolBuildingsEl.style.display = 'flex';
+          schoolBuildingsEl.style.justifyContent = 'flex-end';
+          
+          const chart2 = new ApexCharts(schoolBuildingsEl, {
             chart: {
-              type: 'bar',
-              height: Math.max(320, sortedBuildings.length * 42),
+              type: 'donut',
+              height: 400,
+              width: 400,
               background: 'transparent'
             },
-            series: [{
-              name: 'Parents',
-              data: sortedBuildings.map(b => b.registered_school_parents)
-            }],
-            xaxis: {
-              categories: sortedBuildings.map(b => b.school_name),
-              labels: {
-                style: { colors: colors.textLight, fontSize: '13px' }
-              },
-              axisBorder: { show: false },
-              axisTicks: { show: false }
-            },
-            yaxis: {
-              labels: {
-                style: { colors: colors.text, fontSize: '14px', fontWeight: 600 },
-                maxWidth: 180
-              }
-            },
+            series: sortedBuildings.map(b => b.registered_school_parents),
+            labels: truncatedLabels,
+            colors: treemapPalette,
             plotOptions: {
-              bar: {
-                horizontal: true,
-                borderRadius: 6,
-                barHeight: '65%',
-                dataLabels: { position: 'top' }
+              pie: {
+                donut: {
+                  size: '60%',
+                  labels: {
+                    show: true,
+                    name: {
+                      show: true,
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: colors.text,
+                      offsetY: -8
+                    },
+                    value: {
+                      show: true,
+                      fontSize: '22px',
+                      fontWeight: 700,
+                      color: colors.primary,
+                      offsetY: 4,
+                      formatter: val => {
+                        const pct = ((parseInt(val) / total) * 100).toFixed(1);
+                        return `${pct}%`;
+                      }
+                    },
+                    total: {
+                      show: true,
+                      label: 'Total',
+                      fontSize: '12px',
+                      color: colors.textLight,
+                      formatter: () => total.toLocaleString()
+                    }
+                  }
+                }
               }
             },
-            fill: {
-              type: 'solid',
-              opacity: 0.9
-            },
-            colors: [colors.primary],
-            dataLabels: {
-              enabled: true,
-              textAnchor: 'start',
-              formatter: val => val.toLocaleString(),
-              offsetX: 8,
-              style: {
-                colors: [colors.dark],
-                fontSize: '14px',
-                fontWeight: 700
-              }
-            },
-            grid: {
-              borderColor: '#e8f0f0',
-              xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } }
-            },
+            stroke: { width: 2, colors: ['#fff'] },
+            legend: { show: false },
+            dataLabels: { enabled: false },
             tooltip: {
-              y: { formatter: val => `${val.toLocaleString()} registered parents` }
+              custom: ({ seriesIndex }) => {
+                const name = sortedBuildings[seriesIndex].school_name;
+                const value = sortedBuildings[seriesIndex].registered_school_parents;
+                const pct = ((value / total) * 100).toFixed(1);
+                return `
+                  <div style="padding:14px 18px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);">
+                    <div style="font-size:15px;font-weight:700;color:#2D5A5A;margin-bottom:10px;">${name}</div>
+                    <div style="display:flex;align-items:baseline;gap:10px;">
+                      <span style="font-size:24px;font-weight:700;color:#6B9E9C;">${value.toLocaleString()}</span>
+                      <span style="font-size:13px;color:#5A7A7A;">parents</span>
+                    </div>
+                    <div style="margin-top:8px;font-size:13px;color:#fff;background:#6B9E9C;padding:5px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}%</div>
+                  </div>
+                `;
+              }
             }
-          }).render();
+          });
+          chart2.render();
+          
+          // Force chart to align right after render
+          setTimeout(() => {
+            const chartWrapper = schoolBuildingsEl.querySelector('.apexcharts-canvas');
+            if (chartWrapper) {
+              chartWrapper.style.marginLeft = 'auto';
+              chartWrapper.style.marginRight = '0';
+            }
+          }, 100);
+          
+          // Create custom overlay legend on left
+          const legendHtml = `
+            <div class="donut-overlay-legend" id="schoolBuildingsLegend">
+              ${sortedBuildings.map((item, idx) => `
+                <div class="donut-legend-item" data-index="${idx}" data-chart="chart2">
+                  <span class="donut-legend-marker" style="background-color: ${treemapPalette[idx % treemapPalette.length]};"></span>
+                  <span class="donut-legend-text">${item.school_name}</span>
+                  <span class="donut-legend-value">${item.registered_school_parents}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          const legendContainer = document.createElement('div');
+          legendContainer.innerHTML = legendHtml;
+          schoolBuildingsWrapper.appendChild(legendContainer.firstElementChild);
+          
+          // Add hover interaction
+          document.querySelectorAll('#schoolBuildingsLegend .donut-legend-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+              const idx = parseInt(item.dataset.index);
+              chart2.toggleDataPointSelection(idx);
+              item.classList.add('active');
+            });
+            item.addEventListener('mouseleave', () => {
+              const idx = parseInt(item.dataset.index);
+              chart2.toggleDataPointSelection(idx);
+              item.classList.remove('active');
+            });
+          });
         }
       } else {
         document.getElementById("schoolBuildingsChartWrapper").innerHTML =
