@@ -18,28 +18,38 @@ if (!window.scriptExecuted) {
         background: '#FFFFFF'
       };
 
-      // 90+ SOFT DESATURATED COLORS for treemap (gentle on eyes) - PRE-SHUFFLED for variety
+      // 100 VIBRANT BUT PLEASANT COLORS - PRE-SHUFFLED for variety
       const treemapPalette = [
-        '#B8B5AF', '#C5BCC0', '#B5BCB3', '#C9C5BE', '#B3B8BC',
-        '#C4BFBA', '#D1C8CC', '#C4C9C1', '#D2CDCA', '#C2C7CA',
-        '#BDB8B3', '#C8C3BE', '#BAC0BD', '#CCC8C3', '#B7BCBF',
-        '#C7C2BD', '#D4CBCF', '#C7CCC9', '#D5D0CD', '#C5CACD',
-        '#C0BBB6', '#CBC6C1', '#BDC3C0', '#CFCBC6', '#BAC0C3',
-        '#CAC5C0', '#D7CED2', '#CACFCC', '#D8D3D0', '#C8CDD0',
-        '#B5B0AB', '#C3BEB9', '#B8BEB9', '#C6C2BD', '#B5BABD',
-        '#C2BDB8', '#CFCACA', '#C2C7C4', '#D0CBCA', '#C0C5C8',
-        '#BCB7B2', '#C6C1BC', '#BBC1BC', '#C9C5C0', '#B8BDC0',
-        '#C5C0BB', '#D2C9CD', '#C5CAC6', '#D3CECA', '#C3C8CB',
-        '#B3AEA9', '#C1BCB7', '#B6BCB7', '#C4C0BB', '#B3B8BB',
-        '#C0BBB6', '#CDC4C8', '#C0C5C2', '#CEC9C6', '#BEC3C6',
-        '#BAB5B0', '#C4BFBA', '#B9BFBA', '#C7C3BE', '#B6BBBD',
-        '#C3BEB9', '#D0C7CB', '#C3C8C5', '#D1CCC9', '#C1C6C9',
-        '#B6B1AC', '#C2BDB8', '#B7BDB8', '#C5C1BC', '#B4B9BC',
-        '#C1BCB7', '#CEC5C9', '#C1C6C3', '#CFC9C7', '#BFC4C7',
-        '#B9B4AF', '#C5C0BB', '#BAC0BB', '#C8C4BF', '#B7BCBE',
-        '#C4BFBA', '#D1C8CC', '#C4C9C6', '#D2CDC9', '#C2C7CA',
-        '#B4AFA9', '#C0BBB6', '#B5BBB6', '#C3BFBA', '#B2B7BA',
-        '#BFBAB5', '#CCC3C7', '#BFC4C1', '#CDC8C5', '#BDC2C5'
+        // Vibrant corals & warm reds
+        '#E8907C', '#F4A08C', '#E58068', '#F0967A', '#DC7862',
+        '#F2988A', '#E68A74', '#EE9480', '#DA7660', '#F09C8E',
+        // Rich teals & turquoise
+        '#4AADA8', '#5CC4BE', '#42A09B', '#52B8B2', '#3A9994',
+        '#58C0BA', '#4EB4AE', '#54BCB6', '#46A8A2', '#5AC2BC',
+        // Warm golds & amber
+        '#E8C468', '#F2D078', '#DEB858', '#ECC86E', '#D4AC4A',
+        '#F0CE76', '#E6C264', '#EECC72', '#DCBA56', '#E4C060',
+        // Lively greens & emerald
+        '#5EAE72', '#6EC082', '#4EA264', '#64B878', '#46985C',
+        '#6ABC80', '#5AB270', '#66BA7A', '#52A668', '#5EB476',
+        // Sky blues & ocean
+        '#5A9EC8', '#6AAED8', '#4A90BC', '#60A6D0', '#4288B4',
+        '#68ACD6', '#5EA2CC', '#64A8D2', '#5698C2', '#62A4CE',
+        // Rich purples & violet
+        '#8E7CB8', '#9E8CC8', '#806EAA', '#9484C0', '#7866A2',
+        '#9C8AC6', '#8A78B4', '#9680BC', '#8472B0', '#9886C2',
+        // Vibrant pinks & rose
+        '#E07A98', '#EC8AA8', '#D46C8A', '#E88298', '#CC647E',
+        '#EA88A4', '#DE7894', '#E680A0', '#D87088', '#E4869E',
+        // Warm oranges & tangerine
+        '#F0A060', '#F8AC70', '#E89452', '#F4A868', '#E08C4A',
+        '#F6AA6E', '#EE9E5E', '#F2A664', '#E69658', '#F0A262',
+        // Fresh limes & chartreuse
+        '#98C45A', '#A6D06A', '#8CB84C', '#A0CA60', '#84B044',
+        '#A4CE68', '#9AC258', '#A2CC64', '#90BC52', '#9CC65C',
+        // Soft plums & mauve
+        '#B888A8', '#C698B8', '#AA7A9A', '#C090B0', '#A27292',
+        '#C496B6', '#B686A6', '#BE8EB0', '#AE809E', '#C294B4'
       ];
 
       // Matte palette for other charts (bar, donut, etc)
