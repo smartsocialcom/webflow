@@ -198,144 +198,73 @@ if (!window.scriptExecuted) {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // CHART 2: SCHOOL BUILDINGS (Treemap + Custom HTML Legend)
+      // CHART 2: SCHOOL BUILDINGS (Horizontal Bar Chart)
       // ═══════════════════════════════════════════════════════════════
       if (school_buildings.length) {
         const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
         if (schoolBuildingsEl) {
-          const total = school_buildings.reduce((sum, i) => sum + i.registered_school_parents, 0);
-          
           // Sort by value for better visual hierarchy
           const sortedBuildings = [...school_buildings].sort((a, b) => 
             b.registered_school_parents - a.registered_school_parents
           );
-          
-          // Prepare treemap data with rank and color
-          const treemapData = sortedBuildings.map((b, idx) => ({
-            x: b.school_name,
-            y: b.registered_school_parents,
-            rank: idx + 1,
-            fillColor: treemapPalette[idx % treemapPalette.length]
-          }));
 
-          const treemapChart = new ApexCharts(schoolBuildingsEl, {
+          new ApexCharts(schoolBuildingsEl, {
             chart: {
-              type: 'treemap',
-              height: 400,
-              background: 'transparent',
-              animations: {
-                enabled: true,
-                speed: 600
-              },
-              events: {
-                dataPointMouseEnter: (event, chartContext, config) => {
-                  // Highlight corresponding legend item
-                  const legendItem = document.querySelector(`[data-legend-idx="${config.dataPointIndex}"]`);
-                  if (legendItem) legendItem.classList.add('legend-active');
-                },
-                dataPointMouseLeave: (event, chartContext, config) => {
-                  // Remove highlight from legend item
-                  const legendItem = document.querySelector(`[data-legend-idx="${config.dataPointIndex}"]`);
-                  if (legendItem) legendItem.classList.remove('legend-active');
-                }
-              }
+              type: 'bar',
+              height: Math.max(320, sortedBuildings.length * 42),
+              background: 'transparent'
             },
             series: [{
-              data: treemapData
+              name: 'Parents',
+              data: sortedBuildings.map(b => b.registered_school_parents)
             }],
-            colors: treemapPalette,
+            xaxis: {
+              categories: sortedBuildings.map(b => b.school_name),
+              labels: {
+                style: { colors: colors.textLight, fontSize: '13px' }
+              },
+              axisBorder: { show: false },
+              axisTicks: { show: false }
+            },
+            yaxis: {
+              labels: {
+                style: { colors: colors.text, fontSize: '14px', fontWeight: 600 },
+                maxWidth: 180
+              }
+            },
             plotOptions: {
-              treemap: {
-                distributed: true,
-                enableShades: false
+              bar: {
+                horizontal: true,
+                borderRadius: 6,
+                barHeight: '65%',
+                dataLabels: { position: 'top' }
               }
             },
+            fill: {
+              type: 'solid',
+              opacity: 0.9
+            },
+            colors: [colors.primary],
             dataLabels: {
-              enabled: false
-            },
-            stroke: {
-              width: 2,
-              colors: ['#fff']
-            },
-            legend: {
-              show: false
-            },
-            states: {
-              hover: {
-                filter: {
-                  type: 'lighten',
-                  value: 0.12
-                }
+              enabled: true,
+              textAnchor: 'start',
+              formatter: val => val.toLocaleString(),
+              offsetX: 8,
+              style: {
+                colors: [colors.dark],
+                fontSize: '14px',
+                fontWeight: 700
               }
+            },
+            grid: {
+              borderColor: '#e8f0f0',
+              xaxis: { lines: { show: true } },
+              yaxis: { lines: { show: false } }
             },
             tooltip: {
-              custom: ({ seriesIndex, dataPointIndex, w }) => {
-                const item = treemapData[dataPointIndex];
-                const name = item.x;
-                const value = item.y;
-                const rank = item.rank;
-                const color = item.fillColor;
-                const pct = ((value / total) * 100).toFixed(1);
-                return `
-                  <div style="padding:16px 20px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.18);min-width:240px;">
-                    <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:600;">#${rank} of ${treemapData.length} schools</div>
-                    <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:12px;line-height:1.3;">${name}</div>
-                    <div style="display:flex;align-items:baseline;gap:12px;">
-                      <span style="font-size:30px;font-weight:700;color:${color};">${value.toLocaleString()}</span>
-                      <span style="font-size:14px;color:#666;">parents</span>
-                    </div>
-                    <div style="margin-top:10px;font-size:13px;color:#fff;background:${color};padding:5px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}% of total</div>
-                  </div>
-                `;
-              }
+              y: { formatter: val => `${val.toLocaleString()} registered parents` }
             }
-          });
-          
-          treemapChart.render();
-
-          // CREATE CUSTOM HTML LEGEND
-          const legendContainer = document.createElement('div');
-          legendContainer.className = 'treemap-legend';
-          legendContainer.innerHTML = treemapData.map((item, idx) => {
-            const pct = ((item.y / total) * 100).toFixed(1);
-            const shortName = item.x.length > 30 ? item.x.substring(0, 28) + '..' : item.x;
-            return `
-              <div class="treemap-legend-item" data-legend-idx="${idx}">
-                <span class="legend-color" style="background:${item.fillColor}"></span>
-                <span class="legend-name">${shortName}</span>
-                <span class="legend-value">${item.y.toLocaleString()}</span>
-                <span class="legend-pct">${pct}%</span>
-              </div>
-            `;
-          }).join('');
-          
-          // Insert legend after chart
-          schoolBuildingsEl.parentNode.insertBefore(legendContainer, schoolBuildingsEl.nextSibling);
-
-          // Add hover interactions to legend
-          legendContainer.querySelectorAll('.treemap-legend-item').forEach((item, idx) => {
-            item.addEventListener('mouseenter', () => {
-              // Highlight the treemap box
-              const rects = schoolBuildingsEl.querySelectorAll('.apexcharts-treemap-rect');
-              rects.forEach((rect, i) => {
-                if (i === idx) {
-                  rect.style.filter = 'brightness(1.3) drop-shadow(0 0 8px rgba(0,0,0,0.3))';
-                  rect.style.strokeWidth = '4px';
-                } else {
-                  rect.style.opacity = '0.4';
-                }
-              });
-            });
-            item.addEventListener('mouseleave', () => {
-              // Reset all treemap boxes
-              const rects = schoolBuildingsEl.querySelectorAll('.apexcharts-treemap-rect');
-              rects.forEach(rect => {
-                rect.style.filter = '';
-                rect.style.strokeWidth = '';
-                rect.style.opacity = '';
-              });
-            });
-          });
+          }).render();
         }
       } else {
         document.getElementById("schoolBuildingsChartWrapper").innerHTML =
