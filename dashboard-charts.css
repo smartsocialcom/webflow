@@ -1,0 +1,277 @@
+/* ═══════════════════════════════════════════════════════════════
+   APEXCHARTS - CLEAN & READABLE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────
+   TOOLTIP STYLING (Large & Readable)
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-tooltip {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(45, 90, 90, 0.18) !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  font-size: 15px !important;
+}
+
+.apexcharts-tooltip-title {
+  background: #449997 !important;
+  border-bottom: none !important;
+  padding: 12px 18px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  color: #fff !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.apexcharts-tooltip-series-group {
+  padding: 14px 18px !important;
+  background: #fff !important;
+}
+
+.apexcharts-tooltip-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+.apexcharts-tooltip-text-y-label {
+  color: #5A7A7A !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+}
+
+.apexcharts-tooltip-text-y-value {
+  color: #2D5A5A !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+}
+
+.apexcharts-tooltip-marker {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 4px !important;
+  margin-right: 10px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   GENERAL LEGEND STYLING
+   ───────────────────────────────────────────────────────────────── */
+
+/* For other charts (donut, etc) */
+.apexcharts-pie .apexcharts-legend-series,
+.apexcharts-donut .apexcharts-legend-series {
+  margin: 5px 10px !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   DATA LABELS
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-data-labels text,
+.apexcharts-datalabel {
+  font-weight: 700 !important;
+}
+
+/* Bar chart data labels */
+.apexcharts-bar-series .apexcharts-datalabel {
+  font-size: 14px !important;
+  fill: #2D5A5A !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   AXIS LABELS
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-xaxis-label,
+.apexcharts-yaxis-label {
+  font-weight: 500 !important;
+  fill: #5A7A7A !important;
+  font-size: 13px !important;
+}
+
+/* Y-axis labels for horizontal bars (names) */
+.apexcharts-yaxis-label tspan {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   DONUT CENTER LABELS
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-datalabel-label {
+  fill: #5A7A7A !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.apexcharts-datalabel-value {
+  fill: #449997 !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   GRID
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-gridlines-horizontal line,
+.apexcharts-gridlines-vertical line {
+  stroke: #e8f0f0 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   HOVER EFFECTS
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-bar-area {
+  transition: opacity 0.15s ease !important;
+}
+
+.apexcharts-bar-area:hover {
+  opacity: 0.85 !important;
+}
+
+.apexcharts-pie-area {
+  transition: transform 0.2s ease !important;
+}
+
+.apexcharts-pie-area:hover {
+  transform: scale(1.02) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   ACTIVE/INACTIVE STATES
+   ───────────────────────────────────────────────────────────────── */
+
+.apexcharts-series-collapsed {
+  opacity: 0.25 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   DONUT CHART WITH SIDE LEGEND (Chart 5)
+   ───────────────────────────────────────────────────────────────── */
+
+#topSchoolBuildingsWrapper {
+  position: relative;
+  overflow: visible;
+}
+
+.donut-overlay-legend {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 20px rgba(45, 90, 90, 0.12);
+  border: 1px solid rgba(107, 158, 156, 0.15);
+  max-height: 360px;
+  max-width: 320px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+#topSchoolBuildings > div {
+  margin-left: auto;
+}
+
+.donut-overlay-legend::-webkit-scrollbar {
+  width: 4px;
+}
+
+.donut-overlay-legend::-webkit-scrollbar-track {
+  background: #f0f5f5;
+  border-radius: 4px;
+}
+
+.donut-overlay-legend::-webkit-scrollbar-thumb {
+  background: #6B9E9C;
+  border-radius: 4px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.donut-legend-item:hover,
+.donut-legend-item.active {
+  background: rgba(107, 158, 156, 0.12);
+}
+
+.donut-legend-marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.donut-legend-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2D5A5A;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.donut-legend-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6B9E9C;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   RESPONSIVE: Mobile layout for donut chart
+   ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .donut-overlay-legend {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    max-height: none;
+    max-width: none;
+    width: 100%;
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .donut-legend-item {
+    flex: 0 0 auto;
+    padding: 5px 10px;
+  }
+
+  .donut-legend-text {
+    font-size: 12px;
+    max-width: 150px;
+  }
+
+  .donut-legend-value {
+    font-size: 12px;
+  }
+
+  #topSchoolBuildings .apexcharts-canvas {
+    float: none;
+    margin: 0 auto;
+  }
+}

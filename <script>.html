@@ -1,0 +1,185 @@
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  const url = new URL(window.location.href);
+  const path = window.location.pathname;
+  const searchParams = url.searchParams;
+  let orgValue, memberData, orgActive, actions, orgData, districtName, feedbackActive, parentStudentVideoAccess;
+
+  function setCookie(k, v, d) {
+    document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/`;
+  }
+
+  function getCookie(k) {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith(k + '='));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+  }
+
+  function removeCookie(key) {
+    document.cookie = `${encodeURIComponent(key)}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  }
+
+  function applyOrgData(districtName) {
+    document.getElementById("district_name_popup").textContent = districtName.includes("free trial") ? districtName : `${districtName} has partnered with SmartSocial.com`;
+    document.getElementById("district_name_input").value = districtName;
+    document.querySelectorAll('#district_name').forEach(el => el.textContent = districtName);
+  }
+
+  function getOrg(orgValue) {
+    return new Promise((resolve, reject) => {
+      const orgApiUrl = window.location.pathname.includes("/dashboard/") ? `https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${orgValue}` : `https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/active/${orgValue}`;
+      axios.get(orgApiUrl).then(response => {
+        orgData = response.data;
+        orgActive = orgData.organization.org_active;
+        districtName = orgData.organization.district_name;
+        feedbackActive = orgData.organization.feedback_active;
+        parentStudentVideoAccess = orgData.organization.parent_student_video_access;
+        if (orgActive) {
+          setCookie("org", orgValue, 400);
+          setCookie("district_name", districtName, 1);
+          applyOrgData(districtName);
+          console.log("orgActive");
+          document.querySelectorAll('[ss="orgActive"]').forEach(element => element.classList.remove('hide'));
+          if (parentStudentVideoAccess) {
+            setCookie("parent_student_video_access", parentStudentVideoAccess, 30);
+            console.log("true");
+          } else {
+            document.cookie = 'parent_student_video_access=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            console.log("false");
+          }
+          resolve(response.data);
+        } else {
+          // Redirect admins of expired Orgs
+          const isAdmin = memberData?.planConnections?.some(p => p.planId === "pln_district-admin-3b1f0x96");
+          if (path.includes("/dashboard") || (isAdmin && ["/blog", "/feedback"].some(p => path.includes(p)))) {
+            window.location.href = `/expired?short_code=${orgValue}`;
+          }
+        }
+      });
+    });
+  }
+
+  function getAccess() {
+    if (orgValue) {
+      document.getElementById("get_access").click();
+      document.getElementById("orgInput").value = orgValue;
+      document.getElementById("refemail_input").value = searchParams.get("ref");
+    }
+  }
+
+  function emailInUse() {
+    const emailFieldSignup = document.getElementById("email");
+    const firstNameFieldSignup = document.getElementById("first_name");
+    setTimeout(() => {
+      document.querySelectorAll('#ms-message[data-ms-message-text]').forEach(el => {
+        if (el.textContent.trim() === "The provided email is already taken.") {
+          location.href = `/login?email=${emailFieldSignup.value}`;
+        }
+      });
+    }, 2000);
+    mixpanel.identify(emailFieldSignup.value);
+    mixpanel.people.set({
+      first_name: firstNameFieldSignup.value,
+      email: emailFieldSignup.value,
+      org: orgValue,
+    });
+  }
+
+  function getOrgValue() {
+    const cookie = getCookie("org");
+    const ms = memberData?.customFields?.organization;
+    const queryOrg = searchParams.get("org");
+    const hashOrg = new URLSearchParams(location.hash.split("?")[1] || "").get("org");
+    orgValue = cookie || ms || queryOrg || hashOrg;
+  }
+
+  function addPoints(action, points) {
+    return axios.put('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/user/points', {
+      memberid: memberData.id,
+      points: points,
+      action: action
+    });
+  }
+  // On Load
+  // url.hash && (window.location.href = url.href.replace('#', ''));
+document.addEventListener('DOMContentLoaded', function() {
+    (async () => {
+      memberData = (await window.$memberstackDom.getCurrentMember()).data;
+      getOrgValue();
+      getOrg(orgValue);
+      if (!memberData) {
+        getOrg(orgValue).then(getAccess);
+        setTimeout(() => {
+          if (getCookie("org")) {
+            document.querySelectorAll('[ss-content="hide"]').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.event_link-access').forEach(el => el.classList.remove('hide'));
+          }
+        }, 4000);
+      } else {
+        if (!window.location.href.includes("/video-lessons/")) {
+          axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
+            member_id: memberData.id,
+            page_url: window.location.href
+          });
+        } else if (getCookie("student_session")) {
+          console.log("student");
+          axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
+            member_id: memberData.id,
+            page_url: window.location.href
+          });
+        }
+      }
+      document.querySelectorAll(".lang-select").forEach(e => e.onclick = () => setTimeout(() => location.reload(), 500)); // Refresh page on lang switcher click
+      document.querySelectorAll('[sms="store_link"]').forEach(link => link.addEventListener('click', () => localStorage.setItem("locat", location.href))); // Store Last Page
+      if (orgValue) document.querySelectorAll('a:not(.fs-toc_link)').forEach(l => {
+        if (l.hostname === location.hostname && !l.href.includes('org=')) {
+          let p = l.href.split('#');
+          p[0] += (p[0].includes('?') ? '&' : '?') + 'org=' + orgValue;
+          l.href = p.join('#');
+        }
+      }); // add ?org= if the link is internal
+      document.querySelector('input[data-ms-member="token"]').type = 'number'; // Turn Token field into a number
+      // Handle Signup Button Click
+      document.getElementById("ms_signup_button").addEventListener("click", function() {
+        setTimeout(function() {
+          emailInUse();
+        }, 500);
+      });
+      // Get Actions Data
+      axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/points_log/user/${memberData.id}`).then(({
+        data
+      }) => {
+        let found = false;
+        data.forEach(({
+          action
+        }) => {
+          const el = document.getElementById(action.split('_').slice(1).join('_') || action);
+          if (el) {
+            found = true;
+            el.classList.add('hide');
+            document.querySelectorAll('.used_message').forEach(msg => msg.classList.remove('hide'));
+          }
+        });
+        if (!found) {
+          setTimeout(() => {
+            document.querySelectorAll('.feedback_link_button').forEach(el => el.classList.remove('hide'));
+            document.querySelectorAll('.loader').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('[ss="points_action"]').forEach(el => el.classList.remove('hide'));
+          }, 60000);
+        } else {
+          document.querySelectorAll('.loader').forEach(el => el.classList.add('hide'));
+        }
+      }).catch(console.error);
+    })();
+  });
+</script>
+<script>
+  // Hide if memberstack custom field blank
+  document.addEventListener('DOMContentLoaded', () => {
+    const ms = JSON.parse(localStorage.getItem('_ms-mem'));
+    document.querySelectorAll('[ms-code-customfield]').forEach(el => {
+      const field = el.getAttribute('ms-code-customfield');
+      const exists = ms?.customFields?.[field.replace('!', '')];
+      if ((field.startsWith('!') && exists) || (!field.startsWith('!') && !exists)) el.remove();
+    });
+  });
+</script>
