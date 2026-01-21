@@ -728,6 +728,15 @@ if (!window.scriptExecuted) {
              <div>${entry.webinar}</div>
            </div>`
         ).join("");
+        
+        // Webinar stats by action type
+        const webinarRegistrations = webinars_log.filter(e => e.action === "registration").length;
+        const webinarAttendees = webinars_log.filter(e => e.action === "live").length;
+        const webinarReplays = webinars_log.filter(e => e.action === "on-demand").length;
+        
+        setText("total_webinar_registrations", formatNumber(webinarRegistrations));
+        setText("total_webinar_attendees", formatNumber(webinarAttendees));
+        setText("total_webinar_replays", formatNumber(webinarReplays));
       }
 
       // Hide loaders
