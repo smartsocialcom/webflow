@@ -720,7 +720,7 @@ if (!window.scriptExecuted) {
       // Webinars Log Table
       if (webinars_log && webinars_log.length) {
         document.querySelector(".webinars_log-wrapper").innerHTML += webinars_log.map(entry =>
-          `<div class='leader_board-row'>
+          `<div class='leader_board-row _3'>
              <div>${entry.last_name ? `${entry.first_name} ${entry.last_name}` : entry.first_name}</div>
              <div>${entry.user?.school_buildings_id?.[0]?.school?.school_name || ""}</div>
              <div>${entry.webinar}</div>
