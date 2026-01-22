@@ -337,7 +337,12 @@
     font-size: 12px;
   }
 
-  /* Center donut charts on mobile */
+  /* Center donut charts on mobile - override JS flex-end */
+  #topSchoolBuildings,
+  #schoolBuildingsChart {
+    justify-content: center !important;
+  }
+
   #topSchoolBuildings .apexcharts-canvas,
   #schoolBuildingsChart .apexcharts-canvas {
     float: none;

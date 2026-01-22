@@ -297,6 +297,10 @@ if (!window.scriptExecuted) {
             b.school_name.length > 18 ? b.school_name.substring(0, 16) + '..' : b.school_name
           );
           
+          // Style the chart container to push chart right (desktop only via CSS)
+          schoolBuildingsEl.style.display = 'flex';
+          schoolBuildingsEl.style.justifyContent = 'flex-end';
+          
           const chart2 = new ApexCharts(schoolBuildingsEl, {
             chart: {
               type: 'donut',
@@ -588,6 +592,10 @@ if (!window.scriptExecuted) {
           const truncatedLabels = topSchoolBuildings.map(i => 
             i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
           );
+          
+          // Style the chart container to push chart right (desktop only via CSS)
+          topSchoolBuildingsEl.style.display = 'flex';
+          topSchoolBuildingsEl.style.justifyContent = 'flex-end';
           
           const chart5 = new ApexCharts(topSchoolBuildingsEl, {
             chart: {
