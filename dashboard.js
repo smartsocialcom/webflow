@@ -76,7 +76,7 @@ if (!window.scriptExecuted) {
         {
           breakpoint: 480,
           options: {
-            chart: { height: 280, width: '100%' },
+            chart: { height: 280, width: 280 },
             plotOptions: {
               pie: {
                 donut: {
@@ -92,7 +92,7 @@ if (!window.scriptExecuted) {
         {
           breakpoint: 768,
           options: {
-            chart: { height: 320, width: '100%' },
+            chart: { height: 320, width: 320 },
             plotOptions: {
               pie: {
                 donut: {
@@ -305,7 +305,7 @@ if (!window.scriptExecuted) {
             chart: {
               type: 'donut',
               height: 400,
-              width: '100%',
+              width: 400,
               background: 'transparent'
             },
             series: sortedBuildings.map(b => b.registered_school_parents),
@@ -610,7 +610,7 @@ if (!window.scriptExecuted) {
             chart: {
               type: 'donut',
               height: 400,
-              width: '100%',
+              width: 400,
               background: 'transparent'
             },
             series: topSchoolBuildings.map(i => i.count),

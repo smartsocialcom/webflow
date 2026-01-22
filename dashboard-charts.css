@@ -305,8 +305,7 @@
 
   #schoolBuildingsChart .apexcharts-canvas,
   #topSchoolBuildings .apexcharts-canvas {
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin: 0 auto !important;
   }
 
   /* Donut legend - below chart on mobile */
