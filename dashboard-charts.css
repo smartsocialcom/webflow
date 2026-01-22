@@ -252,10 +252,8 @@
 
 #schoolBuildingsChartWrapper,
 #topSchoolBuildingsWrapper {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px;
+  position: relative;
+  overflow: visible;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -299,11 +297,16 @@
    ───────────────────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
-  /* Donut chart wrappers - stack vertically */
-  #schoolBuildingsChartWrapper,
-  #topSchoolBuildingsWrapper {
-    flex-direction: column;
-    align-items: stretch;
+  /* Reset donut chart positioning for mobile - center instead of right */
+  #schoolBuildingsChart,
+  #topSchoolBuildings {
+    justify-content: center !important;
+  }
+
+  #schoolBuildingsChart .apexcharts-canvas,
+  #topSchoolBuildings .apexcharts-canvas {
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 
   /* Donut legend - below chart on mobile */
@@ -337,12 +340,7 @@
     font-size: 12px;
   }
 
-  /* Center donut charts on mobile - override JS flex-end */
-  #topSchoolBuildings,
-  #schoolBuildingsChart {
-    justify-content: center !important;
-  }
-
+  /* Center donut charts on mobile */
   #topSchoolBuildings .apexcharts-canvas,
   #schoolBuildingsChart .apexcharts-canvas {
     float: none;

@@ -297,7 +297,7 @@ if (!window.scriptExecuted) {
             b.school_name.length > 18 ? b.school_name.substring(0, 16) + '..' : b.school_name
           );
           
-          // Style the chart container to push chart right (desktop only via CSS)
+          // Style the chart container to push chart right on desktop
           schoolBuildingsEl.style.display = 'flex';
           schoolBuildingsEl.style.justifyContent = 'flex-end';
           
@@ -369,6 +369,15 @@ if (!window.scriptExecuted) {
             responsive: donutChartResponsive
           });
           chart2.render();
+          
+          // Force chart to align right after render on desktop
+          setTimeout(() => {
+            const chartWrapper = schoolBuildingsEl.querySelector('.apexcharts-canvas');
+            if (chartWrapper) {
+              chartWrapper.style.marginLeft = 'auto';
+              chartWrapper.style.marginRight = '0';
+            }
+          }, 100);
           
           // Create custom overlay legend on left
           const legendHtml = `
@@ -593,7 +602,7 @@ if (!window.scriptExecuted) {
             i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
           );
           
-          // Style the chart container to push chart right (desktop only via CSS)
+          // Style the chart container to push chart right on desktop
           topSchoolBuildingsEl.style.display = 'flex';
           topSchoolBuildingsEl.style.justifyContent = 'flex-end';
           
@@ -665,6 +674,15 @@ if (!window.scriptExecuted) {
             responsive: donutChartResponsive
           });
           chart5.render();
+          
+          // Force chart to align right after render on desktop
+          setTimeout(() => {
+            const chartWrapper = topSchoolBuildingsEl.querySelector('.apexcharts-canvas');
+            if (chartWrapper) {
+              chartWrapper.style.marginLeft = 'auto';
+              chartWrapper.style.marginRight = '0';
+            }
+          }, 100);
           
           // Create custom overlay legend on left
           const legendHtml = `
