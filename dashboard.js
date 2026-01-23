@@ -458,9 +458,11 @@ if (!window.scriptExecuted) {
               height: Math.max(320, topPages.length * 42),
               background: 'transparent',
               events: {
-                dataPointSelection: (event, chartContext, config) => {
-                  const pageUrl = topPages[config.dataPointIndex].url;
-                  window.open(`https://smartsocial.com${pageUrl}`, '_blank');
+                click: (event, chartContext, config) => {
+                  if (config.dataPointIndex !== undefined && config.dataPointIndex >= 0) {
+                    const pageUrl = topPages[config.dataPointIndex].url;
+                    window.open(`https://smartsocial.com${pageUrl}`, '_blank');
+                  }
                 }
               }
             },
