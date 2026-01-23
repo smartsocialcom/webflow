@@ -581,17 +581,27 @@ if (!window.scriptExecuted) {
           });
           topPagesChart.render();
 
-          // Add click handler to open page links
-          topPagesEl.addEventListener('click', (e) => {
-            const bar = e.target.closest('.apexcharts-bar-area');
-            if (bar) {
-              const index = parseInt(bar.getAttribute('j'));
-              if (!isNaN(index) && topPages[index]) {
-                window.open(`https://smartsocial.com${topPages[index].url}`, '_blank');
-              }
-            }
-          });
-          topPagesEl.style.cursor = 'pointer';
+          // Add click handlers to bars and labels after chart renders
+          setTimeout(() => {
+            // Make bars clickable
+            topPagesEl.querySelectorAll('.apexcharts-bar-area').forEach((bar, index) => {
+              bar.style.cursor = 'pointer';
+              bar.addEventListener('click', () => {
+                if (topPages[index]) {
+                  window.open(`https://smartsocial.com${topPages[index].url}`, '_blank');
+                }
+              });
+            });
+            // Make y-axis labels clickable too
+            topPagesEl.querySelectorAll('.apexcharts-yaxis-label').forEach((label, index) => {
+              label.style.cursor = 'pointer';
+              label.addEventListener('click', () => {
+                if (topPages[index]) {
+                  window.open(`https://smartsocial.com${topPages[index].url}`, '_blank');
+                }
+              });
+            });
+          }, 500);
         }
       } else {
         document.getElementById("topPagesChartWrapper").innerHTML =
