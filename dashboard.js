@@ -49,6 +49,86 @@ if (!window.scriptExecuted) {
       ];
 
       // ═══════════════════════════════════════════════════════════════
+      // RESPONSIVE BREAKPOINTS FOR CHARTS
+      // ═══════════════════════════════════════════════════════════════
+      const areaChartResponsive = [
+        {
+          breakpoint: 480,
+          options: {
+            chart: { height: 240 },
+            markers: { size: 3, hover: { size: 5 } },
+            xaxis: { labels: { style: { fontSize: '11px' } } },
+            yaxis: { labels: { style: { fontSize: '11px' } } }
+          }
+        },
+        {
+          breakpoint: 768,
+          options: {
+            chart: { height: 280 },
+            markers: { size: 4, hover: { size: 6 } },
+            xaxis: { labels: { style: { fontSize: '12px' } } },
+            yaxis: { labels: { style: { fontSize: '12px' } } }
+          }
+        }
+      ];
+
+      const donutChartResponsive = [
+        {
+          breakpoint: 480,
+          options: {
+            chart: { height: 280, width: 280 },
+            plotOptions: {
+              pie: {
+                donut: {
+                  labels: {
+                    name: { fontSize: '11px' },
+                    value: { fontSize: '18px' }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          breakpoint: 768,
+          options: {
+            chart: { height: 320, width: 320 },
+            plotOptions: {
+              pie: {
+                donut: {
+                  labels: {
+                    name: { fontSize: '12px' },
+                    value: { fontSize: '20px' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+
+      const barChartResponsive = [
+        {
+          breakpoint: 480,
+          options: {
+            plotOptions: { bar: { barHeight: '55%' } },
+            xaxis: { labels: { style: { fontSize: '10px' } } },
+            yaxis: { labels: { style: { fontSize: '11px' }, maxWidth: 120 } },
+            dataLabels: { style: { fontSize: '11px' }, offsetX: 5 }
+          }
+        },
+        {
+          breakpoint: 768,
+          options: {
+            plotOptions: { bar: { barHeight: '60%' } },
+            xaxis: { labels: { style: { fontSize: '11px' } } },
+            yaxis: { labels: { style: { fontSize: '12px' }, maxWidth: 150 } },
+            dataLabels: { style: { fontSize: '12px' }, offsetX: 6 }
+          }
+        }
+      ];
+
+      // ═══════════════════════════════════════════════════════════════
       // GLOBAL APEX DEFAULTS (LARGER FONTS)
       // ═══════════════════════════════════════════════════════════════
       window.Apex = {
@@ -144,6 +224,7 @@ if (!window.scriptExecuted) {
           chart: {
             type: 'area',
             height: 340,
+            width: '100%',
             background: 'transparent',
             zoom: { enabled: false }
           },
@@ -190,13 +271,7 @@ if (!window.scriptExecuted) {
           tooltip: {
             y: { formatter: val => `${val.toLocaleString()} registrations` }
           },
-          responsive: [{
-            breakpoint: 991,
-            options: {
-              chart: { height: 280 },
-              xaxis: { labels: { style: { fontSize: '12px' } } }
-            }
-          }]
+          responsive: areaChartResponsive
         }).render();
       }
 
@@ -222,7 +297,7 @@ if (!window.scriptExecuted) {
             b.school_name.length > 18 ? b.school_name.substring(0, 16) + '..' : b.school_name
           );
           
-          // Style the chart container to push chart right
+          // Style the chart container to push chart right on desktop
           schoolBuildingsEl.style.display = 'flex';
           schoolBuildingsEl.style.justifyContent = 'flex-end';
           
@@ -230,7 +305,7 @@ if (!window.scriptExecuted) {
             chart: {
               type: 'donut',
               height: 400,
-              width: '100%',
+              width: 400,
               background: 'transparent'
             },
             series: sortedBuildings.map(b => b.registered_school_parents),
@@ -291,17 +366,11 @@ if (!window.scriptExecuted) {
                 `;
               }
             },
-            responsive: [{
-              breakpoint: 991,
-              options: {
-                chart: { height: 320, width: '100%' },
-                plotOptions: { pie: { donut: { size: '65%' } } }
-              }
-            }]
+            responsive: donutChartResponsive
           });
           chart2.render();
           
-          // Force chart to align right after render
+          // Force chart to align right after render on desktop
           setTimeout(() => {
             const chartWrapper = schoolBuildingsEl.querySelector('.apexcharts-canvas');
             if (chartWrapper) {
@@ -380,6 +449,7 @@ if (!window.scriptExecuted) {
             chart: {
               type: 'bar',
               height: Math.max(320, topUsers.length * 42),
+              width: '100%',
               background: 'transparent'
             },
             series: [{
@@ -432,13 +502,7 @@ if (!window.scriptExecuted) {
             tooltip: {
               y: { formatter: val => `${val.toLocaleString()} activities` }
             },
-            responsive: [{
-              breakpoint: 991,
-              options: {
-                yaxis: { labels: { maxWidth: 120 } },
-                dataLabels: { style: { fontSize: '12px' } }
-              }
-            }]
+            responsive: barChartResponsive
           }).render();
         }
       } else {
@@ -452,19 +516,12 @@ if (!window.scriptExecuted) {
       if (topPages.length) {
         const topPagesEl = document.getElementById("topPagesChart");
         if (topPagesEl) {
-          new ApexCharts(topPagesEl, {
+          const topPagesChart = new ApexCharts(topPagesEl, {
             chart: {
               type: 'bar',
               height: Math.max(320, topPages.length * 42),
-              background: 'transparent',
-              events: {
-                click: (event, chartContext, config) => {
-                  if (config.dataPointIndex !== undefined && config.dataPointIndex >= 0) {
-                    const pageUrl = topPages[config.dataPointIndex].url;
-                    window.open(`https://smartsocial.com${pageUrl}`, '_blank');
-                  }
-                }
-              }
+              width: '100%',
+              background: 'transparent'
             },
             series: [{
               name: 'Visits',
@@ -520,20 +577,20 @@ if (!window.scriptExecuted) {
             tooltip: {
               y: { formatter: val => `${val.toLocaleString()} visits` }
             },
-            states: {
-              hover: { filter: { type: 'darken', value: 0.85 } },
-              active: { filter: { type: 'darken', value: 0.8 } }
-            },
-            responsive: [{
-              breakpoint: 991,
-              options: {
-                yaxis: { labels: { maxWidth: 120 } },
-                dataLabels: { style: { fontSize: '12px' } }
-              }
-            }]
-          }).render();
+            responsive: barChartResponsive
+          });
+          topPagesChart.render();
 
-          // Add cursor pointer to indicate clickable bars
+          // Add click handler to open page links
+          topPagesEl.addEventListener('click', (e) => {
+            const bar = e.target.closest('.apexcharts-bar-area');
+            if (bar) {
+              const index = parseInt(bar.getAttribute('j'));
+              if (!isNaN(index) && topPages[index]) {
+                window.open(`https://smartsocial.com${topPages[index].url}`, '_blank');
+              }
+            }
+          });
           topPagesEl.style.cursor = 'pointer';
         }
       } else {
@@ -558,7 +615,7 @@ if (!window.scriptExecuted) {
             i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
           );
           
-          // Style the chart container to push chart right
+          // Style the chart container to push chart right on desktop
           topSchoolBuildingsEl.style.display = 'flex';
           topSchoolBuildingsEl.style.justifyContent = 'flex-end';
           
@@ -566,7 +623,7 @@ if (!window.scriptExecuted) {
             chart: {
               type: 'donut',
               height: 400,
-              width: '100%',
+              width: 400,
               background: 'transparent'
             },
             series: topSchoolBuildings.map(i => i.count),
@@ -627,17 +684,11 @@ if (!window.scriptExecuted) {
                 `;
               }
             },
-            responsive: [{
-              breakpoint: 991,
-              options: {
-                chart: { height: 320, width: '100%' },
-                plotOptions: { pie: { donut: { size: '65%' } } }
-              }
-            }]
+            responsive: donutChartResponsive
           });
           chart5.render();
           
-          // Force chart to align right after render
+          // Force chart to align right after render on desktop
           setTimeout(() => {
             const chartWrapper = topSchoolBuildingsEl.querySelector('.apexcharts-canvas');
             if (chartWrapper) {
