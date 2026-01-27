@@ -344,11 +344,12 @@ foreignObject {
    ───────────────────────────────────────────────────────────────── */
 
 @media (min-width: 1200px) {
-  #topSchoolBuildingsLegend,
-  #schoolBuildingsLegend {
+  #topSchoolBuildingsLegend.donut-overlay-legend,
+  #schoolBuildingsLegend.donut-overlay-legend {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 4px 16px;
     max-width: 640px;
+    width: 640px;
   }
 }
