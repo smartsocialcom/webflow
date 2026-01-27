@@ -237,78 +237,15 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   CHART CONTAINERS - Ensure responsiveness
-   ───────────────────────────────────────────────────────────────── */
-
-#usersPerMonthChart,
-#schoolBuildingsChart,
-#topUsersChart,
-#topPagesChart,
-#topSchoolBuildings {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-#schoolBuildingsChartWrapper,
-#topSchoolBuildingsWrapper {
-  position: relative;
-  overflow: visible;
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   RESPONSIVE: Tablet layout (768px - 991px)
+   RESPONSIVE: Mobile layout for donut chart
    ───────────────────────────────────────────────────────────────── */
 
 @media (max-width: 991px) {
-  .apexcharts-tooltip {
-    font-size: 14px !important;
-  }
-
-  .apexcharts-tooltip-title {
-    padding: 10px 14px !important;
-    font-size: 14px !important;
-  }
-
-  .apexcharts-tooltip-series-group {
-    padding: 12px 14px !important;
-  }
-
-  .apexcharts-xaxis-label,
-  .apexcharts-yaxis-label {
-    font-size: 12px !important;
-  }
-
-  .apexcharts-yaxis-label tspan {
-    font-size: 13px !important;
-  }
-
-  .apexcharts-datalabel-value {
-    font-size: 22px !important;
-  }
-
-  .apexcharts-bar-series .apexcharts-datalabel {
-    font-size: 13px !important;
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   RESPONSIVE: Mobile layout (max-width: 768px)
-   ───────────────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  /* Reset donut chart positioning for mobile - center instead of right */
   #schoolBuildingsChart,
   #topSchoolBuildings {
     justify-content: center !important;
   }
 
-  #schoolBuildingsChart .apexcharts-canvas,
-  #topSchoolBuildings .apexcharts-canvas {
-    margin: 0 auto !important;
-  }
-
-  /* Donut legend - below chart on mobile */
   .donut-overlay-legend {
     position: relative;
     left: auto;
@@ -322,7 +259,6 @@
     flex-wrap: wrap;
     gap: 6px;
     padding: 10px 12px;
-    order: 2;
   }
 
   .donut-legend-item {
@@ -339,103 +275,22 @@
     font-size: 12px;
   }
 
-  /* Center donut charts on mobile */
   #topSchoolBuildings .apexcharts-canvas,
   #schoolBuildingsChart .apexcharts-canvas {
     float: none;
     margin: 0 auto;
   }
-
-  /* Adjust tooltip for touch devices */
-  .apexcharts-tooltip {
-    font-size: 13px !important;
-  }
-
-  .apexcharts-tooltip-title {
-    padding: 8px 12px !important;
-    font-size: 13px !important;
-  }
-
-  .apexcharts-tooltip-series-group {
-    padding: 10px 12px !important;
-  }
-
-  /* Smaller axis labels on mobile */
-  .apexcharts-xaxis-label,
-  .apexcharts-yaxis-label {
-    font-size: 11px !important;
-  }
-
-  .apexcharts-yaxis-label tspan {
-    font-size: 12px !important;
-  }
-
-  /* Smaller donut center labels */
-  .apexcharts-datalabel-label {
-    font-size: 12px !important;
-  }
-
-  .apexcharts-datalabel-value {
-    font-size: 20px !important;
-  }
-
-  /* Bar chart data labels */
-  .apexcharts-bar-series .apexcharts-datalabel {
-    font-size: 11px !important;
-  }
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   RESPONSIVE: Small mobile layout (max-width: 480px)
+   RESPONSIVE: 2-column legend for large screens
    ───────────────────────────────────────────────────────────────── */
 
-@media (max-width: 480px) {
-  .apexcharts-tooltip {
-    font-size: 12px !important;
-    max-width: 200px;
-  }
-
-  .apexcharts-tooltip-title {
-    padding: 6px 10px !important;
-    font-size: 12px !important;
-  }
-
-  .apexcharts-tooltip-series-group {
-    padding: 8px 10px !important;
-  }
-
-  .apexcharts-xaxis-label,
-  .apexcharts-yaxis-label {
-    font-size: 10px !important;
-  }
-
-  .apexcharts-yaxis-label tspan {
-    font-size: 11px !important;
-  }
-
-  .apexcharts-datalabel-label {
-    font-size: 11px !important;
-  }
-
-  .apexcharts-datalabel-value {
-    font-size: 18px !important;
-  }
-
-  .apexcharts-bar-series .apexcharts-datalabel {
-    font-size: 10px !important;
-  }
-
-  .donut-legend-text {
-    font-size: 11px;
-    max-width: 120px;
-  }
-
-  .donut-legend-value {
-    font-size: 11px;
-  }
-
-  .donut-legend-marker {
-    width: 8px;
-    height: 8px;
+@media (min-width: 1200px) {
+  #topSchoolBuildingsLegend,
+  #schoolBuildingsLegend {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 16px;
   }
 }
