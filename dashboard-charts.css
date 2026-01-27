@@ -349,5 +349,6 @@ foreignObject {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 4px 16px;
+    max-width: 640px;
   }
 }
