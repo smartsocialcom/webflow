@@ -179,8 +179,36 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations')
     .then(response => {
-      organizations = response.data;
+      organizations = response.data.organizations || [];
       renderTable(organizations);
+
+      // Process webinars_log for statistics
+      const webinarsLog = response.data.webinars_log || [];
+
+      const now = Date.now();
+      const oneDayAgo = now - (24 * 60 * 60 * 1000);
+      const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
+
+      const sevenDayAttendees = webinarsLog.filter(
+        log => log.action === 'live' && log.created_at >= sevenDaysAgo
+      ).length;
+
+      const sevenDayRegistrations = webinarsLog.filter(
+        log => log.action === 'registration' && log.created_at >= sevenDaysAgo
+      ).length;
+
+      const twentyFourHourRegistrations = webinarsLog.filter(
+        log => log.action === 'registration' && log.created_at >= oneDayAgo
+      ).length;
+
+      // Update DOM elements
+      const el7dayAttendees = document.getElementById('7day_attendees');
+      const el7dayRegs = document.getElementById('7day_registrations');
+      const el24hRegs = document.getElementById('24h_registrations');
+
+      if (el7dayAttendees) el7dayAttendees.textContent = sevenDayAttendees;
+      if (el7dayRegs) el7dayRegs.textContent = sevenDayRegistrations;
+      if (el24hRegs) el24hRegs.textContent = twentyFourHourRegistrations;
 
       const loader = document.getElementById('loader');
       if (loader) loader.remove();
