@@ -766,12 +766,14 @@ if (!window.scriptExecuted) {
           </div>`;
       });
       document.querySelector("#org_feedbacks_list").innerHTML = testimonials;
+      if (feedback.length > 6) {
+        document.querySelector("#org_feedbacks_list_overlay").classList.remove("hide");
+      }
       if (feedback.length > 3) {
         const btn = document.querySelector('.view-more_btn');
         btn.classList.remove("hide");
         btn.addEventListener("click", () => {
             document.querySelector("#org_feedbacks_list").classList.remove("max-height");
-            document.querySelector("#org_feedbacks_list_overlay").classList.remove("hide");
         });
       }
       
