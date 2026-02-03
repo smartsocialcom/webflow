@@ -73,6 +73,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // Store processed data globally
       latestUsersData = Object.values(summary);
 
+      // Populate VIP registration and feedback totals
+      const el24hVipRegs = document.getElementById('24h_vip_registrations');
+      const el7dVipRegs = document.getElementById('7d_vip_registrations');
+      const el7dayFeedbacks = document.getElementById('7day_feedbacks');
+
+      if (el24hVipRegs) el24hVipRegs.textContent = oneDayUsers.length;
+      if (el7dVipRegs) el7dVipRegs.textContent = sevenDayUsers.length;
+      if (el7dayFeedbacks) el7dayFeedbacks.textContent = feedbackList.length;
+
       // Initial Sort
       // Since currentSortSummaryColumn is null, this will apply Default logic (Descending for numbers)
       sortLatestUsers('sevenDayCount');
