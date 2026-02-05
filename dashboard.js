@@ -427,7 +427,7 @@ if (!window.scriptExecuted) {
         const path = page_url.split('.com')[1]?.split('?')[0];
         if (path && created_at > thirtyDaysAgo) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
         acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
-        school_buildings_id?.forEach(b => { if (b?.school_name) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; });
+        school_buildings_id?.forEach(b => { if (b?.school_name && b?.id !== 3) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; });
         return acc;
       }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
 
@@ -837,7 +837,7 @@ if (!window.scriptExecuted) {
           .map(entry =>
             `<div class='leader_board-row _3'>
              <div>${entry.user?.last_name ? `${entry.user?.first_name} ${entry.user?.last_name}` : entry.user?.first_name}</div>
-             <div>${entry.user?.school_buildings_id?.[0]?.school?.school_name || ""}</div>
+             <div>${entry.user?.school_buildings_id?.slice(0, 3).map(b => b?.school?.school_name).filter(Boolean).join("<br>") || ""}</div>
              <div>${entry.webinar}</div>
            </div>`
           ).join("");
