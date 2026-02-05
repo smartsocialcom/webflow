@@ -181,7 +181,7 @@ if (!window.scriptExecuted) {
 
       setText("org_name", district_name);
       const formatNumber = n => Math.round(n).toLocaleString();
-      const studentsGoal = total_students * 0.05; 
+      const studentsGoal = total_students * 0.05;
       setText("total_students", formatNumber(total_students));
       setText("community_registration_goal", formatNumber(studentsGoal));
 
@@ -205,7 +205,7 @@ if (!window.scriptExecuted) {
       setText("total_students_absent", formatNumber(studentsGoal));
       setText("estimated_funding", formatNumber(studentsGoal * 100));
       document.getElementById("custom_graphics").href = custom_graphics;
-      
+
       // Toggle
       (() => {
         const toggleInput = document.getElementById("use_goal_toggle");
@@ -283,24 +283,24 @@ if (!window.scriptExecuted) {
         const schoolBuildingsWrapper = document.getElementById("schoolBuildingsChartWrapper");
         if (schoolBuildingsEl && schoolBuildingsWrapper) {
           // Sort by value for better visual hierarchy
-          const sortedBuildings = [...school_buildings].sort((a, b) => 
+          const sortedBuildings = [...school_buildings].sort((a, b) =>
             b.registered_school_parents - a.registered_school_parents
           );
-          
+
           const total = sortedBuildings.reduce((sum, b) => sum + b.registered_school_parents, 0);
-          
+
           // Ensure wrapper can contain absolute legend
           schoolBuildingsWrapper.style.position = 'relative';
-          
+
           // Truncate labels for center display
-          const truncatedLabels = sortedBuildings.map(b => 
+          const truncatedLabels = sortedBuildings.map(b =>
             b.school_name.length > 18 ? b.school_name.substring(0, 16) + '..' : b.school_name
           );
-          
+
           // Style the chart container to push chart right on desktop
           schoolBuildingsEl.style.display = 'flex';
           schoolBuildingsEl.style.justifyContent = 'flex-end';
-          
+
           const chart2 = new ApexCharts(schoolBuildingsEl, {
             chart: {
               type: 'donut',
@@ -369,7 +369,7 @@ if (!window.scriptExecuted) {
             responsive: donutChartResponsive
           });
           chart2.render();
-          
+
           // Force chart to align right after render on desktop
           setTimeout(() => {
             const chartWrapper = schoolBuildingsEl.querySelector('.apexcharts-canvas');
@@ -378,7 +378,7 @@ if (!window.scriptExecuted) {
               chartWrapper.style.marginRight = '0';
             }
           }, 100);
-          
+
           // Create custom overlay legend on left
           const legendHtml = `
             <div class="donut-overlay-legend" id="schoolBuildingsLegend">
@@ -394,7 +394,7 @@ if (!window.scriptExecuted) {
           const legendContainer = document.createElement('div');
           legendContainer.innerHTML = legendHtml;
           schoolBuildingsWrapper.appendChild(legendContainer.firstElementChild);
-          
+
           // Add hover interaction
           document.querySelectorAll('#schoolBuildingsLegend .donut-legend-item').forEach(item => {
             item.addEventListener('mouseenter', () => {
@@ -421,8 +421,8 @@ if (!window.scriptExecuted) {
       const validPaths = ['/events', '/teen-slang', '/app-guide', '/video-games', '/parental-control', '/online-activities', '/offline-activities', '/sex-trafficking', '/post/'];
       const processLog = logs => logs.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
         if (!user || !user.first_name ||
-            (school_buildings_id && school_buildings_id.some(s => s?.id === 1)) ||
-            !validPaths.some(p => page_url.includes(p))) return acc;
+          (school_buildings_id && school_buildings_id.some(s => s?.id === 1)) ||
+          !validPaths.some(p => page_url.includes(p))) return acc;
         const fullName = user.last_name ? `${user.first_name} ${user.last_name}`.trim() : user.first_name;
         const path = page_url.split('.com')[1]?.split('?')[0];
         if (path && created_at > thirtyDaysAgo) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
@@ -430,7 +430,7 @@ if (!window.scriptExecuted) {
         school_buildings_id?.forEach(b => { if (b?.school_name) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; });
         return acc;
       }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
-      
+
       const filteredLog = processLog(log.filter(l => !(l.user?.school_buildings_id?.some(s => s?.id === 1))));
       const allLog = processLog(log);
       const topUsers = getTop(filteredLog.userCounts).map(({ key, count }) => ({ name: key, count }));
@@ -616,19 +616,19 @@ if (!window.scriptExecuted) {
         const topSchoolBuildingsWrapper = document.getElementById("topSchoolBuildingsWrapper");
         if (topSchoolBuildingsEl && topSchoolBuildingsWrapper) {
           const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
-          
+
           // Ensure wrapper can contain absolute legend
           topSchoolBuildingsWrapper.style.position = 'relative';
-          
+
           // Truncate labels for center display
-          const truncatedLabels = topSchoolBuildings.map(i => 
+          const truncatedLabels = topSchoolBuildings.map(i =>
             i.school_name.length > 18 ? i.school_name.substring(0, 16) + '..' : i.school_name
           );
-          
+
           // Style the chart container to push chart right on desktop
           topSchoolBuildingsEl.style.display = 'flex';
           topSchoolBuildingsEl.style.justifyContent = 'flex-end';
-          
+
           const chart5 = new ApexCharts(topSchoolBuildingsEl, {
             chart: {
               type: 'donut',
@@ -697,7 +697,7 @@ if (!window.scriptExecuted) {
             responsive: donutChartResponsive
           });
           chart5.render();
-          
+
           // Force chart to align right after render on desktop
           setTimeout(() => {
             const chartWrapper = topSchoolBuildingsEl.querySelector('.apexcharts-canvas');
@@ -706,7 +706,7 @@ if (!window.scriptExecuted) {
               chartWrapper.style.marginRight = '0';
             }
           }, 100);
-          
+
           // Create custom overlay legend on left
           const legendHtml = `
             <div class="donut-overlay-legend" id="topSchoolBuildingsLegend">
@@ -722,7 +722,7 @@ if (!window.scriptExecuted) {
           const legendContainer = document.createElement('div');
           legendContainer.innerHTML = legendHtml;
           topSchoolBuildingsWrapper.appendChild(legendContainer.firstElementChild);
-          
+
           // Add hover interaction
           document.querySelectorAll('#topSchoolBuildingsLegend .donut-legend-item').forEach(item => {
             item.addEventListener('mouseenter', () => {
@@ -773,10 +773,10 @@ if (!window.scriptExecuted) {
         const btn = document.querySelector('.view-more_btn');
         btn.classList.remove("hide");
         btn.addEventListener("click", () => {
-            document.querySelector("#org_feedbacks_list").classList.remove("max-height");
+          document.querySelector("#org_feedbacks_list").classList.remove("max-height");
         });
       }
-      
+
       // Other Feedbacks List
       const loadOtherBtn = document.getElementById("load_other_feedbacks");
       if (loadOtherBtn) loadOtherBtn.addEventListener("click", async () => {
@@ -793,7 +793,7 @@ if (!window.scriptExecuted) {
             </div>
           </div>`).join("");
       });
-      
+
       // ═══════════════════════════════════════════════════════════════
       // DOWNLOAD FEATURE
       // ═══════════════════════════════════════════════════════════════
@@ -818,7 +818,7 @@ if (!window.scriptExecuted) {
       });
 
       // Time
-      document.getElementById("time").textContent=(d=new Date(),m=d.toLocaleString("en-US",{month:"long"}),day=d.getDate(),y=d.getFullYear(),hr=d.getHours()%12||12,mi=(d.getMinutes()<10?"0":"")+d.getMinutes(),ap=d.getHours()<12?"AM":"PM",tz=d.toLocaleTimeString("en-US",{timeZoneName:"short"}).split(" ")[2],`${m} ${day}, ${y} ${hr}:${mi}${ap} ${tz}`);
+      document.getElementById("time").textContent = (d = new Date(), m = d.toLocaleString("en-US", { month: "long" }), day = d.getDate(), y = d.getFullYear(), hr = d.getHours() % 12 || 12, mi = (d.getMinutes() < 10 ? "0" : "") + d.getMinutes(), ap = d.getHours() < 12 ? "AM" : "PM", tz = d.toLocaleTimeString("en-US", { timeZoneName: "short" }).split(" ")[2], `${m} ${day}, ${y} ${hr}:${mi}${ap} ${tz}`);
 
       // Leader Board from API Top Users
       document.querySelector(".leader_board-wrapper").innerHTML += top_users.items.map((user, i) =>
@@ -835,18 +835,18 @@ if (!window.scriptExecuted) {
         document.querySelector(".webinars_log-wrapper").innerHTML += webinars_log
           .filter(entry => entry.action === "registration")
           .map(entry =>
-          `<div class='leader_board-row _3'>
-             <div>${entry.last_name ? `${entry.first_name} ${entry.last_name}` : entry.first_name}</div>
+            `<div class='leader_board-row _3'>
+             <div>${entry.user?.last_name ? `${entry.user?.first_name} ${entry.user?.last_name}` : entry.user?.first_name}</div>
              <div>${entry.user?.school_buildings_id?.[0]?.school?.school_name || ""}</div>
              <div>${entry.webinar}</div>
            </div>`
-        ).join("");
-        
+          ).join("");
+
         // Webinar stats by action type
         const webinarRegistrations = webinars_log.filter(e => e.action === "registration").length;
         const webinarAttendees = webinars_log.filter(e => e.action === "live").length;
         const webinarReplays = webinars_log.filter(e => e.action === "on-demand").length;
-        
+
         setText("total_webinar_registrations", formatNumber(webinarRegistrations));
         setText("total_webinar_attendees", formatNumber(webinarAttendees));
         setText("total_webinar_replays", formatNumber(webinarReplays));
@@ -856,39 +856,39 @@ if (!window.scriptExecuted) {
       document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
 
       // Download Page PDF
-      document.getElementById("screenshot").addEventListener("click",()=>{
-        document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.add("hide"));
-        setTimeout(()=>{
-          const scale = Math.min(2, 2400/document.body.scrollWidth);
-          html2canvas(document.body,{width:document.body.scrollWidth,height:document.body.scrollHeight,scrollX:0,scrollY:0,useCORS:!0,scale,backgroundColor:'#fff'}).then(c=>{
-                        const {jsPDF} = window.jspdf;
-            const pdf = new jsPDF("p","pt","a4");
-            const [pageWidth,pageHeight] = [pdf.internal.pageSize.getWidth(),pdf.internal.pageSize.getHeight()];
-            const ratio = Math.min(pageWidth/c.width,pageHeight/c.height) * 2;
-            const [scaledWidth,scaledHeight] = [c.width*ratio,c.height*ratio];
-            const pagesNeeded = Math.ceil(scaledHeight/pageHeight);
-            
-            for(let i=0;i<pagesNeeded;i++){
-              if(i>0)pdf.addPage();
-              const sourceY = i*pageHeight/ratio;
-              const sourceHeight = Math.min(pageHeight/ratio,c.height-sourceY);
+      document.getElementById("screenshot").addEventListener("click", () => {
+        document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e => e.classList.add("hide"));
+        setTimeout(() => {
+          const scale = Math.min(2, 2400 / document.body.scrollWidth);
+          html2canvas(document.body, { width: document.body.scrollWidth, height: document.body.scrollHeight, scrollX: 0, scrollY: 0, useCORS: !0, scale, backgroundColor: '#fff' }).then(c => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "pt", "a4");
+            const [pageWidth, pageHeight] = [pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight()];
+            const ratio = Math.min(pageWidth / c.width, pageHeight / c.height) * 2;
+            const [scaledWidth, scaledHeight] = [c.width * ratio, c.height * ratio];
+            const pagesNeeded = Math.ceil(scaledHeight / pageHeight);
+
+            for (let i = 0; i < pagesNeeded; i++) {
+              if (i > 0) pdf.addPage();
+              const sourceY = i * pageHeight / ratio;
+              const sourceHeight = Math.min(pageHeight / ratio, c.height - sourceY);
               const tempCanvas = document.createElement('canvas');
               const tempCtx = tempCanvas.getContext('2d');
               tempCanvas.width = c.width;
               tempCanvas.height = sourceHeight;
-              tempCtx.drawImage(c,0,sourceY,c.width,sourceHeight,0,0,c.width,sourceHeight);
-              pdf.addImage(tempCanvas.toDataURL("image/jpeg",0.4),"JPEG",(pageWidth-scaledWidth)/2,0,scaledWidth,sourceHeight*ratio,undefined,'MEDIUM');
+              tempCtx.drawImage(c, 0, sourceY, c.width, sourceHeight, 0, 0, c.width, sourceHeight);
+              pdf.addImage(tempCanvas.toDataURL("image/jpeg", 0.4), "JPEG", (pageWidth - scaledWidth) / 2, 0, scaledWidth, sourceHeight * ratio, undefined, 'MEDIUM');
             }
-            pdf.save(`${district_name} Parent engagement dashboard download smartsocial.com ${new Date().toLocaleDateString("en-US",{year:"2-digit",month:"numeric",day:"numeric"}).replace(/\//g,".")}.pdf`);
-            document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e=>e.classList.remove("hide"));
+            pdf.save(`${district_name} Parent engagement dashboard download smartsocial.com ${new Date().toLocaleDateString("en-US", { year: "2-digit", month: "numeric", day: "numeric" }).replace(/\//g, ".")}.pdf`);
+            document.querySelectorAll('.footer,.navbar5_component,.nav-wrapper').forEach(e => e.classList.remove("hide"));
           });
-        },1e3);
+        }, 1e3);
       });
     } catch (err) {
       console.error("Error:", err);
       document.querySelectorAll('.failed_loader').forEach(e => e.classList.remove('hide'));
       document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
-      axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t",{memberid:memberData.id});
+      axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t", { memberid: memberData.id });
     }
   });
 }
