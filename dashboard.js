@@ -331,7 +331,7 @@ if (!window.scriptExecuted) {
                       color: colors.primary,
                       offsetY: 4,
                       formatter: val => {
-                        const pct = ((parseInt(val) / total) * 100).toFixed(1);
+                        const pct = Math.round((parseInt(val) / total) * 100);
                         return `${pct}%`;
                       }
                     },
@@ -353,7 +353,7 @@ if (!window.scriptExecuted) {
               custom: ({ seriesIndex }) => {
                 const name = sortedBuildings[seriesIndex].school_name;
                 const value = sortedBuildings[seriesIndex].registered_school_parents;
-                const pct = ((value / total) * 100).toFixed(1);
+                const pct = Math.round((value / total) * 100);
                 return `
                   <div style="padding:14px 18px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);">
                     <div style="font-size:15px;font-weight:700;color:#2D5A5A;margin-bottom:10px;">${name}</div>
@@ -659,7 +659,7 @@ if (!window.scriptExecuted) {
                       color: colors.primary,
                       offsetY: 4,
                       formatter: val => {
-                        const pct = ((parseInt(val) / total) * 100).toFixed(1);
+                        const pct = Math.round((parseInt(val) / total) * 100);
                         return `${pct}%`;
                       }
                     },
@@ -681,7 +681,7 @@ if (!window.scriptExecuted) {
               custom: ({ seriesIndex, w }) => {
                 const name = topSchoolBuildings[seriesIndex].school_name;
                 const value = topSchoolBuildings[seriesIndex].count;
-                const pct = ((value / total) * 100).toFixed(1);
+                const pct = Math.round((value / total) * 100);
                 return `
                   <div style="padding:14px 18px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);">
                     <div style="font-size:15px;font-weight:700;color:#2D5A5A;margin-bottom:10px;">${name}</div>
@@ -846,10 +846,13 @@ if (!window.scriptExecuted) {
         const webinarRegistrations = webinars_log.filter(e => e.action === "registration").length;
         const webinarAttendees = webinars_log.filter(e => e.action === "live").length;
         const webinarReplays = webinars_log.filter(e => e.action === "on-demand").length;
+        const bringKidsCount = webinars_log.filter(e => e.bring_kids === true).length;
+        const bringKidsPercentage = (bringKidsCount / webinars_log.length) * 100;
 
         setText("total_webinar_registrations", formatNumber(webinarRegistrations));
         setText("total_webinar_attendees", formatNumber(webinarAttendees));
         setText("total_webinar_replays", formatNumber(webinarReplays));
+        setText("total_bring_kids_percentage", Math.round(bringKidsPercentage) + "%");
       }
 
       // Hide loaders
