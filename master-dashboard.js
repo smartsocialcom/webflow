@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: '7 Day VIPs', key: 'sevenDayCount' },
       // { name: '7 Day Streamyard', key: '..' },
       { name: '7 Day Feedbacks', key: 'feedbackTotal' },
-      { name: 'Total Regs', key: 'parents' }
+      { name: 'Total VIPs', key: 'parents' }
     ];
 
     let html = `<h3>Registration Summary</h3><table border="1"><thead><tr>`;
@@ -259,9 +259,10 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'District Name', key: 'district_name', type: 'string' },
       { name: 'Students', key: 'total_students', type: 'number' },
       { name: 'Goal', key: 'registrationGoal', type: 'number' },
-      { name: 'Regs', key: 'parents', type: 'number' },
+      { name: 'VIPs', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
       { name: '💵', key: 'payment', type: 'number' },
+      // { name: 'Streamyards', key: '..', type: 'number' }, // Total streamyards overall
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Expire', key: 'org_expire_date', type: 'date' }
     ];
