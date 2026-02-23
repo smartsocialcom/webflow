@@ -128,8 +128,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const headers = [
       { name: 'District Name', key: 'name' },
-      { name: '24 Hr Regs', key: 'oneDayCount' },
-      { name: '7 Day Regs', key: 'sevenDayCount' },
+      { name: '24h VIPs', key: 'oneDayCount' },
+      { name: '7 Day VIPs', key: 'sevenDayCount' },
+      // { name: '7 Day Streamyard', key: '..' },
       { name: '7 Day Feedbacks', key: 'feedbackTotal' },
       { name: 'Total Regs', key: 'parents' }
     ];
