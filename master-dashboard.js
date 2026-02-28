@@ -10,14 +10,54 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global Variables for "Registration Summary" Table
   // ---------------------------------------------------------
   let latestUsersData = [];
-  let sevenDayStreamyardRegistrationsByOrg = {};
-  let totalStreamyardRegistrationsByOrg = {};
+  let sevenDayStreamyardRecordsByOrg = {};
+  let totalStreamyardRecordsByOrg = {};
   
   // FIX: Set this to null. 
   // If you set it to 'sevenDayCount' here, the function below will flip it to Ascending (Low -> High).
   // By setting it to null, the function defaults to Descending (High -> Low).
   let currentSortSummaryColumn = null; 
   let sortAscendingSummary = false;
+
+  function normalizeOrgKey(value) {
+    if (value === undefined || value === null || value === '') return null;
+    if (typeof value === 'object') {
+      if (value.id !== undefined && value.id !== null && value.id !== '') {
+        return String(value.id);
+      }
+      return null;
+    }
+    return String(value);
+  }
+
+  function extractOrgKeyFromLog(log) {
+    return (
+      normalizeOrgKey(log.organization) ||
+      normalizeOrgKey(log.organizations_id) ||
+      normalizeOrgKey(log.organization_id)
+    );
+  }
+
+  function toTimestamp(value) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value > 1e12 ? value : value * 1000;
+    }
+    if (typeof value === 'string') {
+      const parsed = Date.parse(value);
+      if (!Number.isNaN(parsed)) return parsed;
+    }
+    return null;
+  }
+
+  function applySevenDayStreamyardToLatestUsers() {
+    latestUsersData = latestUsersData.map(item => {
+      const orgKey = normalizeOrgKey(item.orgId);
+      return {
+        ...item,
+        sevenDayStreamyardCount: orgKey ? (sevenDayStreamyardRecordsByOrg[orgKey] || 0) : 0
+      };
+    });
+  }
 
   // ---------------------------------------------------------
   // 1. UPDATED CODE: Latest Users (1 Day & 7 Day) + Feedbacks
@@ -76,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Store processed data globally
       latestUsersData = Object.values(summary);
+      applySevenDayStreamyardToLatestUsers();
 
       // Populate VIP registration and feedback totals
       const el24hVipRegs = document.getElementById('24h_vip_registrations');
@@ -203,33 +244,36 @@ document.addEventListener("DOMContentLoaded", () => {
       const oneDayAgo = now - (24 * 60 * 60 * 1000);
       const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
 
-      const sevenDayAttendees = webinarsLog.filter(
-        log => log.action === 'live' && log.created_at >= sevenDaysAgo
-      ).length;
+      let sevenDayAttendees = 0;
+      let sevenDayRegistrations = 0;
+      let twentyFourHourRegistrations = 0;
 
-      const sevenDayRegistrations = webinarsLog.filter(
-        log => log.action === 'registration' && log.created_at >= sevenDaysAgo
-      ).length;
-      totalStreamyardRegistrationsByOrg = {};
-      sevenDayStreamyardRegistrationsByOrg = {};
+      totalStreamyardRecordsByOrg = {};
+      sevenDayStreamyardRecordsByOrg = {};
       webinarsLog.forEach(log => {
-        if (log.action !== 'registration') return;
-        const orgId = Number(log.organization) || 0;
-        totalStreamyardRegistrationsByOrg[orgId] = (totalStreamyardRegistrationsByOrg[orgId] || 0) + 1;
-        if (log.created_at >= sevenDaysAgo) {
-          sevenDayStreamyardRegistrationsByOrg[orgId] = (sevenDayStreamyardRegistrationsByOrg[orgId] || 0) + 1;
+        const orgKey = extractOrgKeyFromLog(log);
+        const createdAt = toTimestamp(log.created_at);
+
+        if (orgKey) {
+          totalStreamyardRecordsByOrg[orgKey] = (totalStreamyardRecordsByOrg[orgKey] || 0) + 1;
+          if (createdAt !== null && createdAt >= sevenDaysAgo) {
+            sevenDayStreamyardRecordsByOrg[orgKey] = (sevenDayStreamyardRecordsByOrg[orgKey] || 0) + 1;
+          }
+        }
+
+        if (createdAt !== null && createdAt >= sevenDaysAgo && log.action === 'live') {
+          sevenDayAttendees++;
+        }
+        if (createdAt !== null && createdAt >= sevenDaysAgo && log.action === 'registration') {
+          sevenDayRegistrations++;
+        }
+        if (createdAt !== null && createdAt >= oneDayAgo && log.action === 'registration') {
+          twentyFourHourRegistrations++;
         }
       });
-      latestUsersData = latestUsersData.map(item => ({
-        ...item,
-        sevenDayStreamyardCount: sevenDayStreamyardRegistrationsByOrg[item.orgId] || 0
-      }));
+      applySevenDayStreamyardToLatestUsers();
       renderTable(organizations);
       renderLatestUsersTable();
-
-      const twentyFourHourRegistrations = webinarsLog.filter(
-        log => log.action === 'registration' && log.created_at >= oneDayAgo
-      ).length;
 
       // Update DOM elements
       const el7dayAttendees = document.getElementById('7day_attendees');
@@ -257,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const normalizedData = data.map(org => ({
       ...org,
-      streamyardTotal: totalStreamyardRegistrationsByOrg[org.id] || 0
+      streamyardTotal: totalStreamyardRecordsByOrg[String(org.id)] || 0
     }));
 
     const activeOrgs = normalizedData.filter(org => org.org_active === true);
@@ -362,7 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return { ...org,
           registrationGoal,
           percentageToGoal,
-          streamyardTotal: totalStreamyardRegistrationsByOrg[org.id] || 0
+          streamyardTotal: totalStreamyardRecordsByOrg[String(org.id)] || 0
         };
       });
       organizations.sort((a, b) => {
