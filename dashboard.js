@@ -417,93 +417,20 @@ if (!window.scriptExecuted) {
       // ═══════════════════════════════════════════════════════════════
       // PROCESS LOGS
       // ═══════════════════════════════════════════════════════════════
-      const processLog = logs => logs.reduce((acc, { page_url, user, school_buildings_id }) => {
-        if (!user || !user.first_name) return acc;
-        const fullName = user.last_name ? `${user.first_name} ${user.last_name}`.trim() : user.first_name;
+      const processLog = logs => logs.reduce((acc, { page_url, school_buildings_id }) => {
         const path = page_url.split('.com')[1]?.split('?')[0];
         if (path) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
-        acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
         school_buildings_id?.forEach(b => { if (b?.school_name && b?.id !== 3) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; });
         return acc;
-      }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
+      }, { pageCounts: {}, schoolCounts: {} });
 
       const allLog = processLog(log);
-      const topUsers = getTop(allLog.userCounts).map(({ key, count }) => ({ name: key, count }));
       const topPages = getTop(allLog.pageCounts).map(({ key, count }) => ({ url: key, count }));
       const topSchoolBuildings = getTop(allLog.schoolCounts)
         .filter(({ key }) => key !== "District Staff")
         .map(({ key, count }) => ({ school_name: key, count }));
 
-      // ═══════════════════════════════════════════════════════════════
-      // CHART 3: TOP USERS (Horizontal Bar - Large Text)
-      // ═══════════════════════════════════════════════════════════════
-      if (topUsers.length > 1) {
-        const topUsersEl = document.getElementById("topUsersChart");
-        if (topUsersEl) {
-          new ApexCharts(topUsersEl, {
-            chart: {
-              type: 'bar',
-              height: Math.max(320, topUsers.length * 42),
-              width: '100%',
-              background: 'transparent'
-            },
-            series: [{
-              name: 'Activities',
-              data: topUsers.map(u => u.count)
-            }],
-            xaxis: {
-              categories: topUsers.map(u => u.name),
-              labels: {
-                style: { colors: colors.textLight, fontSize: '13px' }
-              },
-              axisBorder: { show: false },
-              axisTicks: { show: false }
-            },
-            yaxis: {
-              labels: {
-                style: { colors: colors.text, fontSize: '14px', fontWeight: 600 },
-                maxWidth: 180
-              }
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true,
-                borderRadius: 6,
-                barHeight: '65%',
-                dataLabels: { position: 'top' }
-              }
-            },
-            fill: {
-              type: 'solid',
-              opacity: 0.9
-            },
-            colors: [colors.primary],
-            dataLabels: {
-              enabled: true,
-              textAnchor: 'start',
-              formatter: val => val.toLocaleString(),
-              offsetX: 8,
-              style: {
-                colors: [colors.dark],
-                fontSize: '14px',
-                fontWeight: 700
-              }
-            },
-            grid: {
-              borderColor: '#e8f0f0',
-              xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } }
-            },
-            tooltip: {
-              y: { formatter: val => `${val.toLocaleString()} activities` }
-            },
-            responsive: barChartResponsive
-          }).render();
-        }
-      } else {
-        document.getElementById("topUsersChartWrapper").innerHTML =
-          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
-      }
+      // CHART 3 (Top Users from logs) intentionally disabled.
 
       // ═══════════════════════════════════════════════════════════════
       // CHART 4: TOP PAGES (Horizontal Bar - Large Text)
