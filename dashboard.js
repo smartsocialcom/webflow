@@ -417,23 +417,18 @@ if (!window.scriptExecuted) {
       // ═══════════════════════════════════════════════════════════════
       // PROCESS LOGS
       // ═══════════════════════════════════════════════════════════════
-      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-      const validPaths = ['/events', '/teen-slang', '/app-guide', '/video-games', '/parental-control', '/online-activities', '/offline-activities', '/sex-trafficking', '/post/'];
-      const processLog = logs => logs.reduce((acc, { created_at, page_url, user, school_buildings_id }) => {
-        if (!user || !user.first_name ||
-          (school_buildings_id && school_buildings_id.some(s => s?.id === 1)) ||
-          !validPaths.some(p => page_url.includes(p))) return acc;
+      const processLog = logs => logs.reduce((acc, { page_url, user, school_buildings_id }) => {
+        if (!user || !user.first_name) return acc;
         const fullName = user.last_name ? `${user.first_name} ${user.last_name}`.trim() : user.first_name;
         const path = page_url.split('.com')[1]?.split('?')[0];
-        if (path && created_at > thirtyDaysAgo) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
+        if (path) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
         acc.userCounts[fullName] = (acc.userCounts[fullName] || 0) + 1;
         school_buildings_id?.forEach(b => { if (b?.school_name && b?.id !== 3) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; });
         return acc;
       }, { userCounts: {}, pageCounts: {}, schoolCounts: {} });
 
-      const filteredLog = processLog(log.filter(l => !(l.user?.school_buildings_id?.some(s => s?.id === 1))));
       const allLog = processLog(log);
-      const topUsers = getTop(filteredLog.userCounts).map(({ key, count }) => ({ name: key, count }));
+      const topUsers = getTop(allLog.userCounts).map(({ key, count }) => ({ name: key, count }));
       const topPages = getTop(allLog.pageCounts).map(({ key, count }) => ({ url: key, count }));
       const topSchoolBuildings = getTop(allLog.schoolCounts)
         .filter(({ key }) => key !== "District Staff")
