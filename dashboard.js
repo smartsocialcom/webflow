@@ -535,12 +535,8 @@ if (!window.scriptExecuted) {
       // ═══════════════════════════════════════════════════════════════
       if (topSchoolBuildings.length) {
         const topSchoolBuildingsEl = document.getElementById("topSchoolBuildings");
-        const topSchoolBuildingsWrapper = document.getElementById("topSchoolBuildingsWrapper");
-        if (topSchoolBuildingsEl && topSchoolBuildingsWrapper) {
+        if (topSchoolBuildingsEl) {
           const total = topSchoolBuildings.reduce((sum, { count }) => sum + count, 0);
-
-          // Ensure wrapper can contain absolute legend
-          topSchoolBuildingsWrapper.style.position = 'relative';
 
           // Truncate labels for center display
           const truncatedLabels = topSchoolBuildings.map(i =>
@@ -597,7 +593,7 @@ if (!window.scriptExecuted) {
               }
             },
             stroke: { width: 2, colors: ['#fff'] },
-            legend: { show: false }, // Hide built-in legend
+            legend: { show: true },
             dataLabels: { enabled: false },
             tooltip: {
               custom: ({ seriesIndex, w }) => {
@@ -619,49 +615,7 @@ if (!window.scriptExecuted) {
             responsive: donutChartResponsive
           });
           chart5.render();
-
-          // Force chart to align right after render on desktop
-          setTimeout(() => {
-            const chartWrapper = topSchoolBuildingsEl.querySelector('.apexcharts-canvas');
-            if (chartWrapper) {
-              chartWrapper.style.marginLeft = 'auto';
-              chartWrapper.style.marginRight = '0';
-            }
-          }, 100);
-
-          // Create custom overlay legend on left
-          const legendHtml = `
-            <div class="donut-overlay-legend" id="topSchoolBuildingsLegend">
-              ${topSchoolBuildings.map((item, idx) => `
-                <div class="donut-legend-item" data-index="${idx}">
-                  <span class="donut-legend-marker" style="background-color: ${treemapPalette[idx % treemapPalette.length]};"></span>
-                  <span class="donut-legend-text">${item.school_name}</span>
-                  <span class="donut-legend-value">${item.count}</span>
-                </div>
-              `).join('')}
-            </div>
-          `;
-          const legendContainer = document.createElement('div');
-          legendContainer.innerHTML = legendHtml;
-          topSchoolBuildingsWrapper.appendChild(legendContainer.firstElementChild);
-
-          // Add hover interaction
-          document.querySelectorAll('#topSchoolBuildingsLegend .donut-legend-item').forEach(item => {
-            item.addEventListener('mouseenter', () => {
-              const idx = parseInt(item.dataset.index);
-              chart5.toggleDataPointSelection(idx);
-              item.classList.add('active');
-            });
-            item.addEventListener('mouseleave', () => {
-              const idx = parseInt(item.dataset.index);
-              chart5.toggleDataPointSelection(idx);
-              item.classList.remove('active');
-            });
-          });
         }
-      } else {
-        document.getElementById("topSchoolBuildingsWrapper").innerHTML =
-          `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
       }
 
       // ═══════════════════════════════════════════════════════════════

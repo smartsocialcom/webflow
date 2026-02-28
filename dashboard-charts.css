@@ -33,7 +33,6 @@
 
 /* Chart wrapper containers */
 #schoolBuildingsChartWrapper,
-#topSchoolBuildingsWrapper,
 #topUsersChartWrapper,
 #topPagesChartWrapper,
 #usersPerMonthChartWrapper,
@@ -211,11 +210,6 @@ foreignObject {
 /* ─────────────────────────────────────────────────────────────────
    DONUT CHART WITH SIDE LEGEND (Chart 5)
    ───────────────────────────────────────────────────────────────── */
-
-#topSchoolBuildingsWrapper {
-  position: relative;
-  overflow: visible;
-}
 
 .donut-overlay-legend {
   position: absolute;
