@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global Variables for "Registration Summary" Table
   // ---------------------------------------------------------
   let latestUsersData = [];
+  let sevenDayStreamyardRegistrationsByOrg = {};
+  let totalStreamyardRegistrationsByOrg = {};
   
   // FIX: Set this to null. 
   // If you set it to 'sevenDayCount' here, the function below will flip it to Ascending (Low -> High).
@@ -41,10 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!summary[distName]) {
           summary[distName] = {
             name: distName,
+            orgId: orgId || 0,
             shortCode: shortCode || '',
             parents: parents || 0,
             oneDayCount: 0,
             sevenDayCount: 0,
+            sevenDayStreamyardCount: 0,
             feedbackTotal: feedbackCounts[orgId] || 0
           };
         }
@@ -99,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sortAscendingSummary = true; // Default to A-Z for strings
       
       // FIX: Ensure numbers start as Descending (High -> Low)
-      if (['oneDayCount', 'sevenDayCount', 'feedbackTotal', 'parents'].includes(key)) {
+      if (['oneDayCount', 'sevenDayCount', 'sevenDayStreamyardCount', 'feedbackTotal', 'parents'].includes(key)) {
         sortAscendingSummary = false; 
       }
     }
@@ -130,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'District Name', key: 'name' },
       { name: '24h VIPs', key: 'oneDayCount' },
       { name: '7 Day VIPs', key: 'sevenDayCount' },
-      // { name: '7 Day Streamyard', key: '..' },
+      { name: '7 Day Streamyard', key: 'sevenDayStreamyardCount' },
       { name: '7 Day Feedbacks', key: 'feedbackTotal' },
       { name: 'Total VIPs', key: 'parents' }
     ];
@@ -169,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </td>
           <td style="${oneDayStyle}">${item.oneDayCount}</td> 
           <td>${item.sevenDayCount}</td>
+          <td>${item.sevenDayStreamyardCount}</td>
           <td>${item.feedbackTotal}</td>
           <td>${item.parents.toLocaleString()}</td>
         </tr>`;
@@ -190,7 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations')
     .then(response => {
       organizations = response.data.organizations || [];
-      renderTable(organizations);
 
       // Process webinars_log for statistics
       const webinarsLog = response.data.webinars_log || [];
@@ -206,6 +210,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const sevenDayRegistrations = webinarsLog.filter(
         log => log.action === 'registration' && log.created_at >= sevenDaysAgo
       ).length;
+      totalStreamyardRegistrationsByOrg = {};
+      sevenDayStreamyardRegistrationsByOrg = {};
+      webinarsLog.forEach(log => {
+        if (log.action !== 'registration') return;
+        const orgId = Number(log.organization) || 0;
+        totalStreamyardRegistrationsByOrg[orgId] = (totalStreamyardRegistrationsByOrg[orgId] || 0) + 1;
+        if (log.created_at >= sevenDaysAgo) {
+          sevenDayStreamyardRegistrationsByOrg[orgId] = (sevenDayStreamyardRegistrationsByOrg[orgId] || 0) + 1;
+        }
+      });
+      latestUsersData = latestUsersData.map(item => ({
+        ...item,
+        sevenDayStreamyardCount: sevenDayStreamyardRegistrationsByOrg[item.orgId] || 0
+      }));
+      renderTable(organizations);
+      renderLatestUsersTable();
 
       const twentyFourHourRegistrations = webinarsLog.filter(
         log => log.action === 'registration' && log.created_at >= oneDayAgo
@@ -235,8 +255,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeContainer = document.getElementById('active');
     const inactiveContainer = document.getElementById('inactive');
 
-    const activeOrgs = data.filter(org => org.org_active === true);
-    const inactiveOrgs = data.filter(org => org.org_active === false);
+    const normalizedData = data.map(org => ({
+      ...org,
+      streamyardTotal: totalStreamyardRegistrationsByOrg[org.id] || 0
+    }));
+
+    const activeOrgs = normalizedData.filter(org => org.org_active === true);
+    const inactiveOrgs = normalizedData.filter(org => org.org_active === false);
 
     if (activeContainer) {
       activeContainer.innerHTML = renderTableSection(activeOrgs, 'Active Organizations', 'active');
@@ -262,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: 'VIPs', key: 'parents', type: 'number' },
       { name: '% to Goal', key: 'percentageToGoal', type: 'number' },
       { name: '💵', key: 'payment', type: 'number' },
-      // { name: 'Streamyards', key: '..', type: 'number' }, // Total streamyards overall
+      { name: 'Streamyards', key: 'streamyardTotal', type: 'number' },
       { name: 'Feedback', key: 'total_feedbacks', type: 'number' },
       { name: 'Expire', key: 'org_expire_date', type: 'date' }
     ];
@@ -300,6 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${org.parents.toLocaleString()}</td>
         <td style="${percentStyle}">${percentageToGoal}%</td>
         <td>${paymentFormatted}</td>
+        <td>${(org.streamyardTotal || 0).toLocaleString()}</td>
         <td>${org.total_feedbacks.toLocaleString()}</td>`;
 
       if (org.org_expire_date) {
@@ -335,7 +361,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
         return { ...org,
           registrationGoal,
-          percentageToGoal
+          percentageToGoal,
+          streamyardTotal: totalStreamyardRegistrationsByOrg[org.id] || 0
         };
       });
       organizations.sort((a, b) => {
