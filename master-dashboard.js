@@ -12,11 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let latestUsersData = [];
   let sevenDayStreamyardRecordsByOrg = {};
   let totalStreamyardRecordsByOrg = {};
-  
+
   // FIX: Set this to null. 
   // If you set it to 'sevenDayCount' here, the function below will flip it to Ascending (Low -> High).
   // By setting it to null, the function defaults to Descending (High -> Low).
-  let currentSortSummaryColumn = null; 
+  let currentSortSummaryColumn = null;
   let sortAscendingSummary = false;
 
   function normalizeOrgKey(value) {
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
         const orgId = user.organizations_id;
         const shortCode = user.organization ? user.organization.short_code : '';
-        
+
         initDistrict(distName, user.parents, orgId, shortCode);
         summary[distName].sevenDayCount++;
       });
@@ -142,10 +142,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // If clicking a NEW column (or first load), set defaults
       currentSortSummaryColumn = key;
       sortAscendingSummary = true; // Default to A-Z for strings
-      
+
       // FIX: Ensure numbers start as Descending (High -> Low)
       if (['oneDayCount', 'sevenDayCount', 'sevenDayStreamyardCount', 'feedbackTotal', 'parents'].includes(key)) {
-        sortAscendingSummary = false; 
+        sortAscendingSummary = false;
       }
     }
 
@@ -197,13 +197,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     latestUsersData.forEach(item => {
       const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
-      
-      const parentLink = item.shortCode 
-        ? `https://smartsocial.com/dashboard/parents?as_org=${item.shortCode}` 
+
+      const parentLink = item.shortCode
+        ? `https://smartsocial.com/dashboard/parents?as_org=${item.shortCode}`
         : '#';
-      
-      const studentLink = item.shortCode 
-        ? `https://smartsocial.com/dashboard/student?as_org=${item.shortCode}` 
+
+      const studentLink = item.shortCode
+        ? `https://smartsocial.com/dashboard/student?as_org=${item.shortCode}`
         : '#';
 
       html += `
@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const orgKey = extractOrgKeyFromLog(log);
         const createdAt = toTimestamp(log.created_at);
 
-        if (orgKey) {
+        if (orgKey && log.action === 'registration') {
           totalStreamyardRecordsByOrg[orgKey] = (totalStreamyardRecordsByOrg[orgKey] || 0) + 1;
           if (createdAt !== null && createdAt >= sevenDaysAgo) {
             sevenDayStreamyardRecordsByOrg[orgKey] = (sevenDayStreamyardRecordsByOrg[orgKey] || 0) + 1;
@@ -403,7 +403,8 @@ document.addEventListener("DOMContentLoaded", () => {
       organizations = organizations.map(org => {
         const registrationGoal = Math.round(org.total_students * 0.05);
         const percentageToGoal = ((org.parents / (org.total_students * 0.05)) * 100);
-        return { ...org,
+        return {
+          ...org,
           registrationGoal,
           percentageToGoal,
           streamyardTotal: totalStreamyardRecordsByOrg[String(org.id)] || 0
