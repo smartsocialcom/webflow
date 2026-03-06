@@ -173,6 +173,10 @@ if (!window.scriptExecuted) {
       const org = searchParams.get("as_org") || member.data.customFields.organization;
       setText("copy_link", `https://${window.location.hostname}/events?org=${org}`);
 
+      if (searchParams.has("as_org")) document.querySelectorAll('a:not(.fs-toc_link)').forEach(l => {
+        if (l.hostname === location.hostname) try { let u = new URL(l.href); u.searchParams.set('org', org); l.href = u.href; } catch (e) { }
+      });
+
       const { data } = await axios.get(
         `https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${org}`
       );
