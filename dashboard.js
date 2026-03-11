@@ -726,7 +726,13 @@ if (!window.scriptExecuted) {
         const webinarRegistrations = webinars_log.filter(e => e.action === "registration").length;
         const webinarAttendees = webinars_log.filter(e => e.action === "live").length;
         const webinarReplays = webinars_log.filter(e => e.action === "on-demand").length;
-        const recentWebinars = webinars_log.filter(e => new Date(e.created_at) >= new Date('2026-02-14'));
+        const cutoffDate = new Date('2026-02-14').getTime();
+        const recentWebinars = webinars_log.filter(e => {
+          let ts = e.created_at;
+          if (typeof ts === 'number') ts = ts > 1e12 ? ts : ts * 1000;
+          else ts = new Date(ts).getTime();
+          return ts >= cutoffDate;
+        });
         const bringKidsCount = recentWebinars.filter(e => e.bring_kids === true).length;
         const bringKidsPercentage = recentWebinars.length > 0 ? (bringKidsCount / recentWebinars.length) * 100 : 0;
 
