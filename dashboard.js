@@ -726,7 +726,7 @@ if (!window.scriptExecuted) {
         const webinarRegistrations = webinars_log.filter(e => e.action === "registration").length;
         const webinarAttendees = webinars_log.filter(e => e.action === "live").length;
         const webinarReplays = webinars_log.filter(e => e.action === "on-demand").length;
-        const cutoffDate = new Date('2026-02-14').getTime();
+        const cutoffDate = new Date('2026-01-01').getTime();
         const recentWebinars = webinars_log.filter(e => {
           let ts = e.created_at;
           if (typeof ts === 'number') ts = ts > 1e12 ? ts : ts * 1000;
