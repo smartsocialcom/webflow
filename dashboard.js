@@ -726,7 +726,7 @@ if (!window.scriptExecuted) {
         const webinarRegistrations = webinars_log.filter(e => e.action === "registration").length;
         const webinarAttendees = webinars_log.filter(e => e.action === "live").length;
         const webinarReplays = webinars_log.filter(e => e.action === "on-demand").length;
-        const recentWebinars = webinars_log.filter(e => new Date(e.created_at) >= new Date('2026-01-01'));
+        const recentWebinars = webinars_log.filter(e => new Date(e.created_at) >= new Date('2026-02-14'));
         const bringKidsCount = recentWebinars.filter(e => e.bring_kids === true).length;
         const bringKidsPercentage = recentWebinars.length > 0 ? (bringKidsCount / recentWebinars.length) * 100 : 0;
 
