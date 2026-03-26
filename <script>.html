@@ -127,10 +127,11 @@
       }
       document.querySelectorAll(".lang-select").forEach(e => e.onclick = () => setTimeout(() => location.reload(), 500)); // Refresh page on lang switcher click
       document.querySelectorAll('[sms="store_link"]').forEach(link => link.addEventListener('click', () => localStorage.setItem("locat", location.href))); // Store Last Page
-      if (orgValue) document.querySelectorAll('a:not(.fs-toc_link)').forEach(l => {
+      const linkOrg = searchParams.get("as_org") || orgValue;
+      if (linkOrg) document.querySelectorAll('a:not(.fs-toc_link)').forEach(l => {
         if (l.hostname === location.hostname && !l.href.includes('org=')) {
           let p = l.href.split('#');
-          p[0] += (p[0].includes('?') ? '&' : '?') + 'org=' + orgValue;
+          p[0] += (p[0].includes('?') ? '&' : '?') + 'org=' + linkOrg;
           l.href = p.join('#');
         }
       }); // add ?org= if the link is internal
