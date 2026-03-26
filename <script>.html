@@ -98,6 +98,11 @@
       memberData = (await window.$memberstackDom.getCurrentMember()).data;
       getOrgValue();
       getOrg(orgValue);
+      const asOrg = searchParams.get("as_org");
+      if (asOrg) {
+        axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${asOrg}`)
+          .then(res => applyOrgData(res.data.organization.district_name));
+      }
       if (!memberData) {
         getOrg(orgValue).then(getAccess);
         setTimeout(() => {
