@@ -342,7 +342,7 @@ if (!window.scriptExecuted) {
                       label: 'Total',
                       fontSize: '12px',
                       color: colors.textLight,
-                      formatter: () => total.toLocaleString()
+                      formatter: () => '100%'
                     }
                   }
                 }
@@ -360,10 +360,8 @@ if (!window.scriptExecuted) {
                   <div style="padding:14px 18px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(45,90,90,0.15);">
                     <div style="font-size:15px;font-weight:700;color:#2D5A5A;margin-bottom:10px;">${name}</div>
                     <div style="display:flex;align-items:baseline;gap:10px;">
-                      <span style="font-size:24px;font-weight:700;color:#6B9E9C;">${value.toLocaleString()}</span>
-                      <span style="font-size:13px;color:#5A7A7A;">parents</span>
+                      <span style="font-size:24px;font-weight:700;color:#6B9E9C;">${pct}%</span>
                     </div>
-                    <div style="margin-top:8px;font-size:13px;color:#fff;background:#6B9E9C;padding:5px 12px;border-radius:20px;display:inline-block;font-weight:600;">${pct}%</div>
                   </div>
                 `;
               }
@@ -388,7 +386,7 @@ if (!window.scriptExecuted) {
                 <div class="donut-legend-item" data-index="${idx}" data-chart="chart2">
                   <span class="donut-legend-marker" style="background-color: ${treemapPalette[idx % treemapPalette.length]};"></span>
                   <span class="donut-legend-text">${item.school_name}</span>
-                  <span class="donut-legend-value">${item.registered_school_parents}</span>
+                  <span class="donut-legend-value">${Math.round((item.registered_school_parents / total) * 100)}%</span>
                 </div>
               `).join('')}
             </div>
