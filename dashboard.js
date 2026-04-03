@@ -181,8 +181,7 @@ if (!window.scriptExecuted) {
       const { feedback, top_users, users_per_month_arr, log, webinars_log } = data;
 
       setText("org_name", district_name);
-      const displayDistrictName = searchParams.has("as_org") ? district_name : org;
-      document.querySelectorAll("#district_name").forEach(el => { el.textContent = displayDistrictName; });
+      document.querySelectorAll("#district_name").forEach(el => { el.textContent = district_name; });
       const formatNumber = n => Math.round(n).toLocaleString();
       const studentsGoal = total_students * 0.05;
       setText("total_students", formatNumber(total_students));
