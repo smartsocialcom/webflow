@@ -632,7 +632,7 @@ if (!window.scriptExecuted) {
         testimonials += `
           <div class="testimonial_card">
             <div class="feedback">"${positive_feedback}"</div>
-            <p class="page_name">- ${page_name}</p>
+            <p class="page_name">✏️ ${page_name}</p>
             <div class="feedback_line-divider"></div>
             <div>
               <p class="name">${name}</p>
@@ -667,7 +667,7 @@ if (!window.scriptExecuted) {
             <p class="page_name">✏️ ${page_name}</p>
             <div class="feedback_line-divider"></div>
             <div>
-              <p class="name">${organization_info.district_name}</p>
+              <p class="name">${organization_info?.district_name || ''}</p>
               <p class="created_at">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
             </div>
           </div>`).join("");
