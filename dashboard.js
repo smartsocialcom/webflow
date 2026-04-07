@@ -664,7 +664,7 @@ if (!window.scriptExecuted) {
         document.getElementById("other_feedbacks_list").innerHTML = data.map(({ positive_feedback, page_name, created_at, organization_info }) => `
           <div class="testimonial_card">
             <div class="feedback">"${positive_feedback}"</div>
-            <p class="page_name">- ${page_name}</p>
+            <p class="page_name">✏️ ${page_name}</p>
             <div class="feedback_line-divider"></div>
             <div>
               <p class="name">${organization_info.district_name}</p>
