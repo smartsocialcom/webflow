@@ -1,0 +1,99 @@
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const checkData = setInterval(async () => {
+            if (typeof memberData !== 'undefined' && memberData?.auth?.email && typeof orgData !== 'undefined' && orgData?.organization) {
+                clearInterval(checkData);
+
+                const dismissLoader = () => document.getElementById("close")?.click();
+
+                const showFallback = () => {
+                    document.getElementById("no-feedbacks-message")?.classList.remove("hide");
+                    dismissLoader();
+                };
+
+                // Always populate district leader email
+                const emailEl = document.querySelector('#district_leader_email');
+                if (emailEl && orgData.organization.district_leader_email) {
+                    emailEl.textContent = orgData.organization.district_leader_email.join(', ');
+                }
+
+                try {
+                    const email = memberData.auth.email;
+                    const url = `https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/feedback/email/${encodeURIComponent(email)}`;
+                    console.log('[Testimonials] Email:', email);
+                    console.log('[Testimonials] Fetching:', url);
+
+                    const res = await fetch(url);
+                    console.log('[Testimonials] Response status:', res.status, res.statusText);
+
+                    if (!res.ok) {
+                        console.warn('[Testimonials] Non-OK response, showing fallback');
+                        return showFallback();
+                    }
+
+                    const raw = await res.text();
+                    console.log('[Testimonials] Raw response body:', raw);
+
+                    let list;
+                    try { list = JSON.parse(raw); } catch (e) {
+                        console.error('[Testimonials] Failed to parse JSON:', e);
+                        return showFallback();
+                    }
+
+                    console.log('[Testimonials] Parsed response:', list);
+                    console.log('[Testimonials] Is array?', Array.isArray(list), '| Length:', list?.length);
+
+                    if (!Array.isArray(list) || !list.length) {
+                        console.warn('[Testimonials] Empty or non-array, showing fallback');
+                        return showFallback();
+                    }
+
+                    // Only require non-empty positive_feedback
+                    const filtered = list.filter(item => item.positive_feedback?.trim());
+                    console.log('[Testimonials] Filtered count:', filtered.length, 'of', list.length);
+
+                    if (!filtered.length) {
+                        console.warn('[Testimonials] All items filtered out, showing fallback');
+                        return showFallback();
+                    }
+
+                    // Build testimonial cards
+                    const cardsHTML = filtered.map(item => {
+                        const name = [item.first_name, item.last_name].filter(Boolean).join(' ');
+                        const date = item.created_at
+                            ? new Date(item.created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })
+                            : '';
+
+                        return `
+          <div class="testimonial_card">
+            <div class="feedback">"${item.positive_feedback}"</div>
+            ${item.page_name ? `<p class="page_name">✏️ ${item.page_name}</p>` : ''}
+            <div class="feedback_line-divider"></div>
+            <div>
+              ${name ? `<p class="name">${name}</p>` : ''}
+              ${item.district_name ? `<p class="schools">${item.district_name}</p>` : ''}
+              ${date ? `<p class="created_at">${date}</p>` : ''}
+            </div>
+          </div>`;
+                    }).join("");
+
+                    // Insert cards into container-large
+                    const wrapper = document.querySelector(".section_feedback .container-large");
+                    console.log('[Testimonials] Wrapper found?', !!wrapper);
+                    if (wrapper) {
+                        const container = document.createElement("div");
+                        container.className = "testimonial-list";
+                        container.innerHTML = cardsHTML;
+                        wrapper.appendChild(container);
+                        console.log('[Testimonials] Cards inserted successfully!');
+                    }
+
+                    dismissLoader();
+                } catch (err) {
+                    console.error('[Testimonials] Caught error:', err);
+                    showFallback();
+                }
+            }
+        }, 100);
+    });
+</script>

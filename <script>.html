@@ -5,7 +5,7 @@
   let orgValue, memberData, orgActive, actions, orgData, districtName, feedbackActive, parentStudentVideoAccess;
 
   function setCookie(k, v, d) {
-    document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/`;
+    document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)};expires=${(new Date(Date.now() + d * 864e5)).toUTCString()};path=/;SameSite=Lax`;
   }
 
   function getCookie(k) {
@@ -14,7 +14,7 @@
   }
 
   function removeCookie(key) {
-    document.cookie = `${encodeURIComponent(key)}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    document.cookie = `${encodeURIComponent(key)}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax`;
   }
 
   function applyOrgData(districtName) {
@@ -34,6 +34,7 @@
         parentStudentVideoAccess = orgData.organization.parent_student_video_access;
         if (orgActive) {
           setCookie("org", orgValue, 400);
+          localStorage.setItem("org", orgValue);
           setCookie("district_name", districtName, 1);
           applyOrgData(districtName);
           console.log("orgActive");
@@ -78,10 +79,11 @@
 
   function getOrgValue() {
     const cookie = getCookie("org");
+    const ls = localStorage.getItem("org");
     const ms = memberData?.customFields?.organization;
     const queryOrg = searchParams.get("org");
     const hashOrg = new URLSearchParams(location.hash.split("?")[1] || "").get("org");
-    orgValue = cookie || ms || queryOrg || hashOrg;
+    orgValue = queryOrg || hashOrg || cookie || ls || ms;
   }
 
   function addPoints(action, points) {
@@ -97,14 +99,14 @@
     (async () => {
       memberData = (await window.$memberstackDom.getCurrentMember()).data;
       getOrgValue();
-      getOrg(orgValue);
+      if (orgValue) getOrg(orgValue);
       const asOrg = searchParams.get("as_org");
       if (asOrg) {
         axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${asOrg}`)
           .then(res => applyOrgData(res.data.organization.district_name));
       }
       if (!memberData) {
-        getOrg(orgValue).then(getAccess);
+        if (orgValue) getOrg(orgValue).then(getAccess);
         setTimeout(() => {
           if (getCookie("org")) {
             document.querySelectorAll('[ss-content="hide"]').forEach(el => el.classList.add('hide'));
@@ -128,6 +130,8 @@
       document.querySelectorAll(".lang-select").forEach(e => e.onclick = () => setTimeout(() => location.reload(), 500)); // Refresh page on lang switcher click
       document.querySelectorAll('[sms="store_link"]').forEach(link => link.addEventListener('click', () => localStorage.setItem("locat", location.href))); // Store Last Page
       if (orgValue) document.querySelectorAll('a:not(.fs-toc_link)').forEach(l => {
+        const raw = l.getAttribute('href');
+        if (!raw || raw === '#' || raw.startsWith('#')) return;
         if (l.hostname === location.hostname && !l.href.includes('org=')) {
           let p = l.href.split('#');
           p[0] += (p[0].includes('?') ? '&' : '?') + 'org=' + orgValue;
