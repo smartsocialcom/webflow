@@ -173,6 +173,7 @@ if (!window.scriptExecuted) {
       const org = searchParams.get("as_org") || member.data.customFields.organization;
       setText("copy_link", `https://${window.location.hostname}/events?org=${org}`);
 
+      if (member.data.planConnections?.some(p => p.planId === "pln_master-admin-ay6204pn")) document.head.insertAdjacentHTML("beforeend", "<style>.created_at{display:none!important}</style>"); //hide created_at if master-admin
 
       const { data } = await axios.get(
         `https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${org}`
