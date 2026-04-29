@@ -637,7 +637,7 @@ if (!window.scriptExecuted) {
             <div>
               <p class="name">${name}</p>
               <p class="schools">${schools}</p>
-              <p class="created_at hide">${date}</p>
+              <p class="created_at" data-ms-content="master-admin">${date}</p>
             </div>
           </div>`;
       });
@@ -668,7 +668,7 @@ if (!window.scriptExecuted) {
             <div class="feedback_line-divider"></div>
             <div>
               <p class="name">${organization_info?.district_name || ''}</p>
-              <p class="created_at hide">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
+              <p class="created_at" data-ms-content="master-admin">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
             </div>
           </div>`).join("");
       });
