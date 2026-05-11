@@ -127,7 +127,7 @@
           });
         }
       }
-      document.querySelectorAll(".lang-select").forEach(e => e.onclick = () => setTimeout(() => location.reload(), 500)); // Refresh page on lang switcher click
+      document.querySelectorAll('.lang-link').forEach(a => a.addEventListener('click', e => { e.preventDefault(); var x = '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/', h = location.hostname, b = h.replace(/^www\./, '');[h, '.' + h, b, '.' + b].forEach(d => document.cookie = 'googtrans' + x + ';domain=' + d); document.cookie = 'googtrans' + x; location.href = a.href }))
       document.querySelectorAll('[sms="store_link"]').forEach(link => link.addEventListener('click', () => localStorage.setItem("locat", location.href))); // Store Last Page
       if (orgValue) document.querySelectorAll('a:not(.fs-toc_link)').forEach(l => {
         const raw = l.getAttribute('href');
