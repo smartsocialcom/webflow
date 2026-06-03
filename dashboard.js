@@ -684,8 +684,8 @@ if (!window.scriptExecuted) {
             #parent_impact .kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px;}
             #parent_impact .kpi-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:18px 10px 16px;text-align:center;}
             #parent_impact .coview{display:flex;flex-direction:column;justify-content:center;}
-            #parent_impact .ring-wrap{position:relative;width:96px;height:96px;margin:0 auto 8px;}
-            #parent_impact .ring-svg{width:96px;height:96px;transform:rotate(-90deg);display:block;}
+            #parent_impact .ring-wrap{position:relative;width:112px;height:112px;margin:0 auto 8px;}
+            #parent_impact .ring-svg{width:112px;height:112px;transform:rotate(-90deg);display:block;}
             #parent_impact .ring-bg{fill:none;stroke:var(--color-border-tertiary);stroke-width:7;}
             #parent_impact .ring-fill{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1);}
             #parent_impact .ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
