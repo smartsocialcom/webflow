@@ -678,35 +678,37 @@ if (!window.scriptExecuted) {
               --color-border-tertiary:#E2EEEE;--border-radius-lg:12px;
             }
             #parent_impact .ss-wrap{padding:.75rem 0;font-family:var(--font-sans);}
-            #parent_impact .ss-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
-            #parent_impact .ss-title{font-size:17px;font-weight:500;color:var(--color-text-primary);}
-            #parent_impact .ss-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px;}
-            #parent_impact .kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px;}
-            #parent_impact .kpi-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 8px 12px;text-align:center;}
-            #parent_impact .ring-wrap{position:relative;width:88px;height:88px;margin:0 auto 6px;}
-            #parent_impact .ring-svg{width:88px;height:88px;transform:rotate(-90deg);display:block;}
+            #parent_impact .ss-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+            #parent_impact .ss-title{font-size:18px;font-weight:600;color:var(--color-text-primary);}
+            #parent_impact .ss-sub{font-size:16px;color:var(--color-text-secondary);margin-top:3px;}
+            #parent_impact .kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px;}
+            #parent_impact .kpi-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:18px 10px 16px;text-align:center;}
+            #parent_impact .coview{display:flex;flex-direction:column;justify-content:center;}
+            #parent_impact .ring-wrap{position:relative;width:96px;height:96px;margin:0 auto 8px;}
+            #parent_impact .ring-svg{width:96px;height:96px;transform:rotate(-90deg);display:block;}
             #parent_impact .ring-bg{fill:none;stroke:var(--color-border-tertiary);stroke-width:7;}
             #parent_impact .ring-fill{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1);}
             #parent_impact .ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
-            #parent_impact .ring-pct{font-size:19px;font-weight:500;color:var(--color-text-primary);line-height:1;}
-            #parent_impact .kpi-name{font-size:11px;font-weight:500;color:var(--color-text-primary);line-height:1.3;}
-            #parent_impact .kpi-ctx{font-size:10px;color:var(--color-text-tertiary);margin-top:2px;}
-            #parent_impact .bottom-row{display:grid;grid-template-columns:1fr 164px;gap:10px;}
-            #parent_impact .b-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px;}
-            #parent_impact .sec-lbl{font-size:10px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.07em;text-transform:uppercase;margin:0 0 11px;}
-            #parent_impact .c-row{margin-bottom:8px;}
-            #parent_impact .c-top{display:flex;justify-content:space-between;font-size:11.5px;color:var(--color-text-secondary);margin-bottom:3px;}
-            #parent_impact .c-pct{font-weight:500;color:var(--color-text-primary);min-width:32px;text-align:right;}
-            #parent_impact .bar-bg{background:var(--color-background-primary);border-radius:2px;height:6px;overflow:hidden;border:.5px solid var(--color-border-tertiary);}
-            #parent_impact .bar-fill{height:100%;border-radius:2px;width:0;transition:width 1.6s cubic-bezier(.22,1,.36,1);}
-            #parent_impact .impact-num{font-size:52px;font-weight:500;color:var(--color-text-primary);line-height:1;}
-            #parent_impact .impact-denom{font-size:16px;color:var(--color-text-tertiary);font-weight:400;}
-            #parent_impact .divider{border:none;border-top:.5px solid var(--color-border-tertiary);margin:10px 0;}
-            #parent_impact .badge{display:inline-block;font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px;}
+            #parent_impact .ring-pct{font-size:26px;font-weight:600;color:var(--color-text-primary);line-height:1;}
+            #parent_impact .kpi-name{font-size:18px;font-weight:600;color:var(--color-text-primary);line-height:1.3;}
+            #parent_impact .kpi-ctx{font-size:16px;color:var(--color-text-tertiary);margin-top:4px;}
+            #parent_impact .bottom-row{display:grid;grid-template-columns:220px 180px 1fr;gap:12px;align-items:stretch;}
+            #parent_impact .b-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:18px;}
+            #parent_impact .sec-lbl{font-size:16px;font-weight:600;color:var(--color-text-secondary);letter-spacing:.04em;text-transform:uppercase;margin:0 0 14px;}
+            #parent_impact .c-row{margin-bottom:12px;}
+            #parent_impact .c-top{display:flex;justify-content:space-between;gap:10px;font-size:16px;color:var(--color-text-secondary);margin-bottom:5px;}
+            #parent_impact .c-pct{font-weight:600;color:var(--color-text-primary);min-width:44px;text-align:right;}
+            #parent_impact .bar-bg{background:var(--color-background-primary);border-radius:3px;height:8px;overflow:hidden;border:.5px solid var(--color-border-tertiary);}
+            #parent_impact .bar-fill{height:100%;border-radius:3px;width:0;transition:width 1.6s cubic-bezier(.22,1,.36,1);}
+            #parent_impact .impact-num{font-size:56px;font-weight:600;color:var(--color-text-primary);line-height:1;}
+            #parent_impact .impact-denom{font-size:18px;color:var(--color-text-tertiary);font-weight:400;}
+            #parent_impact .divider{border:none;border-top:.5px solid var(--color-border-tertiary);margin:12px 0;}
+            #parent_impact .badge{display:inline-block;font-size:16px;font-weight:600;padding:4px 10px;border-radius:6px;}
             #parent_impact .badge-green{background:#E3F1EF;color:#15706A;}
             #parent_impact .badge-amber{background:#FBEFD8;color:#8A5A12;}
-            #parent_impact .footer-note{font-size:10px;color:var(--color-text-tertiary);margin-top:10px;text-align:right;}
-            @media (max-width:600px){#parent_impact .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}#parent_impact .bottom-row{grid-template-columns:1fr;}}
+            #parent_impact .footer-note{font-size:16px;color:var(--color-text-tertiary);margin-top:14px;line-height:1.4;}
+            @media (max-width:860px){#parent_impact .bottom-row{grid-template-columns:1fr;}}
+            @media (max-width:560px){#parent_impact .kpi-grid{grid-template-columns:1fr;}}
           `;
           document.head.appendChild(style);
         }
@@ -764,6 +766,18 @@ if (!window.scriptExecuted) {
         ];
 
         const RADIUS = 38, CIRC = 2 * Math.PI * RADIUS;
+        const ringCard = (i, extraClass = "") => `
+          <div class="kpi-card ${extraClass}">
+            <div class="ring-wrap">
+              <svg class="ring-svg" viewBox="0 0 100 100">
+                <circle class="ring-bg" cx="50" cy="50" r="${RADIUS}"></circle>
+                <circle class="ring-fill" id="ss-r${i}" cx="50" cy="50" r="${RADIUS}" stroke="${ringColors[i]}" stroke-dasharray="${CIRC.toFixed(2)}" stroke-dashoffset="${CIRC.toFixed(2)}"></circle>
+              </svg>
+              <div class="ring-center"><div class="ring-pct" id="ss-p${i}">0%</div></div>
+            </div>
+            <div class="kpi-name">${rings[i].name}</div>
+            <div class="kpi-ctx">${rings[i].ctx}</div>
+          </div>`;
 
         mount.innerHTML = `
           <div class="ss-wrap">
@@ -774,20 +788,19 @@ if (!window.scriptExecuted) {
               <span class="badge badge-green">● Live</span>
             </div>
             <div class="kpi-grid">
-              ${rings.map((r, i) => `
-                <div class="kpi-card">
-                  <div class="ring-wrap">
-                    <svg class="ring-svg" viewBox="0 0 100 100">
-                      <circle class="ring-bg" cx="50" cy="50" r="${RADIUS}"></circle>
-                      <circle class="ring-fill" id="ss-r${i}" cx="50" cy="50" r="${RADIUS}" stroke="${ringColors[i]}" stroke-dasharray="${CIRC.toFixed(2)}" stroke-dashoffset="${CIRC.toFixed(2)}"></circle>
-                    </svg>
-                    <div class="ring-center"><div class="ring-pct" id="ss-p${i}">0%</div></div>
-                  </div>
-                  <div class="kpi-name">${r.name}</div>
-                  <div class="kpi-ctx">${r.ctx}</div>
-                </div>`).join("")}
+              ${ringCard(0)}${ringCard(1)}${ringCard(2)}
             </div>
             <div class="bottom-row">
+              <div class="b-card" style="display:flex;flex-direction:column;justify-content:center;">
+                <div class="sec-lbl">Impact score</div>
+                <div><span class="impact-num" id="ss-iscore">0</span><span class="impact-denom">/100</span></div>
+                <div style="font-size:16px;color:var(--color-text-secondary);margin-top:6px;line-height:1.4;">Weighted composite: referral · return intent · adoption</div>
+                <div class="divider"></div>
+                <div style="font-size:16px;color:var(--color-text-secondary);">National average</div>
+                <div style="font-size:18px;font-weight:600;color:var(--color-text-primary);margin-top:3px;">${NATIONAL_IMPACT_AVG} / 100</div>
+                <div style="margin-top:9px;">${benchBadge}</div>
+              </div>
+              ${ringCard(3, "coview")}
               <div class="b-card">
                 <div class="sec-lbl">Family concern index</div>
                 ${concerns.map((c, i) => `
@@ -795,15 +808,6 @@ if (!window.scriptExecuted) {
                     <div class="c-top"><span>${c.name}</span><span class="c-pct" id="ss-cp${i}">—</span></div>
                     <div class="bar-bg"><div class="bar-fill" id="ss-cb${i}" style="background:${concernColors[i % concernColors.length]};"></div></div>
                   </div>`).join("")}
-              </div>
-              <div class="b-card" style="display:flex;flex-direction:column;justify-content:center;">
-                <div class="sec-lbl">Impact score</div>
-                <div><span class="impact-num" id="ss-iscore">0</span><span class="impact-denom">/100</span></div>
-                <div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px;line-height:1.4;">Weighted composite: referral · return intent · adoption</div>
-                <div class="divider"></div>
-                <div style="font-size:10px;color:var(--color-text-secondary);">National average</div>
-                <div style="font-size:15px;font-weight:500;color:var(--color-text-primary);margin-top:2px;">${NATIONAL_IMPACT_AVG} / 100</div>
-                <div style="margin-top:7px;">${benchBadge}</div>
               </div>
             </div>
             <div class="footer-note">Ring % = "Likely" + "Very Likely" responses &nbsp;·&nbsp; Concern topics inferred from written feedback (multi-select; totals may exceed 100%)</div>
