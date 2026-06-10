@@ -786,7 +786,7 @@ if (!window.scriptExecuted) {
           <div class="ss-wrap">
             <div class="ss-header">
               <div>
-                <div class="ss-sub">${N.toLocaleString()} survey ${N === 1 ? "response" : "responses"} &nbsp;·&nbsp; ${districtName || ""}</div>
+                <div class="ss-sub"><span data-ms-content="master-admin">${N.toLocaleString()} survey ${N === 1 ? "response" : "responses"} &nbsp;·&nbsp; </span>${districtName || ""}</div>
               </div>
               <span class="badge badge-green">● Live</span>
             </div>
