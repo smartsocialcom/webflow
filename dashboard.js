@@ -719,6 +719,7 @@ if (!window.scriptExecuted) {
 
         // Empty / low-data state — mirror the chart wrappers' "data being updated" pattern
         if (!N) {
+          setText("total_bring_kids_percentage", "—");
           mount.innerHTML = `<div class="chart_message-wrapper"><h4 class="chart_message">Not enough survey responses yet. Use the <a href="https://smartsocial.com/share?org=${org}"><strong>Sharing Center</strong></a> to gather parent feedback.</h4></div>`;
           return;
         }
@@ -728,6 +729,8 @@ if (!window.scriptExecuted) {
         const returnIntent = pctLikely("watch_likely");
         const adoption = pctLikely("use_strategies_likely");
         const coview = Math.round(100 * survey.filter(f => f.kid_attended === "Yes").length / N);
+        // Single source of truth: the dashboard "bring kids" tile mirrors the widget's Family co-view.
+        setText("total_bring_kids_percentage", coview + "%");
 
         // Weighted composite (template subtitle: referral · return intent · adoption)
         const WEIGHTS = { referral: 0.4, return: 0.3, adoption: 0.3 };
@@ -917,20 +920,10 @@ if (!window.scriptExecuted) {
         const webinarRegistrations = webinars_log.filter(e => e.action === "registration").length;
         const webinarAttendees = webinars_log.filter(e => e.action === "live").length;
         const webinarReplays = webinars_log.filter(e => e.action === "on-demand").length;
-        const cutoffDate = new Date('2026-01-01').getTime();
-        const recentWebinars = webinars_log.filter(e => {
-          let ts = e.created_at;
-          if (typeof ts === 'number') ts = ts > 1e12 ? ts : ts * 1000;
-          else ts = new Date(ts).getTime();
-          return ts >= cutoffDate;
-        });
-        const bringKidsCount = recentWebinars.filter(e => e.bring_kids === true).length;
-        const bringKidsPercentage = recentWebinars.length > 0 ? (bringKidsCount / recentWebinars.length) * 100 : 0;
-
         setText("total_webinar_registrations", formatNumber(webinarRegistrations));
         setText("total_webinar_attendees", formatNumber(webinarAttendees));
         setText("total_webinar_replays", formatNumber(webinarReplays));
-        setText("total_bring_kids_percentage", Math.round(bringKidsPercentage) + "%");
+        // total_bring_kids_percentage is set by renderParentImpact (mirrors the widget's Family co-view).
       }
 
       // Hide loaders
