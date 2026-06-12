@@ -428,11 +428,8 @@ if (!window.scriptExecuted) {
         return acc;
       }, { pageCounts: {}, schoolCounts: {} });
 
-      console.log('[SS-DEBUG] log entries:', log?.length, 'sample:', log?.slice(0, 2));
       const allLog = processLog(log);
-      console.log('[SS-DEBUG] pageCounts keys:', Object.keys(allLog.pageCounts).length, 'sample:', Object.entries(allLog.pageCounts).slice(0, 3));
       const topPages = getTop(allLog.pageCounts).map(({ key, count }) => ({ url: key, count }));
-      console.log('[SS-DEBUG] topPages:', topPages);
       const topSchoolBuildings = getTop(allLog.schoolCounts)
         .filter(({ key }) => key !== "District Staff")
         .map(({ key, count }) => ({ school_name: key, count }));
@@ -441,102 +438,91 @@ if (!window.scriptExecuted) {
 
       // ═══════════════════════════════════════════════════════════════
       // CHART 4: TOP PAGES (Horizontal Bar - Large Text)
+      // Webflow/Finsweet may re-render the w-embed block, detaching
+      // the element after chart render. renderTopPages retries into
+      // the fresh DOM node when that happens.
       // ═══════════════════════════════════════════════════════════════
-      if (topPages.length) {
-        const topPagesEl = document.getElementById("topPagesChart");
-        if (topPagesEl) {
-          console.log('[SS-DEBUG] Creating topPagesChart, element:', topPagesEl);
-          const topPagesChart = new ApexCharts(topPagesEl, {
-            chart: {
-              type: 'bar',
-              height: Math.max(320, topPages.length * 42),
-              width: '100%',
-              background: 'transparent'
-            },
-            series: [{
-              name: 'Visits',
-              data: topPages.map(p => p.count)
-            }],
-            xaxis: {
-              categories: topPages.map(p => {
-                // Clean URL for display
-                let url = p.url.replace('/post/', '').replace(/-/g, ' ');
-                return url.length > 25 ? url.substring(0, 23) + '..' : url;
-              }),
-              labels: {
-                style: { colors: colors.textLight, fontSize: '13px' }
-              },
-              axisBorder: { show: false },
-              axisTicks: { show: false }
-            },
-            yaxis: {
-              labels: {
-                style: { colors: colors.text, fontSize: '13px', fontWeight: 600 },
-                maxWidth: 180
-              }
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true,
-                borderRadius: 6,
-                barHeight: '65%',
-                dataLabels: { position: 'top' }
-              }
-            },
-            fill: {
-              type: 'solid',
-              opacity: 0.9
-            },
-            colors: [colors.mid],
-            dataLabels: {
-              enabled: true,
-              textAnchor: 'start',
-              formatter: val => val.toLocaleString(),
-              offsetX: 8,
-              style: {
-                colors: [colors.dark],
-                fontSize: '14px',
-                fontWeight: 700
-              }
-            },
-            grid: {
-              borderColor: '#e8f0f0',
-              xaxis: { lines: { show: true } },
-              yaxis: { lines: { show: false } }
-            },
-            tooltip: {
-              y: { formatter: val => `${val.toLocaleString()} visits` }
-            },
-            responsive: barChartResponsive
-          });
-          console.log('[SS-DEBUG] Calling topPagesChart.render()');
-          topPagesChart.render().then(() => {
-            console.log('[SS-DEBUG] topPagesChart render SUCCESS, children:', topPagesEl.children.length, 'innerHTML length:', topPagesEl.innerHTML.length);
-            // Dump full layout info for element + every ancestor
-            let el = topPagesEl;
-            let depth = 0;
-            while (el && el !== document.documentElement) {
-              const cs = getComputedStyle(el);
-              const r = el.getBoundingClientRect();
-              console.log(`[SS-DEBUG] Ancestor[${depth}]`, el.tagName + (el.id ? '#'+el.id : '') + (el.className ? '.'+String(el.className).split(' ')[0] : ''), {
-                display: cs.display, position: cs.position,
-                width: cs.width, height: cs.height, minHeight: cs.minHeight, maxHeight: cs.maxHeight,
-                overflow: cs.overflow, overflowX: cs.overflowX, overflowY: cs.overflowY,
-                visibility: cs.visibility, opacity: cs.opacity,
-                clipPath: cs.clipPath, clip: cs.clip,
-                contain: cs.contain, contentVisibility: cs.contentVisibility,
-                rectW: Math.round(r.width), rectH: Math.round(r.height), rectTop: Math.round(r.top),
-                offsetH: el.offsetHeight, offsetParent: el.offsetParent?.tagName || 'null'
-              });
-              el = el.parentElement;
-              depth++;
-            }
-          }).catch(e => console.error('[SS-DEBUG] topPagesChart render FAILED:', e));
+      const topPagesChartOptions = {
+        chart: {
+          type: 'bar',
+          height: Math.max(320, topPages.length * 42),
+          width: '100%',
+          background: 'transparent'
+        },
+        series: [{
+          name: 'Visits',
+          data: topPages.map(p => p.count)
+        }],
+        xaxis: {
+          categories: topPages.map(p => {
+            let url = p.url.replace('/post/', '').replace(/-/g, ' ');
+            return url.length > 25 ? url.substring(0, 23) + '..' : url;
+          }),
+          labels: {
+            style: { colors: colors.textLight, fontSize: '13px' }
+          },
+          axisBorder: { show: false },
+          axisTicks: { show: false }
+        },
+        yaxis: {
+          labels: {
+            style: { colors: colors.text, fontSize: '13px', fontWeight: 600 },
+            maxWidth: 180
+          }
+        },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            borderRadius: 6,
+            barHeight: '65%',
+            dataLabels: { position: 'top' }
+          }
+        },
+        fill: {
+          type: 'solid',
+          opacity: 0.9
+        },
+        colors: [colors.mid],
+        dataLabels: {
+          enabled: true,
+          textAnchor: 'start',
+          formatter: val => val.toLocaleString(),
+          offsetX: 8,
+          style: {
+            colors: [colors.dark],
+            fontSize: '14px',
+            fontWeight: 700
+          }
+        },
+        grid: {
+          borderColor: '#e8f0f0',
+          xaxis: { lines: { show: true } },
+          yaxis: { lines: { show: false } }
+        },
+        tooltip: {
+          y: { formatter: val => `${val.toLocaleString()} visits` }
+        },
+        responsive: barChartResponsive
+      };
 
-          // Add click handlers to bars and labels after chart renders
+      const renderTopPages = (attempt = 0) => {
+        const el = document.getElementById("topPagesChart");
+        if (!el) return;
+        const chart = new ApexCharts(el, topPagesChartOptions);
+        chart.render().then(() => {
+          // Check if the element was detached by a Webflow/Finsweet re-render
+          if (!document.contains(el)) {
+            if (attempt < 3) {
+              chart.destroy();
+              setTimeout(() => renderTopPages(attempt + 1), 500 * (attempt + 1));
+            }
+            return;
+          }
+          // Add click handlers to bars and labels
           setTimeout(() => {
-            // Make bars clickable
-            topPagesEl.querySelectorAll('.apexcharts-bar-area').forEach((bar, index) => {
+            const liveEl = document.getElementById("topPagesChart");
+            if (!liveEl) return;
+            liveEl.querySelectorAll('.apexcharts-bar-area').forEach((bar, index) => {
               bar.style.cursor = 'pointer';
               bar.addEventListener('click', () => {
                 if (topPages[index]) {
@@ -544,8 +530,7 @@ if (!window.scriptExecuted) {
                 }
               });
             });
-            // Make y-axis labels clickable too
-            topPagesEl.querySelectorAll('.apexcharts-yaxis-label').forEach((label, index) => {
+            liveEl.querySelectorAll('.apexcharts-yaxis-label').forEach((label, index) => {
               label.style.cursor = 'pointer';
               label.addEventListener('click', () => {
                 if (topPages[index]) {
@@ -554,7 +539,11 @@ if (!window.scriptExecuted) {
               });
             });
           }, 500);
-        }
+        });
+      };
+
+      if (topPages.length) {
+        renderTopPages();
       } else {
         document.getElementById("topPagesChartWrapper").innerHTML =
           `<div class="chart_message-wrapper"><h4 class="chart_message">Data is being updated. Use <a href="https://smartsocial.com/share?org=rooseveltmiddleschool"><strong>Sharing Center</strong></a> for accurate data.</h4></div>`;
