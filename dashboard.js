@@ -512,32 +512,25 @@ if (!window.scriptExecuted) {
           console.log('[SS-DEBUG] Calling topPagesChart.render()');
           topPagesChart.render().then(() => {
             console.log('[SS-DEBUG] topPagesChart render SUCCESS, children:', topPagesEl.children.length, 'innerHTML length:', topPagesEl.innerHTML.length);
-            // Walk up ancestors to find what's hiding the chart
+            // Dump full layout info for element + every ancestor
             let el = topPagesEl;
+            let depth = 0;
             while (el && el !== document.documentElement) {
               const cs = getComputedStyle(el);
-              if (cs.display === 'none') {
-                console.warn('[SS-DEBUG] FOUND display:none on:', el.tagName, el.id || '', el.className, el);
-                el.style.setProperty('display', 'block', 'important');
-              }
-              if (cs.visibility === 'hidden') {
-                console.warn('[SS-DEBUG] FOUND visibility:hidden on:', el.tagName, el.id || '', el.className, el);
-                el.style.setProperty('visibility', 'visible', 'important');
-              }
-              if (parseFloat(cs.maxHeight) === 0) {
-                console.warn('[SS-DEBUG] FOUND max-height:0 on:', el.tagName, el.id || '', el.className, el);
-                el.style.setProperty('max-height', 'none', 'important');
-              }
-              if (parseFloat(cs.height) === 0 && el !== topPagesEl) {
-                console.warn('[SS-DEBUG] FOUND height:0 on:', el.tagName, el.id || '', el.className, el);
-              }
-              if (cs.opacity === '0') {
-                console.warn('[SS-DEBUG] FOUND opacity:0 on:', el.tagName, el.id || '', el.className, el);
-                el.style.setProperty('opacity', '1', 'important');
-              }
+              const r = el.getBoundingClientRect();
+              console.log(`[SS-DEBUG] Ancestor[${depth}]`, el.tagName + (el.id ? '#'+el.id : '') + (el.className ? '.'+String(el.className).split(' ')[0] : ''), {
+                display: cs.display, position: cs.position,
+                width: cs.width, height: cs.height, minHeight: cs.minHeight, maxHeight: cs.maxHeight,
+                overflow: cs.overflow, overflowX: cs.overflowX, overflowY: cs.overflowY,
+                visibility: cs.visibility, opacity: cs.opacity,
+                clipPath: cs.clipPath, clip: cs.clip,
+                contain: cs.contain, contentVisibility: cs.contentVisibility,
+                rectW: Math.round(r.width), rectH: Math.round(r.height), rectTop: Math.round(r.top),
+                offsetH: el.offsetHeight, offsetParent: el.offsetParent?.tagName || 'null'
+              });
               el = el.parentElement;
+              depth++;
             }
-            setTimeout(() => console.log('[SS-DEBUG] After fix: offsetHeight=', topPagesEl.offsetHeight), 100);
           }).catch(e => console.error('[SS-DEBUG] topPagesChart render FAILED:', e));
 
           // Add click handlers to bars and labels after chart renders
