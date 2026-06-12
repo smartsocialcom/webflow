@@ -512,15 +512,32 @@ if (!window.scriptExecuted) {
           console.log('[SS-DEBUG] Calling topPagesChart.render()');
           topPagesChart.render().then(() => {
             console.log('[SS-DEBUG] topPagesChart render SUCCESS, children:', topPagesEl.children.length, 'innerHTML length:', topPagesEl.innerHTML.length);
-            // Watch for something clearing the chart
-            new MutationObserver((mutations, obs) => {
-              mutations.forEach(m => {
-                if (m.removedNodes.length) console.warn('[SS-DEBUG] NODES REMOVED from #topPagesChart:', m.removedNodes, 'remaining children:', topPagesEl.children.length, new Error().stack);
-              });
-              if (!topPagesEl.children.length) { console.error('[SS-DEBUG] #topPagesChart was CLEARED! Stack:', new Error().stack); obs.disconnect(); }
-            }).observe(topPagesEl, { childList: true, subtree: true });
-            // Periodic check
-            [500, 1000, 2000, 5000].forEach(ms => setTimeout(() => console.log(`[SS-DEBUG] Check @${ms}ms: children=${topPagesEl.children.length}, height=${topPagesEl.offsetHeight}`), ms));
+            // Walk up ancestors to find what's hiding the chart
+            let el = topPagesEl;
+            while (el && el !== document.documentElement) {
+              const cs = getComputedStyle(el);
+              if (cs.display === 'none') {
+                console.warn('[SS-DEBUG] FOUND display:none on:', el.tagName, el.id || '', el.className, el);
+                el.style.setProperty('display', 'block', 'important');
+              }
+              if (cs.visibility === 'hidden') {
+                console.warn('[SS-DEBUG] FOUND visibility:hidden on:', el.tagName, el.id || '', el.className, el);
+                el.style.setProperty('visibility', 'visible', 'important');
+              }
+              if (parseFloat(cs.maxHeight) === 0) {
+                console.warn('[SS-DEBUG] FOUND max-height:0 on:', el.tagName, el.id || '', el.className, el);
+                el.style.setProperty('max-height', 'none', 'important');
+              }
+              if (parseFloat(cs.height) === 0 && el !== topPagesEl) {
+                console.warn('[SS-DEBUG] FOUND height:0 on:', el.tagName, el.id || '', el.className, el);
+              }
+              if (cs.opacity === '0') {
+                console.warn('[SS-DEBUG] FOUND opacity:0 on:', el.tagName, el.id || '', el.className, el);
+                el.style.setProperty('opacity', '1', 'important');
+              }
+              el = el.parentElement;
+            }
+            setTimeout(() => console.log('[SS-DEBUG] After fix: offsetHeight=', topPagesEl.offsetHeight), 100);
           }).catch(e => console.error('[SS-DEBUG] topPagesChart render FAILED:', e));
 
           // Add click handlers to bars and labels after chart renders
