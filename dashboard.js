@@ -200,14 +200,15 @@ if (!window.scriptExecuted) {
         const p = v / (studentsGoal) * 100;
         if (p > 25) {
           setText("percentage_to_goal", Math.round(p) + "%");
-          document.getElementById("percentage_to_goal").classList.remove("small");
+          document.getElementById("percentage_to_goal")?.classList.remove("small");
         }
       };
       updateImpactMetrics(false);
       setText("feedback_count", formatNumber(feedback.length));
       setText("total_students_absent", formatNumber(studentsGoal));
       setText("estimated_funding", formatNumber(studentsGoal * 100));
-      document.getElementById("custom_graphics").href = custom_graphics;
+      const customGraphicsEl = document.getElementById("custom_graphics");
+      if (customGraphicsEl) customGraphicsEl.href = custom_graphics;
 
       // Toggle
       (() => {
@@ -964,7 +965,7 @@ if (!window.scriptExecuted) {
       console.error("Error:", err);
       document.querySelectorAll('.failed_loader').forEach(e => e.classList.remove('hide'));
       document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
-      axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t", { memberid: memberData.id });
+      axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t", { memberid: memberData?.id }).catch(() => {});
     }
   });
 }
