@@ -510,7 +510,18 @@ if (!window.scriptExecuted) {
             responsive: barChartResponsive
           });
           console.log('[SS-DEBUG] Calling topPagesChart.render()');
-          topPagesChart.render().then(() => console.log('[SS-DEBUG] topPagesChart render SUCCESS')).catch(e => console.error('[SS-DEBUG] topPagesChart render FAILED:', e));
+          topPagesChart.render().then(() => {
+            console.log('[SS-DEBUG] topPagesChart render SUCCESS, children:', topPagesEl.children.length, 'innerHTML length:', topPagesEl.innerHTML.length);
+            // Watch for something clearing the chart
+            new MutationObserver((mutations, obs) => {
+              mutations.forEach(m => {
+                if (m.removedNodes.length) console.warn('[SS-DEBUG] NODES REMOVED from #topPagesChart:', m.removedNodes, 'remaining children:', topPagesEl.children.length, new Error().stack);
+              });
+              if (!topPagesEl.children.length) { console.error('[SS-DEBUG] #topPagesChart was CLEARED! Stack:', new Error().stack); obs.disconnect(); }
+            }).observe(topPagesEl, { childList: true, subtree: true });
+            // Periodic check
+            [500, 1000, 2000, 5000].forEach(ms => setTimeout(() => console.log(`[SS-DEBUG] Check @${ms}ms: children=${topPagesEl.children.length}, height=${topPagesEl.offsetHeight}`), ms));
+          }).catch(e => console.error('[SS-DEBUG] topPagesChart render FAILED:', e));
 
           // Add click handlers to bars and labels after chart renders
           setTimeout(() => {
