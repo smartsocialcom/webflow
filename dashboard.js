@@ -428,8 +428,11 @@ if (!window.scriptExecuted) {
         return acc;
       }, { pageCounts: {}, schoolCounts: {} });
 
+      console.log('[SS-DEBUG] log entries:', log?.length, 'sample:', log?.slice(0, 2));
       const allLog = processLog(log);
+      console.log('[SS-DEBUG] pageCounts keys:', Object.keys(allLog.pageCounts).length, 'sample:', Object.entries(allLog.pageCounts).slice(0, 3));
       const topPages = getTop(allLog.pageCounts).map(({ key, count }) => ({ url: key, count }));
+      console.log('[SS-DEBUG] topPages:', topPages);
       const topSchoolBuildings = getTop(allLog.schoolCounts)
         .filter(({ key }) => key !== "District Staff")
         .map(({ key, count }) => ({ school_name: key, count }));
@@ -442,6 +445,7 @@ if (!window.scriptExecuted) {
       if (topPages.length) {
         const topPagesEl = document.getElementById("topPagesChart");
         if (topPagesEl) {
+          console.log('[SS-DEBUG] Creating topPagesChart, element:', topPagesEl);
           const topPagesChart = new ApexCharts(topPagesEl, {
             chart: {
               type: 'bar',
@@ -505,7 +509,8 @@ if (!window.scriptExecuted) {
             },
             responsive: barChartResponsive
           });
-          topPagesChart.render();
+          console.log('[SS-DEBUG] Calling topPagesChart.render()');
+          topPagesChart.render().then(() => console.log('[SS-DEBUG] topPagesChart render SUCCESS')).catch(e => console.error('[SS-DEBUG] topPagesChart render FAILED:', e));
 
           // Add click handlers to bars and labels after chart renders
           setTimeout(() => {
