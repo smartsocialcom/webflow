@@ -419,8 +419,10 @@ if (!window.scriptExecuted) {
       // PROCESS LOGS
       // ═══════════════════════════════════════════════════════════════
       const processLog = logs => logs.reduce((acc, { page_url, school_buildings_id }) => {
-        const path = page_url.split('.com')[1]?.split('?')[0];
-        if (path) acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
+        try {
+          const path = new URL(page_url).pathname;
+          if (path && path !== '/') acc.pageCounts[path] = (acc.pageCounts[path] || 0) + 1;
+        } catch (e) { /* malformed URL, skip */ }
         school_buildings_id?.forEach(b => { if (b?.school_name && b?.id !== 3) acc.schoolCounts[b.school_name] = (acc.schoolCounts[b.school_name] || 0) + 1; });
         return acc;
       }, { pageCounts: {}, schoolCounts: {} });
