@@ -179,7 +179,7 @@ if (!window.scriptExecuted) {
         `https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${org}`
       );
       const { total_students, parents: parentsCount, school_buildings, district_name, custom_graphics } = data.organization;
-      const { feedback, top_users, users_per_month_arr, log, webinars_log } = data;
+      const { feedback, top_users, users_per_month_arr, log, webinars_log, parent_concerns } = data;
 
       setText("org_name", district_name);
       document.querySelectorAll("#district_name").forEach(el => { el.textContent = district_name; });
@@ -680,7 +680,7 @@ if (!window.scriptExecuted) {
       // Every metric computed live from the org-endpoint `feedback` array.
       // No extra API calls — survey fields ride along in `data.feedback`.
       // ═══════════════════════════════════════════════════════════════
-      const renderParentImpact = (feedbackArr, districtName) => {
+      const renderParentImpact = (feedbackArr, districtName, parentConcerns) => {
         const mount = document.getElementById("parent_impact");
         if (!mount) return;
 
@@ -762,21 +762,26 @@ if (!window.scriptExecuted) {
           ? `<span class="badge badge-green">+${diff} pts vs. national avg</span>`
           : `<span class="badge badge-amber">${diff} pts vs. national avg</span>`;
 
-        // Family concern index — keyword topic-mining over written feedback (multi-select; totals can exceed 100%)
-        const CONCERNS = [
-          { name: "Screen time & device overuse", kw: ["screen time", "screentime", "device", "phone", "tablet", "youtube", "too much time"] },
-          { name: "Social media & oversharing", kw: ["social media", "instagram", "tiktok", "tik tok", "snapchat", "oversharing", "posting", "share online", "what to share", "facebook"] },
-          { name: "Cyberbullying", kw: ["bully", "cyberbull", "mean comment", "harass"] },
-          { name: "Mental health & anxiety", kw: ["mental health", "anxiety", "anxious", "depress", "self-esteem", "self esteem", "emotional", "well-being", "wellbeing"] },
-          { name: "Online predators / grooming", kw: ["predator", "groom", "stranger", "trafficking", "sextor", "identity theft", "scam", "kidnap"] },
-          { name: "Gaming & app addiction", kw: ["gaming", "video game", "addict", "roblox", "fortnite", "minecraft"] }
-        ];
-        const texts = (feedbackArr || []).map(f => (f.positive_feedback || "").toLowerCase()).filter(Boolean);
-        const concernDen = texts.length || 1;
+        // Family concern index — from the structured concerns[] selections (multi-select; totals can exceed 100%).
+        // Denominator = only respondents who selected at least one concern (the recent responders).
+        const CONCERN_BAR_LIMIT = 6;
+        const concernLabel = new Map((parentConcerns || [])
+          .filter(p => p.display_concern !== false)
+          .map(p => [String(p.id), p.concern_topic]));
+        const withConcerns = (feedbackArr || []).filter(f => Array.isArray(f.concerns) && f.concerns.length);
+        const concernDen = withConcerns.length || 1;
         const concernColors = ["#6B9E9C", "#7B9EB8", "#9B8EB5", "#D4A5B0", "#CBA58A", "#8BAA8E"];
-        const concerns = CONCERNS
-          .map(c => ({ name: c.name, v: Math.round(100 * texts.filter(t => c.kw.some(k => t.includes(k))).length / concernDen) }))
-          .sort((a, b) => b.v - a.v);
+        const concernCounts = new Map();
+        withConcerns.forEach(f => {
+          // de-dupe per respondent so one person can't count twice for the same topic
+          new Set(f.concerns.map(String)).forEach(id => {
+            if (concernLabel.has(id)) concernCounts.set(id, (concernCounts.get(id) || 0) + 1);
+          });
+        });
+        const concerns = [...concernCounts.entries()]
+          .map(([id, n]) => ({ name: concernLabel.get(id), v: Math.round(100 * n / concernDen) }))
+          .sort((a, b) => b.v - a.v)
+          .slice(0, CONCERN_BAR_LIMIT);
 
         const ringColors = ["#2D5A5A", "#357A78", "#449997", "#5AADAB"];
         const rings = [
@@ -831,7 +836,7 @@ if (!window.scriptExecuted) {
                   </div>`).join("")}
               </div>
             </div>
-            <div class="footer-note">Ring % = "Likely" + "Very Likely" responses &nbsp;·&nbsp; Concern topics inferred from written feedback (multi-select; totals may exceed 100%)</div>
+            <div class="footer-note">Ring % = "Likely" + "Very Likely" responses &nbsp;·&nbsp; Concern % = share of parents who selected each topic (multi-select; totals may exceed 100%)</div>
           </div>`;
 
         // Animate rings (sweep + count-up)
@@ -867,7 +872,7 @@ if (!window.scriptExecuted) {
           const iv = setInterval(() => { cur = Math.min(cur + inc, impact); el.textContent = Math.round(cur); if (cur >= impact) clearInterval(iv); }, 26);
         }, 200);
       };
-      renderParentImpact(feedback, district_name);
+      renderParentImpact(feedback, district_name, parent_concerns);
 
       // Other Feedbacks List
       const loadOtherBtn = document.getElementById("load_other_feedbacks");
