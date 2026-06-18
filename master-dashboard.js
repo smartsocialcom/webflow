@@ -275,10 +275,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Process courses_log for bootcamp statistics
       const coursesLog = response.data.courses_log || [];
+      const BOOTCAMP_ACTIONS = new Set(['registration', 'Start', 'start']);
       let sevenDayBootcamp = 0;
       let thirtyDayBootcamp = 0;
-      let allBootcamp = coursesLog.length;
+      let allBootcamp = 0;
       coursesLog.forEach(log => {
+        if (!BOOTCAMP_ACTIONS.has(log.action)) return;
+        allBootcamp++;
         const createdAt = toTimestamp(log.created_at);
         if (createdAt !== null && createdAt >= sevenDaysAgo) {
           sevenDayBootcamp++;
