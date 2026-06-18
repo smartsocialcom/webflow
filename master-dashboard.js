@@ -247,8 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let sevenDayAttendees = 0;
       let sevenDayRegistrations = 0;
-      let thirtyDayRegistrations = 0;
-      let allTimeRegistrations = 0;
       let twentyFourHourRegistrations = 0;
 
       totalStreamyardRecordsByOrg = {};
@@ -267,17 +265,26 @@ document.addEventListener("DOMContentLoaded", () => {
         if (createdAt !== null && createdAt >= sevenDaysAgo && log.action === 'live') {
           sevenDayAttendees++;
         }
-        if (log.action === 'registration') {
-          allTimeRegistrations++;
-          if (createdAt !== null && createdAt >= thirtyDaysAgo) {
-            thirtyDayRegistrations++;
-          }
-          if (createdAt !== null && createdAt >= sevenDaysAgo) {
-            sevenDayRegistrations++;
-          }
+        if (createdAt !== null && createdAt >= sevenDaysAgo && log.action === 'registration') {
+          sevenDayRegistrations++;
         }
         if (createdAt !== null && createdAt >= oneDayAgo && log.action === 'registration') {
           twentyFourHourRegistrations++;
+        }
+      });
+
+      // Process courses_log for bootcamp statistics
+      const coursesLog = response.data.courses_log || [];
+      let sevenDayBootcamp = 0;
+      let thirtyDayBootcamp = 0;
+      let allBootcamp = coursesLog.length;
+      coursesLog.forEach(log => {
+        const createdAt = toTimestamp(log.created_at);
+        if (createdAt !== null && createdAt >= sevenDaysAgo) {
+          sevenDayBootcamp++;
+        }
+        if (createdAt !== null && createdAt >= thirtyDaysAgo) {
+          thirtyDayBootcamp++;
         }
       });
       applySevenDayStreamyardToLatestUsers();
@@ -295,9 +302,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el7dayAttendees) el7dayAttendees.textContent = sevenDayAttendees;
       if (el7dayRegs) el7dayRegs.textContent = sevenDayRegistrations;
       if (el24hRegs) el24hRegs.textContent = twentyFourHourRegistrations;
-      if (el7dayBootcamp) el7dayBootcamp.textContent = sevenDayRegistrations;
-      if (el30dayBootcamp) el30dayBootcamp.textContent = thirtyDayRegistrations;
-      if (elAllBootcamp) elAllBootcamp.textContent = allTimeRegistrations;
+      if (el7dayBootcamp) el7dayBootcamp.textContent = sevenDayBootcamp;
+      if (el30dayBootcamp) el30dayBootcamp.textContent = thirtyDayBootcamp;
+      if (elAllBootcamp) elAllBootcamp.textContent = allBootcamp;
 
       const loader = document.getElementById('loader');
       if (loader) loader.remove();
