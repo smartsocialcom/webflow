@@ -809,7 +809,7 @@ if (!window.scriptExecuted) {
           <div class="ss-wrap">
             <div class="ss-header">
               <div>
-                <div class="ss-sub"><span data-ms-content="master-admin">${N.toLocaleString()} survey ${N === 1 ? "response" : "responses"} &nbsp;·&nbsp; </span>${districtName || ""}</div>
+                <div class="ss-sub">${districtName || ""}</div>
               </div>
               <span class="badge badge-green">● Live</span>
             </div>
@@ -836,7 +836,7 @@ if (!window.scriptExecuted) {
                   </div>`).join("")}
               </div>
             </div>
-            <div class="footer-note">Ring % = "Likely" + "Very Likely" responses &nbsp;·&nbsp; Concern % = share of parents who selected each topic (multi-select; totals may exceed 100%)</div>
+            <div class="footer-note"><span data-ms-content="master-admin">${N.toLocaleString()} survey ${N === 1 ? "response" : "responses"} &nbsp;·&nbsp; </span>Ring % = "Likely" + "Very Likely" responses &nbsp;·&nbsp; Concern % = share of parents who selected each topic (multi-select; totals may exceed 100%)</div>
           </div>`;
 
         // Animate rings (sweep + count-up)
