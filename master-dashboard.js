@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Process courses_log for bootcamp statistics
       const coursesLog = response.data.courses_log || [];
-      const BOOTCAMP_ACTIONS = new Set(['registration', 'Start', 'start']);
+      const BOOTCAMP_ACTIONS = new Set(['register']);
       let sevenDayBootcamp = 0;
       let thirtyDayBootcamp = 0;
       let allBootcamp = 0;
