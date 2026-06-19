@@ -639,23 +639,101 @@ if (!window.scriptExecuted) {
 
       // ═══════════════════════════════════════════════════════════════
       // FEEDBACK TESTIMONIALS
+      // Each card carries a stats row of survey chips: referral / watch /
+      // use-strategies likert meters + kids-attendance chips. Style injected
+      // once, mirroring the #parent_impact widget's self-contained pattern.
       // ═══════════════════════════════════════════════════════════════
+      if (!document.getElementById("ss-stats-row-style")) {
+        const style = document.createElement("style");
+        style.id = "ss-stats-row-style";
+        style.textContent = `
+          .stats_row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0 2px;}
+          .stat_chip{display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:#f7f7f8;border:1px solid #ebebee;font-size:12px;font-weight:500;color:#555;line-height:1;white-space:nowrap;min-width:0;}
+          .stat_chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;}
+          .stat_chip .icon{width:14px;height:14px;flex:none;opacity:.8;}
+          .stat_chip .meter{flex:none;margin-left:auto;}
+          .stat_chip span + .icon{margin-left:auto;}
+          .kids_chip-yes{background:#ecfdf5;border-color:#d3f0e0;color:#067a52;}
+          .kids_chip-no{background:#fafafa;border-color:#f0f0f0;color:#a8a8ad;}
+          @media (max-width:480px){.stats_row{grid-template-columns:1fr;}}
+        `;
+        document.head.appendChild(style);
+      }
+
+      const LIKERT = {
+        "very unlikely": 1, "unlikely": 2, "not likely": 2, "neutral": 3,
+        "somewhat likely": 3, "likely": 4, "very likely": 5, "extremely likely": 5,
+      };
+      const LEVEL_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
+      const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const likertLevel = v => LIKERT[String(v || "").trim().toLowerCase()] ?? 0;
+      const yesNo = value => {
+        if (value === true) return true;
+        if (value === false) return false;
+        const s = String(value || "").trim().toLowerCase();
+        if (s === "yes" || s === "true") return true;
+        if (s === "no" || s === "false") return false;
+        return null;
+      };
+      const meterSVG = (level, max = 5) => {
+        const color = LEVEL_COLORS[level - 1] || "#d4d4d8";
+        let dots = "";
+        for (let i = 0; i < max; i++) {
+          const filled = i < level;
+          dots += `<circle cx="${6 + i * 13}" cy="6" r="4" fill="${filled ? color : "transparent"}" stroke="${filled ? color : "#d4d4d8"}" stroke-width="1.5"/>`;
+        }
+        return `<svg class="meter" width="${max * 13}" height="12" viewBox="0 0 ${max * 13} 12" aria-hidden="true">${dots}</svg>`;
+      };
+      const ICONS = {
+        recommend:  `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4v9H3z"/><path d="M7 11l3.6-7.2A1.9 1.9 0 0 1 14 5.6V10h4.6a2 2 0 0 1 2 2.4l-1.1 5.2A2 2 0 0 1 17.5 20H7"/></svg>`,
+        watch:      `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>`,
+        strategies: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-3.4 10.9c.6.4 1 1.1 1 1.9h4.8c0-.8.4-1.5 1-1.9A6 6 0 0 0 12 3Z"/><path d="M9.8 19h4.4"/><path d="M10.6 21.5h2.8"/></svg>`,
+        kids:       `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="7.5" r="3"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9.5" r="2.3"/><path d="M14.8 20a4.3 4.3 0 0 1 6.7 0"/></svg>`,
+        check:      `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>`,
+      };
+      const statChip = (iconKey, label, value) => {
+        const level = likertLevel(value);
+        if (!level) return "";
+        return `<div class="stat_chip" title="${esc(label)}: ${esc(value)}">${ICONS[iconKey]}<span>${esc(label)}</span>${meterSVG(level)}</div>`;
+      };
+      // Only shows when value resolves to true/false. Empty/missing -> hidden.
+      // Pass onlyYes=true to hide the chip entirely when the answer is false/no.
+      const kidsChip = (value, yesLabel, noLabel, onlyYes = false) => {
+        const state = yesNo(value);
+        if (state === null) return "";
+        if (state === false && onlyYes) return "";
+        return state
+          ? `<div class="stat_chip kids_chip-yes" title="${esc(yesLabel)}">${ICONS.kids}<span>${esc(yesLabel)}</span>${ICONS.check}</div>`
+          : `<div class="stat_chip kids_chip-no" title="${esc(noLabel)}">${ICONS.kids}<span>${esc(noLabel)}</span></div>`;
+      };
+
       let testimonials = "";
-      feedback.forEach(({ positive_feedback, user, created_at, page_name }) => {
+      feedback.forEach(({ positive_feedback, user, created_at, page_name, recommend_likely, watch_likely, use_strategies_likely, kid_attended, bring_kids_next_time }) => {
         const name = user?.last_name ? `${user.first_name} ${user.last_name}` : user.first_name;
         const schools = user?.school_buildings_id
           ?.filter(s => s?.school_name && s.school_name !== "District Staff")
           .map(s => s.school_name)
           .join(", ") || "";
-        const date = new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" });
+        const date = created_at
+          ? new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+          : "";
+        const statsRow = [
+          statChip("recommend",  "Recommend",      recommend_likely),
+          statChip("watch",      "Watch again",    watch_likely),
+          statChip("strategies", "Use strategies", use_strategies_likely),
+          kidsChip(kid_attended,         "I brought my kids",       "Adults only this time"),
+          kidsChip(bring_kids_next_time, "Bringing kids next time", "Not bringing kids next time", true),
+        ].join("");
         testimonials += `
           <div class="testimonial_card">
-            <div class="feedback">"${positive_feedback}"</div>
-            <p class="page_name">✏️ ${page_name}</p>
+            <div class="feedback">"${esc(positive_feedback)}"</div>
+            <p class="page_name">✏️ ${esc(page_name)}</p>
+            ${statsRow ? `<div class="stats_row">${statsRow}</div>` : ""}
             <div class="feedback_line-divider"></div>
             <div>
-              <p class="name">${name}</p>
-              <p class="schools">${schools}</p>
+              <p class="name">${esc(name)}</p>
+              <p class="schools">${esc(schools)}</p>
               <p class="created_at">${date}</p>
             </div>
           </div>`;
