@@ -957,16 +957,29 @@ if (!window.scriptExecuted) {
       if (loadOtherBtn) loadOtherBtn.addEventListener("click", async () => {
         loadOtherBtn.remove();
         const { data } = await axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/feedback/not_org/${org}`);
-        document.getElementById("other_feedbacks_list").innerHTML = data.map(({ positive_feedback, page_name, created_at, organization_info }) => `
+        document.getElementById("other_feedbacks_list").innerHTML = data.map(({ positive_feedback, page_name, created_at, organization_info, recommend_likely, watch_likely, use_strategies_likely, kid_attended, bring_kids_next_time }) => {
+          const date = created_at
+            ? new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+            : "";
+          const statsRow = [
+            statChip("recommend",  "Recommend",      recommend_likely),
+            statChip("watch",      "Watch again",    watch_likely),
+            statChip("strategies", "Use strategies", use_strategies_likely),
+            kidsChip(kid_attended,         "I brought my kids",       "Adults only this time"),
+            kidsChip(bring_kids_next_time, "Bringing kids next time", "Not bringing kids next time", true),
+          ].join("");
+          return `
           <div class="testimonial_card">
-            <div class="feedback">"${positive_feedback}"</div>
-            <p class="page_name">✏️ ${page_name}</p>
+            <div class="feedback">"${esc(positive_feedback)}"</div>
+            <p class="page_name">✏️ ${esc(page_name)}</p>
+            ${statsRow ? `<div class="stats_row">${statsRow}</div>` : ""}
             <div class="feedback_line-divider"></div>
             <div>
-              <p class="name">${organization_info?.district_name || ''}</p>
-              <p class="created_at">${new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" })}</p>
+              <p class="name">${esc(organization_info?.district_name || '')}</p>
+              <p class="created_at">${date}</p>
             </div>
-          </div>`).join("");
+          </div>`;
+        }).join("");
       });
 
       // ═══════════════════════════════════════════════════════════════
