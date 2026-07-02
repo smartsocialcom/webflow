@@ -662,12 +662,13 @@ if (!window.scriptExecuted) {
 
       const LIKERT = {
         "very unlikely": 1, "unlikely": 2, "not likely": 2, "neutral": 3,
-        "somewhat likely": 3, "likely": 4, "very likely": 5, "extremely likely": 5,
+        "maybe": 3, "somewhat likely": 3, "likely": 4, "very likely": 5, "extremely likely": 5,
       };
       const LEVEL_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
       const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-      const likertLevel = v => LIKERT[String(v || "").trim().toLowerCase()] ?? 0;
+      const likertKey = v => String(v || "").trim().toLowerCase();
+      const likertLevel = v => LIKERT[likertKey(v)] ?? 0;
       const yesNo = value => {
         if (value === true) return true;
         if (value === false) return false;
@@ -809,7 +810,7 @@ if (!window.scriptExecuted) {
           document.head.appendChild(style);
         }
 
-        const LIKELY = new Set(["Very Likely", "Likely"]);
+        const LIKELY = new Set(["very likely", "likely"]);
         const survey = (feedbackArr || []).filter(f => (f.recommend_likely || "").trim());
         const N = survey.length;
 
@@ -820,7 +821,7 @@ if (!window.scriptExecuted) {
           return;
         }
 
-        const pctLikely = field => Math.round(100 * survey.filter(f => LIKELY.has(f[field])).length / N);
+        const pctLikely = field => Math.round(100 * survey.filter(f => LIKELY.has(likertKey(f[field]))).length / N);
         const referral = pctLikely("recommend_likely");
         const returnIntent = pctLikely("watch_likely");
         const adoption = pctLikely("use_strategies_likely");
