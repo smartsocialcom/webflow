@@ -73,8 +73,44 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------------------------------------------------
-  // "New Activity — Last 30 Days" line chart
+  // "New Activity — Last 30 Days" — small multiples
+  //
+  // Four metrics of very different magnitude (registrations & bootcamp in
+  // the dozens/day, feedbacks & Streamyard near zero) and sporadic daily
+  // counts. A single overlaid line chart would crush the small series onto
+  // the axis and a smoothed curve would invent values on zero-activity days.
+  // Instead each metric gets its own panel: a daily COLUMN chart (no
+  // interpolation) on its OWN y-scale, sharing an aligned 30-day x-window so
+  // spikes still line up across panels. Each panel leads with a total + peak.
   // ---------------------------------------------------------
+
+  // getTs is read lazily at render time because the timestamp arrays are
+  // populated asynchronously by two different endpoints. `note` returns an
+  // optional data-quality caveat for that panel (or null).
+  const TREND_METRICS = [
+    {
+      key: 'registrations', name: 'New Registrations', unit: 'registrations',
+      color: '#449997', getTs: () => trendRegistrationTs,
+      note: () => trendRegistrationHasFullWindow ? null : 'Last 7 days only — add users_30days'
+    },
+    {
+      key: 'bootcamp', name: 'Bootcamp Registrations', unit: 'registrations',
+      color: '#8E7CB8', getTs: () => trendBootcampTs, note: () => null
+    },
+    {
+      key: 'feedbacks', name: 'New Feedbacks', unit: 'feedbacks',
+      color: '#E8907C', getTs: () => trendFeedbackTs,
+      note: (windowTotal, allTime) => allTime === 0 ? 'Add created_at to feedbacks to plot' : null
+    },
+    {
+      key: 'streamyard', name: 'Streamyard Signups', unit: 'signups',
+      color: '#E0A93B', getTs: () => trendStreamyardTs,
+      note: (windowTotal, allTime) =>
+        (windowTotal <= 3 && allTime > 50)
+          ? 'Recent feed sparse · ' + allTime.toLocaleString() + ' logged all-time'
+          : null
+    }
+  ];
 
   // Load ApexCharts on demand so the master-admin page doesn't
   // need its own script embed. Resolves once window.ApexCharts exists.
@@ -94,38 +130,54 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Return the mount element for the chart. Prefer a #trends_chart
-  // element the admin placed in Webflow; otherwise inject a card
-  // above the Registration Summary so it always appears.
-  function ensureTrendContainer() {
-    const existing = document.getElementById('trends_chart');
-    if (existing) return existing;
-
+  // Build (once) the card + responsive grid and return the grid element.
+  // Prefer a #trends_chart element the admin placed in Webflow as the host;
+  // otherwise inject a card above the Registration Summary table.
+  function ensureTrendGrid() {
     if (!document.getElementById('trends_chart_style')) {
       const style = document.createElement('style');
       style.id = 'trends_chart_style';
       style.textContent =
         '#trends_chart_card{background:#fff;border:1px solid #e3ecec;border-radius:12px;' +
-        'padding:18px 20px;margin:0 0 24px;box-shadow:0 1px 3px rgba(45,90,90,.06);}' +
-        '#trends_chart_card h3{font-size:18px;color:#2D5A5A;font-weight:700;margin:0 0 4px;}' +
-        '#trends_chart_note{margin:0 0 12px;font-size:12px;color:#6b7c7c;}';
+        'padding:18px 20px 10px;margin:0 0 24px;box-shadow:0 1px 3px rgba(45,90,90,.06);}' +
+        '#trends_chart_card h3{font-size:18px;color:#2D5A5A;font-weight:700;margin:0 0 2px;}' +
+        '#trends_chart_note{margin:0 0 14px;font-size:12px;color:#6b7c7c;}' +
+        '.trends-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}' +
+        '.trend-panel{border:1px solid #eef2f2;border-radius:10px;padding:12px 12px 2px;background:#fbfdfd;}' +
+        '.trend-panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}' +
+        '.trend-panel-name{font-size:13px;font-weight:600;color:#2D5A5A;}' +
+        '.trend-panel-total{font-size:22px;font-weight:800;line-height:1;}' +
+        '.trend-panel-sub{font-size:11px;color:#7c8c8c;margin:3px 0 2px;}' +
+        '.trend-panel-note{font-size:10.5px;color:#b0870f;margin:1px 0 0;}';
       document.head.appendChild(style);
     }
 
-    const card = document.createElement('div');
-    card.id = 'trends_chart_card';
-    card.innerHTML =
-      '<h3>New Activity — Last 30 Days</h3>' +
-      '<p id="trends_chart_note"></p>' +
-      '<div id="trends_chart"></div>';
+    let host = document.getElementById('trends_chart');
+    if (!host) {
+      const card = document.createElement('div');
+      card.id = 'trends_chart_card';
+      card.innerHTML =
+        '<h3>New Activity — Last 30 Days</h3>' +
+        '<p id="trends_chart_note">Each panel has its own scale — daily counts over the last 30 days.</p>';
+      const grid = document.createElement('div');
+      grid.className = 'trends-grid';
+      card.appendChild(grid);
 
-    const anchor = document.getElementById('latest_users') || document.getElementById('active');
-    if (anchor && anchor.parentNode) {
-      anchor.parentNode.insertBefore(card, anchor);
-    } else {
-      document.body.insertBefore(card, document.body.firstChild);
+      const anchor = document.getElementById('latest_users') || document.getElementById('active');
+      if (anchor && anchor.parentNode) {
+        anchor.parentNode.insertBefore(card, anchor);
+      } else {
+        document.body.insertBefore(card, document.body.firstChild);
+      }
+      return grid;
     }
-    return document.getElementById('trends_chart');
+
+    // Admin-provided host: render the grid inside it.
+    host.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'trends-grid';
+    host.appendChild(grid);
+    return grid;
   }
 
   // Bucket an array of epoch-ms timestamps into `days` daily points
@@ -150,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return points;
   }
 
-  // Render once both source endpoints have populated their timestamps.
+  // Render once all four source arrays have populated their timestamps.
   function maybeRenderTrendChart() {
     const ready = [trendRegistrationTs, trendFeedbackTs, trendStreamyardTs, trendBootcampTs]
       .every(v => v !== null);
@@ -162,69 +214,93 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderTrendChart() {
     if (trendChartRendered) return;
-    const el = ensureTrendContainer();
-    if (!el) return;
+    const grid = ensureTrendGrid();
+    if (!grid) return;
     trendChartRendered = true;
 
-    const series = [
-      { name: 'New Registrations', data: bucketDailySeries(trendRegistrationTs, TREND_DAYS) },
-      { name: 'Streamyard Signups', data: bucketDailySeries(trendStreamyardTs, TREND_DAYS) },
-      { name: 'New Feedbacks', data: bucketDailySeries(trendFeedbackTs, TREND_DAYS) },
-      { name: 'Bootcamp Registrations', data: bucketDailySeries(trendBootcampTs, TREND_DAYS) }
-    ];
-    const totals = series.map(s => s.data.reduce((sum, p) => sum + p.y, 0));
+    const fmtDay = ms => new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
+    // State the shared 30-day window once in the header (x-axis labels are
+    // hidden on the individual sparkline panels).
+    const dayMs = 24 * 60 * 60 * 1000;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const windowStartMs = todayStart.getTime() - (TREND_DAYS - 1) * dayMs;
     const noteEl = document.getElementById('trends_chart_note');
     if (noteEl) {
-      let note = 'Totals — Registrations ' + totals[0].toLocaleString() +
-        ' · Streamyard ' + totals[1].toLocaleString() +
-        ' · Feedbacks ' + totals[2].toLocaleString() +
-        ' · Bootcamp ' + totals[3].toLocaleString();
-      const caveats = [];
-      if (!trendRegistrationHasFullWindow) caveats.push('registrations reflect the last 7 days only');
-      if ((trendFeedbackTs || []).length === 0) caveats.push('feedbacks need a date field to plot');
-      if (caveats.length) note += ' (' + caveats.join('; ') + ')';
-      noteEl.textContent = note;
+      noteEl.textContent = 'Daily counts · ' + fmtDay(windowStartMs) + ' – ' + fmtDay(todayStart.getTime()) +
+        ' · each panel has its own scale.';
     }
 
-    new ApexCharts(el, {
-      chart: {
-        type: 'line',
-        height: 360,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-        toolbar: { show: false },
-        zoom: { enabled: false },
-        animations: { enabled: true, speed: 600 }
-      },
-      series: series,
-      colors: ['#449997', '#E8907C', '#E0A93B', '#8E7CB8'],
-      stroke: { curve: 'smooth', width: 3 },
-      markers: { size: 0, hover: { size: 5 } },
-      dataLabels: { enabled: false },
-      legend: { position: 'top', horizontalAlign: 'left', fontSize: '14px' },
-      xaxis: {
-        type: 'datetime',
-        labels: {
-          datetimeUTC: false,
-          format: 'MMM d',
-          style: { colors: '#5a7a7a', fontSize: '12px' },
-          hideOverlappingLabels: true
+    TREND_METRICS.forEach(metric => {
+      const allTs = metric.getTs() || [];
+      const points = bucketDailySeries(allTs, TREND_DAYS);
+      const total = points.reduce((sum, p) => sum + p.y, 0);
+      const peak = points.reduce((m, p) => (p.y > m.y ? p : m), { x: null, y: 0 });
+      const note = metric.note ? metric.note(total, allTs.length) : null;
+
+      const panel = document.createElement('div');
+      panel.className = 'trend-panel';
+      panel.innerHTML =
+        '<div class="trend-panel-head">' +
+          '<span class="trend-panel-name">' + metric.name + '</span>' +
+          '<span class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="trend-panel-sub">' +
+          (total > 0 ? 'Peak ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
+        '</div>' +
+        (note ? '<div class="trend-panel-note">' + note + '</div>' : '') +
+        '<div class="trend-panel-chart" id="trends_chart_' + metric.key + '"></div>';
+      grid.appendChild(panel);
+
+      new ApexCharts(panel.querySelector('.trend-panel-chart'), {
+        chart: {
+          type: 'bar',
+          height: 130,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+          toolbar: { show: false },
+          zoom: { enabled: false },
+          parentHeightOffset: 0,
+          animations: { enabled: true, speed: 500 }
         },
-        axisBorder: { show: false },
-        axisTicks: { show: false },
-        tooltip: { enabled: false }
-      },
-      yaxis: {
-        min: 0,
-        forceNiceScale: true,
-        labels: {
-          style: { colors: '#5a7a7a', fontSize: '12px' },
-          formatter: v => Math.round(v).toLocaleString()
+        series: [{ name: metric.name, data: points }],
+        colors: [metric.color],
+        plotOptions: { bar: { columnWidth: '68%', borderRadius: 2 } },
+        dataLabels: { enabled: false },
+        legend: { show: false },
+        xaxis: {
+          type: 'datetime',
+          // Per-panel date labels crowd/double at sparkline width and Apex
+          // places datetime ticks per-panel regardless of tickAmount, so the
+          // shared window is stated once in the card header instead. The
+          // tooltip still carries the exact day on hover.
+          labels: { show: false },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
+          tooltip: { enabled: false }
+        },
+        yaxis: {
+          min: 0,
+          tickAmount: 2,
+          forceNiceScale: true,
+          labels: {
+            style: { colors: '#9aa8a8', fontSize: '10px' },
+            formatter: v => Math.round(v).toLocaleString()
+          }
+        },
+        grid: {
+          borderColor: '#eef4f4',
+          strokeDashArray: 3,
+          padding: { left: 2, right: 6, top: 0, bottom: 0 },
+          xaxis: { lines: { show: false } },
+          yaxis: { lines: { show: true } }
+        },
+        tooltip: {
+          x: { format: 'MMM d, yyyy' },
+          y: { formatter: v => v.toLocaleString() + ' ' + metric.unit }
         }
-      },
-      grid: { borderColor: '#e8f0f0', strokeDashArray: 4 },
-      tooltip: { shared: true, x: { format: 'MMM d, yyyy' } }
-    }).render();
+      }).render();
+    });
   }
 
   // ---------------------------------------------------------
@@ -296,10 +372,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el7dayFeedbacks) el7dayFeedbacks.textContent = feedbackList.length;
 
       // Feed the 30-day trend chart. Prefer a full 30-day user list if the
-      // endpoint provides one (users_30day); otherwise fall back to the
-      // 7-day list so the series still renders for the recent window.
-      const registrationUsers = response.data.users_30day || sevenDayUsers;
-      trendRegistrationHasFullWindow = Array.isArray(response.data.users_30day);
+      // endpoint provides one (Xano returns it as `users_30days`; accept the
+      // singular too). Fall back to the 7-day list so the panel still renders.
+      const thirtyDayUsers = response.data.users_30days || response.data.users_30day;
+      const registrationUsers = thirtyDayUsers || sevenDayUsers;
+      trendRegistrationHasFullWindow = Array.isArray(thirtyDayUsers);
       trendRegistrationTs = registrationUsers
         .map(u => toTimestamp(u.created_at))
         .filter(v => v !== null);
