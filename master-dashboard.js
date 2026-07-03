@@ -19,6 +19,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentSortSummaryColumn = null;
   let sortAscendingSummary = false;
 
+  // ---------------------------------------------------------
+  // State for the "New Activity — Last 30 Days" trend chart
+  // Each holds an array of epoch-ms timestamps once its source
+  // endpoint has resolved (null = still loading, [] = none).
+  // ---------------------------------------------------------
+  let trendRegistrationTs = null;
+  let trendFeedbackTs = null;
+  let trendStreamyardTs = null;
+  let trendBootcampTs = null;
+  let trendRegistrationHasFullWindow = false; // true only when a 30-day user list is provided
+  let trendChartRendered = false;
+  const TREND_DAYS = 30;
+
   function normalizeOrgKey(value) {
     if (value === undefined || value === null || value === '') return null;
     if (typeof value === 'object') {
@@ -57,6 +70,161 @@ document.addEventListener("DOMContentLoaded", () => {
         sevenDayStreamyardCount: orgKey ? (sevenDayStreamyardRecordsByOrg[orgKey] || 0) : 0
       };
     });
+  }
+
+  // ---------------------------------------------------------
+  // "New Activity — Last 30 Days" line chart
+  // ---------------------------------------------------------
+
+  // Load ApexCharts on demand so the master-admin page doesn't
+  // need its own script embed. Resolves once window.ApexCharts exists.
+  function ensureApexCharts() {
+    return new Promise((resolve, reject) => {
+      if (window.ApexCharts) return resolve(window.ApexCharts);
+      let script = document.querySelector('script[data-apexcharts-loader]');
+      if (!script) {
+        script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/apexcharts';
+        script.async = true;
+        script.setAttribute('data-apexcharts-loader', '');
+        document.head.appendChild(script);
+      }
+      script.addEventListener('load', () => resolve(window.ApexCharts));
+      script.addEventListener('error', () => reject(new Error('Failed to load ApexCharts')));
+    });
+  }
+
+  // Return the mount element for the chart. Prefer a #trends_chart
+  // element the admin placed in Webflow; otherwise inject a card
+  // above the Registration Summary so it always appears.
+  function ensureTrendContainer() {
+    const existing = document.getElementById('trends_chart');
+    if (existing) return existing;
+
+    if (!document.getElementById('trends_chart_style')) {
+      const style = document.createElement('style');
+      style.id = 'trends_chart_style';
+      style.textContent =
+        '#trends_chart_card{background:#fff;border:1px solid #e3ecec;border-radius:12px;' +
+        'padding:18px 20px;margin:0 0 24px;box-shadow:0 1px 3px rgba(45,90,90,.06);}' +
+        '#trends_chart_card h3{font-size:18px;color:#2D5A5A;font-weight:700;margin:0 0 4px;}' +
+        '#trends_chart_note{margin:0 0 12px;font-size:12px;color:#6b7c7c;}';
+      document.head.appendChild(style);
+    }
+
+    const card = document.createElement('div');
+    card.id = 'trends_chart_card';
+    card.innerHTML =
+      '<h3>New Activity — Last 30 Days</h3>' +
+      '<p id="trends_chart_note"></p>' +
+      '<div id="trends_chart"></div>';
+
+    const anchor = document.getElementById('latest_users') || document.getElementById('active');
+    if (anchor && anchor.parentNode) {
+      anchor.parentNode.insertBefore(card, anchor);
+    } else {
+      document.body.insertBefore(card, document.body.firstChild);
+    }
+    return document.getElementById('trends_chart');
+  }
+
+  // Bucket an array of epoch-ms timestamps into `days` daily points
+  // ending today. Each point is { x: localMidnightMs, y: count } so it
+  // maps cleanly onto an ApexCharts datetime x-axis.
+  function bucketDailySeries(timestamps, days) {
+    const dayMs = 24 * 60 * 60 * 1000;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const startMs = todayStart.getTime() - (days - 1) * dayMs;
+    const endMs = startMs + days * dayMs;
+
+    const points = [];
+    for (let i = 0; i < days; i++) {
+      points.push({ x: startMs + i * dayMs, y: 0 });
+    }
+    (timestamps || []).forEach(ts => {
+      if (ts === null || ts < startMs || ts >= endMs) return;
+      const idx = Math.floor((ts - startMs) / dayMs);
+      if (idx >= 0 && idx < days) points[idx].y++;
+    });
+    return points;
+  }
+
+  // Render once both source endpoints have populated their timestamps.
+  function maybeRenderTrendChart() {
+    const ready = [trendRegistrationTs, trendFeedbackTs, trendStreamyardTs, trendBootcampTs]
+      .every(v => v !== null);
+    if (!ready || trendChartRendered) return;
+    ensureApexCharts()
+      .then(renderTrendChart)
+      .catch(err => console.error('Trend chart:', err));
+  }
+
+  function renderTrendChart() {
+    if (trendChartRendered) return;
+    const el = ensureTrendContainer();
+    if (!el) return;
+    trendChartRendered = true;
+
+    const series = [
+      { name: 'New Registrations', data: bucketDailySeries(trendRegistrationTs, TREND_DAYS) },
+      { name: 'Streamyard Signups', data: bucketDailySeries(trendStreamyardTs, TREND_DAYS) },
+      { name: 'New Feedbacks', data: bucketDailySeries(trendFeedbackTs, TREND_DAYS) },
+      { name: 'Bootcamp Registrations', data: bucketDailySeries(trendBootcampTs, TREND_DAYS) }
+    ];
+    const totals = series.map(s => s.data.reduce((sum, p) => sum + p.y, 0));
+
+    const noteEl = document.getElementById('trends_chart_note');
+    if (noteEl) {
+      let note = 'Totals — Registrations ' + totals[0].toLocaleString() +
+        ' · Streamyard ' + totals[1].toLocaleString() +
+        ' · Feedbacks ' + totals[2].toLocaleString() +
+        ' · Bootcamp ' + totals[3].toLocaleString();
+      const caveats = [];
+      if (!trendRegistrationHasFullWindow) caveats.push('registrations reflect the last 7 days only');
+      if ((trendFeedbackTs || []).length === 0) caveats.push('feedbacks need a date field to plot');
+      if (caveats.length) note += ' (' + caveats.join('; ') + ')';
+      noteEl.textContent = note;
+    }
+
+    new ApexCharts(el, {
+      chart: {
+        type: 'line',
+        height: 360,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        animations: { enabled: true, speed: 600 }
+      },
+      series: series,
+      colors: ['#449997', '#E8907C', '#E0A93B', '#8E7CB8'],
+      stroke: { curve: 'smooth', width: 3 },
+      markers: { size: 0, hover: { size: 5 } },
+      dataLabels: { enabled: false },
+      legend: { position: 'top', horizontalAlign: 'left', fontSize: '14px' },
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          datetimeUTC: false,
+          format: 'MMM d',
+          style: { colors: '#5a7a7a', fontSize: '12px' },
+          hideOverlappingLabels: true
+        },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        tooltip: { enabled: false }
+      },
+      yaxis: {
+        min: 0,
+        forceNiceScale: true,
+        labels: {
+          style: { colors: '#5a7a7a', fontSize: '12px' },
+          formatter: v => Math.round(v).toLocaleString()
+        }
+      },
+      grid: { borderColor: '#e8f0f0', strokeDashArray: 4 },
+      tooltip: { shared: true, x: { format: 'MMM d, yyyy' } }
+    }).render();
   }
 
   // ---------------------------------------------------------
@@ -127,11 +295,30 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el7dVipRegs) el7dVipRegs.textContent = sevenDayUsers.length;
       if (el7dayFeedbacks) el7dayFeedbacks.textContent = feedbackList.length;
 
+      // Feed the 30-day trend chart. Prefer a full 30-day user list if the
+      // endpoint provides one (users_30day); otherwise fall back to the
+      // 7-day list so the series still renders for the recent window.
+      const registrationUsers = response.data.users_30day || sevenDayUsers;
+      trendRegistrationHasFullWindow = Array.isArray(response.data.users_30day);
+      trendRegistrationTs = registrationUsers
+        .map(u => toTimestamp(u.created_at))
+        .filter(v => v !== null);
+      trendFeedbackTs = feedbackList
+        .map(f => toTimestamp(f.created_at))
+        .filter(v => v !== null);
+      maybeRenderTrendChart();
+
       // Initial Sort
       // Since currentSortSummaryColumn is null, this will apply Default logic (Descending for numbers)
       sortLatestUsers('sevenDayCount');
     })
-    .catch(error => console.error("Error fetching latest users:", error));
+    .catch(error => {
+      console.error("Error fetching latest users:", error);
+      // Let the chart still render from the other endpoint's data.
+      if (trendRegistrationTs === null) trendRegistrationTs = [];
+      if (trendFeedbackTs === null) trendFeedbackTs = [];
+      maybeRenderTrendChart();
+    });
 
   // Function to Sort the Summary Table
   function sortLatestUsers(key) {
@@ -311,6 +498,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el30dayBootcamp) el30dayBootcamp.textContent = thirtyDayBootcamp;
       if (elAllBootcamp) elAllBootcamp.textContent = allBootcamp;
 
+      // Feed the 30-day trend chart with Streamyard signups (webinars_log
+      // registrations) and Bootcamp registrations (courses_log actions).
+      trendStreamyardTs = webinarsLog
+        .filter(log => log.action === 'registration')
+        .map(log => toTimestamp(log.created_at))
+        .filter(v => v !== null);
+      trendBootcampTs = coursesLog
+        .filter(log => BOOTCAMP_ACTIONS.has((log.action || '').toString().trim().toLowerCase()))
+        .map(log => toTimestamp(log.created_at))
+        .filter(v => v !== null);
+      maybeRenderTrendChart();
+
       const loader = document.getElementById('loader');
       if (loader) loader.remove();
 
@@ -320,7 +519,13 @@ document.addEventListener("DOMContentLoaded", () => {
         sortColumn('total_feedbacks');
       }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+      console.error("Error:", error);
+      // Let the chart still render from the other endpoint's data.
+      if (trendStreamyardTs === null) trendStreamyardTs = [];
+      if (trendBootcampTs === null) trendBootcampTs = [];
+      maybeRenderTrendChart();
+    });
 
   function renderTable(data) {
     const activeContainer = document.getElementById('active');
