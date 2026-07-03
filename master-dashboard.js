@@ -138,17 +138,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const style = document.createElement('style');
       style.id = 'trends_chart_style';
       style.textContent =
-        '#trends_chart_card{background:#fff;border:1px solid #e3ecec;border-radius:12px;' +
-        'padding:18px 20px 10px;margin:0 0 24px;box-shadow:0 1px 3px rgba(45,90,90,.06);}' +
+        '#trends_chart_card{background:#fff;border:1px solid #e3ecec;border-radius:14px;' +
+        'padding:20px 22px 16px;margin:0 0 24px;box-shadow:0 1px 3px rgba(45,90,90,.06);}' +
         '#trends_chart_card h3{font-size:18px;color:#2D5A5A;font-weight:700;margin:0 0 2px;}' +
-        '#trends_chart_note{margin:0 0 14px;font-size:12px;color:#6b7c7c;}' +
-        '.trends-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}' +
-        '.trend-panel{border:1px solid #eef2f2;border-radius:10px;padding:12px 12px 2px;background:#fbfdfd;}' +
-        '.trend-panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}' +
-        '.trend-panel-name{font-size:13px;font-weight:600;color:#2D5A5A;}' +
-        '.trend-panel-total{font-size:22px;font-weight:800;line-height:1;}' +
-        '.trend-panel-sub{font-size:11px;color:#7c8c8c;margin:3px 0 2px;}' +
-        '.trend-panel-note{font-size:10.5px;color:#b0870f;margin:1px 0 0;}';
+        '#trends_chart_note{margin:0 0 16px;font-size:12px;color:#6b7c7c;}' +
+        '.trends-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}' +
+        '@media(max-width:560px){.trends-grid{grid-template-columns:1fr;}}' +
+        '.trend-panel{position:relative;border:1px solid #edf1f1;border-radius:12px;' +
+        'padding:14px 16px 0;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(45,90,90,.04);' +
+        'transition:box-shadow .15s ease,transform .15s ease;}' +
+        '.trend-panel:hover{box-shadow:0 6px 18px rgba(45,90,90,.11);transform:translateY(-2px);}' +
+        '.trend-panel-name{font-size:11px;font-weight:600;letter-spacing:.04em;' +
+        'text-transform:uppercase;color:#7c8c8c;}' +
+        '.trend-panel-total{font-size:30px;font-weight:800;line-height:1.05;margin:3px 0 0;}' +
+        '.trend-panel-sub{font-size:11.5px;color:#8a9a9a;margin:2px 0 10px;}' +
+        '.trend-panel-note{font-size:10.5px;color:#b0870f;margin:-6px 0 10px;}' +
+        '.trend-panel-chart{margin:0 -16px;}';
       document.head.appendChild(style);
     }
 
@@ -220,16 +225,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const fmtDay = ms => new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
-    // State the shared 30-day window once in the header (x-axis labels are
-    // hidden on the individual sparkline panels).
+    // State the shared window once in the header; each curve is a running
+    // total scaled to its own metric (x-axis is hidden on the sparklines).
     const dayMs = 24 * 60 * 60 * 1000;
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const windowStartMs = todayStart.getTime() - (TREND_DAYS - 1) * dayMs;
     const noteEl = document.getElementById('trends_chart_note');
     if (noteEl) {
-      noteEl.textContent = 'Daily counts · ' + fmtDay(windowStartMs) + ' – ' + fmtDay(todayStart.getTime()) +
-        ' · each panel has its own scale.';
+      noteEl.textContent = 'Running total · ' + fmtDay(windowStartMs) + ' – ' + fmtDay(todayStart.getTime()) +
+        ' · each panel scaled to itself.';
     }
 
     TREND_METRICS.forEach(metric => {
@@ -239,15 +244,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const peak = points.reduce((m, p) => (p.y > m.y ? p : m), { x: null, y: 0 });
       const note = metric.note ? metric.note(total, allTs.length) : null;
 
+      // Cumulative running total — turns sporadic, mostly-zero daily counts
+      // into a curve that rises across the window and fills the panel, while
+      // staying exact (each point is the true total through that day).
+      let running = 0;
+      const cumulative = points.map(p => { running += p.y; return { x: p.x, y: running }; });
+
       const panel = document.createElement('div');
       panel.className = 'trend-panel';
       panel.innerHTML =
-        '<div class="trend-panel-head">' +
-          '<span class="trend-panel-name">' + metric.name + '</span>' +
-          '<span class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</span>' +
-        '</div>' +
+        '<div class="trend-panel-name">' + metric.name + '</div>' +
+        '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
         '<div class="trend-panel-sub">' +
-          (total > 0 ? 'Peak ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
+          (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
         '</div>' +
         (note ? '<div class="trend-panel-note">' + note + '</div>' : '') +
         '<div class="trend-panel-chart" id="trends_chart_' + metric.key + '"></div>';
@@ -255,49 +264,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
       new ApexCharts(panel.querySelector('.trend-panel-chart'), {
         chart: {
-          type: 'bar',
-          height: 130,
+          type: 'area',
+          height: 104,
+          sparkline: { enabled: true },
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-          toolbar: { show: false },
-          zoom: { enabled: false },
-          parentHeightOffset: 0,
-          animations: { enabled: true, speed: 500 }
+          animations: { enabled: true, speed: 650 }
         },
-        series: [{ name: metric.name, data: points }],
+        series: [{ name: metric.name, data: cumulative }],
         colors: [metric.color],
-        plotOptions: { bar: { columnWidth: '68%', borderRadius: 2 } },
+        stroke: { curve: 'smooth', width: 3, lineCap: 'round' },
+        fill: {
+          type: 'gradient',
+          gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.04, stops: [0, 100] }
+        },
         dataLabels: { enabled: false },
-        legend: { show: false },
-        xaxis: {
-          type: 'datetime',
-          // Per-panel date labels crowd/double at sparkline width and Apex
-          // places datetime ticks per-panel regardless of tickAmount, so the
-          // shared window is stated once in the card header instead. The
-          // tooltip still carries the exact day on hover.
-          labels: { show: false },
-          axisBorder: { show: false },
-          axisTicks: { show: false },
-          tooltip: { enabled: false }
-        },
-        yaxis: {
-          min: 0,
-          tickAmount: 2,
-          forceNiceScale: true,
-          labels: {
-            style: { colors: '#9aa8a8', fontSize: '10px' },
-            formatter: v => Math.round(v).toLocaleString()
-          }
-        },
-        grid: {
-          borderColor: '#eef4f4',
-          strokeDashArray: 3,
-          padding: { left: 2, right: 6, top: 0, bottom: 0 },
-          xaxis: { lines: { show: false } },
-          yaxis: { lines: { show: true } }
-        },
         tooltip: {
           x: { format: 'MMM d, yyyy' },
-          y: { formatter: v => v.toLocaleString() + ' ' + metric.unit }
+          y: { formatter: v => v.toLocaleString() + ' ' + metric.unit + ' (running total)' }
         }
       }).render();
     });
