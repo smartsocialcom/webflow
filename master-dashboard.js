@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '.trends-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}' +
         '@media(max-width:560px){.trends-grid{grid-template-columns:1fr;}}' +
         '.trend-panel{position:relative;border:1px solid #edf1f1;border-radius:12px;' +
-        'padding:14px 16px 0;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(45,90,90,.04);' +
+        'padding:14px 16px 8px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(45,90,90,.04);' +
         'transition:box-shadow .15s ease,transform .15s ease;}' +
         '.trend-panel:hover{box-shadow:0 6px 18px rgba(45,90,90,.11);transform:translateY(-2px);}' +
         '.trend-panel-name{font-size:11px;font-weight:600;letter-spacing:.04em;' +
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '.trend-panel-total{font-size:30px;font-weight:800;line-height:1.05;margin:3px 0 0;}' +
         '.trend-panel-sub{font-size:11.5px;color:#8a9a9a;margin:2px 0 10px;}' +
         '.trend-panel-note{font-size:10.5px;color:#b0870f;margin:-6px 0 10px;}' +
-        '.trend-panel-chart{margin:0 -16px;}';
+        '.trend-panel-chart{margin:0 -6px;}';
       document.head.appendChild(style);
     }
 
@@ -265,8 +265,10 @@ document.addEventListener("DOMContentLoaded", () => {
       new ApexCharts(panel.querySelector('.trend-panel-chart'), {
         chart: {
           type: 'area',
-          height: 104,
-          sparkline: { enabled: true },
+          height: 122,
+          toolbar: { show: false },
+          zoom: { enabled: false },
+          parentHeightOffset: 0,
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
           animations: { enabled: true, speed: 650 }
         },
@@ -278,6 +280,25 @@ document.addEventListener("DOMContentLoaded", () => {
           gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.04, stops: [0, 100] }
         },
         dataLabels: { enabled: false },
+        grid: { show: false, padding: { left: 10, right: 10, top: 0, bottom: -6 } },
+        xaxis: {
+          type: 'datetime',
+          // Fixed to the shared window so all four panels' date ticks align.
+          min: windowStartMs,
+          max: todayStart.getTime(),
+          tickAmount: 5,
+          labels: {
+            datetimeUTC: false,
+            format: 'MMM d',
+            style: { colors: '#9aa8a8', fontSize: '11px' },
+            hideOverlappingLabels: true,
+            rotate: 0
+          },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
+          tooltip: { enabled: false }
+        },
+        yaxis: { show: false },
         tooltip: {
           x: { format: 'MMM d, yyyy' },
           y: { formatter: v => v.toLocaleString() + ' ' + metric.unit + ' (running total)' }
