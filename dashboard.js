@@ -166,6 +166,19 @@ if (!window.scriptExecuted) {
           .sort((a, b) => b.count - a.count)
           .slice(0, 10);
 
+      // Accept epoch seconds/milliseconds or any Date-parseable string;
+      // returns epoch-ms or null. Feeds the 30-day trend chart's daily buckets.
+      const toTimestamp = value => {
+        if (typeof value === "number" && Number.isFinite(value)) {
+          return value > 1e12 ? value : value * 1000;
+        }
+        if (typeof value === "string") {
+          const parsed = Date.parse(value);
+          if (!Number.isNaN(parsed)) return parsed;
+        }
+        return null;
+      };
+
       // ═══════════════════════════════════════════════════════════════
       // DATA FETCHING
       // ═══════════════════════════════════════════════════════════════
@@ -278,6 +291,159 @@ if (!window.scriptExecuted) {
           responsive: areaChartResponsive
         }).render();
       }
+
+      // ═══════════════════════════════════════════════════════════════
+      // CHART: NEW ACTIVITY — LAST 30 DAYS (org-scoped small multiples)
+      //
+      // Each panel is one metric on its OWN scale: a cumulative area curve
+      // over a shared 30-day window so spikes line up across panels. Built
+      // ONLY from arrays the single org endpoint already returns (feedback +
+      // webinars_log) — no extra API calls. Registrations aren't plottable
+      // daily here: the endpoint exposes only monthly aggregates
+      // (users_per_month_arr). To add a daily Registrations panel, expose a
+      // raw users array with created_at on this endpoint.
+      // ═══════════════════════════════════════════════════════════════
+      const TREND_DAYS = 30;
+      const webinarTsByAction = act => (webinars_log || [])
+        .filter(l => l.action === act)
+        .map(l => toTimestamp(l.created_at))
+        .filter(v => v !== null);
+      const trendMetrics = [
+        { key: "feedbacks", name: "New Feedbacks",  unit: "feedbacks",  color: "#E8907C", ts: (feedback || []).map(f => toTimestamp(f.created_at)).filter(v => v !== null) },
+        { key: "signups",   name: "Webinar Signups", unit: "signups",    color: "#E0A93B", ts: webinarTsByAction("registration") },
+        { key: "attendees", name: "Live Attendees",  unit: "attendees",  color: "#449997", ts: webinarTsByAction("live") },
+        { key: "replays",   name: "Replay Views",    unit: "views",      color: "#8E7CB8", ts: webinarTsByAction("on-demand") }
+      ];
+
+      // Bucket epoch-ms timestamps into `days` daily points ending today,
+      // each { x: localMidnightMs, y: count } — maps onto a datetime x-axis.
+      const bucketDailySeries = (timestamps, days) => {
+        const dayMs = 24 * 60 * 60 * 1000;
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const startMs = todayStart.getTime() - (days - 1) * dayMs;
+        const endMs = startMs + days * dayMs;
+        const points = [];
+        for (let i = 0; i < days; i++) points.push({ x: startMs + i * dayMs, y: 0 });
+        (timestamps || []).forEach(ts => {
+          if (ts === null || ts < startMs || ts >= endMs) return;
+          const idx = Math.floor((ts - startMs) / dayMs);
+          if (idx >= 0 && idx < days) points[idx].y++;
+        });
+        return points;
+      };
+
+      // Inject the card/grid styles once. Prefer a #trends_chart host the
+      // admin placed in Webflow; otherwise build a self-contained card and
+      // drop it above the first chart.
+      const ensureTrendGrid = () => {
+        if (!document.getElementById("trends_chart_style")) {
+          const style = document.createElement("style");
+          style.id = "trends_chart_style";
+          style.textContent = `
+            #trends_chart_card{background:#fff;border:1px solid #e3ecec;border-radius:14px;padding:20px 22px 16px;margin:0 0 24px;box-shadow:0 1px 3px rgba(45,90,90,.06);}
+            #trends_chart_card h3{font-size:18px;color:#2D5A5A;font-weight:700;margin:0 0 2px;}
+            #trends_chart_note{margin:0 0 16px;font-size:12px;color:#6b7c7c;}
+            .trends-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+            @media(max-width:560px){.trends-grid{grid-template-columns:1fr;}}
+            .trend-panel{position:relative;border:1px solid #edf1f1;border-radius:12px;padding:14px 16px 8px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(45,90,90,.04);transition:box-shadow .15s ease,transform .15s ease;}
+            .trend-panel:hover{box-shadow:0 6px 18px rgba(45,90,90,.11);transform:translateY(-2px);}
+            .trend-panel-name{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#7c8c8c;}
+            .trend-panel-total{font-size:30px;font-weight:800;line-height:1.05;margin:3px 0 0;}
+            .trend-panel-sub{font-size:11.5px;color:#8a9a9a;margin:2px 0 10px;}
+            .trend-panel-chart{margin:0 -6px;}
+          `;
+          document.head.appendChild(style);
+        }
+
+        const host = document.getElementById("trends_chart");
+        if (host) {
+          host.innerHTML = "";
+          const grid = document.createElement("div");
+          grid.className = "trends-grid";
+          host.appendChild(grid);
+          return grid;
+        }
+
+        const card = document.createElement("div");
+        card.id = "trends_chart_card";
+        card.innerHTML =
+          '<h3>New Activity — Last 30 Days</h3>' +
+          '<p id="trends_chart_note">Each panel has its own scale — daily counts over the last 30 days.</p>';
+        const grid = document.createElement("div");
+        grid.className = "trends-grid";
+        card.appendChild(grid);
+
+        const anchor = document.getElementById("usersPerMonthChart")
+          || document.getElementById("schoolBuildingsChartWrapper");
+        if (anchor && anchor.parentNode) {
+          anchor.parentNode.insertBefore(card, anchor);
+        } else {
+          document.body.insertBefore(card, document.body.firstChild);
+        }
+        return grid;
+      };
+
+      (() => {
+        const grid = ensureTrendGrid();
+        if (!grid || typeof ApexCharts === "undefined") return;
+
+        const fmtDay = ms => new Date(ms).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        const dayMs = 24 * 60 * 60 * 1000;
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const windowStartMs = todayStart.getTime() - (TREND_DAYS - 1) * dayMs;
+
+        const noteEl = document.getElementById("trends_chart_note");
+        if (noteEl) {
+          noteEl.textContent = "Running total · " + fmtDay(windowStartMs) + " – " + fmtDay(todayStart.getTime()) + " · each panel scaled to itself.";
+        }
+
+        trendMetrics.forEach(metric => {
+          const points = bucketDailySeries(metric.ts, TREND_DAYS);
+          const total = points.reduce((sum, p) => sum + p.y, 0);
+          const peak = points.reduce((m, p) => (p.y > m.y ? p : m), { x: null, y: 0 });
+
+          // Cumulative running total — turns sporadic, mostly-zero daily
+          // counts into a curve that rises across the window, while staying
+          // exact (each point is the true total through that day).
+          let running = 0;
+          const cumulative = points.map(p => { running += p.y; return { x: p.x, y: running }; });
+
+          const panel = document.createElement("div");
+          panel.className = "trend-panel";
+          panel.innerHTML =
+            '<div class="trend-panel-name">' + metric.name + '</div>' +
+            '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
+            '<div class="trend-panel-sub">' +
+              (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
+            '</div>' +
+            '<div class="trend-panel-chart"></div>';
+          grid.appendChild(panel);
+
+          new ApexCharts(panel.querySelector(".trend-panel-chart"), {
+            chart: {
+              type: "area", height: 122, toolbar: { show: false }, zoom: { enabled: false },
+              parentHeightOffset: 0,
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+              animations: { enabled: true, speed: 650 }
+            },
+            series: [{ name: metric.name, data: cumulative }],
+            colors: [metric.color],
+            stroke: { curve: "smooth", width: 3, lineCap: "round" },
+            fill: { type: "gradient", gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.04, stops: [0, 100] } },
+            dataLabels: { enabled: false },
+            grid: { show: false, padding: { left: 10, right: 10, top: 0, bottom: -6 } },
+            xaxis: {
+              type: "datetime", min: windowStartMs, max: todayStart.getTime(), tickAmount: 5,
+              labels: { datetimeUTC: false, format: "MMM d", style: { colors: "#9aa8a8", fontSize: "11px" }, hideOverlappingLabels: true, rotate: 0 },
+              axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false }
+            },
+            yaxis: { show: false },
+            tooltip: { x: { format: "MMM d, yyyy" }, y: { formatter: v => v.toLocaleString() + " " + metric.unit + " (running total)" } }
+          }).render();
+        });
+      })();
 
       // ═══════════════════════════════════════════════════════════════
       // CHART 2: SCHOOL BUILDINGS (Donut - Full Width + Overlay Legend)
