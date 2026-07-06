@@ -440,7 +440,13 @@ if (!window.scriptExecuted) {
               axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false }
             },
             yaxis: { show: false },
-            tooltip: { x: { format: "MMM d, yyyy" }, y: { formatter: v => v.toLocaleString() + " " + metric.unit + " (running total)" } }
+            tooltip: {
+              // Pin to the top of the panel so it never floats off to the
+              // side (where the panel's overflow:hidden would clip it).
+              fixed: { enabled: true, position: "topLeft", offsetX: 0, offsetY: 0 },
+              x: { format: "MMM d, yyyy" },
+              y: { formatter: v => v.toLocaleString() + " " + metric.unit + " (running total)" }
+            }
           }).render();
         });
       })();
