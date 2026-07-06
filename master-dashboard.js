@@ -148,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
         'padding:14px 16px 8px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(45,90,90,.04);' +
         'transition:box-shadow .15s ease,transform .15s ease;}' +
         '.trend-panel:hover{box-shadow:0 6px 18px rgba(45,90,90,.11);transform:translateY(-2px);}' +
-        '.trend-panel-name{font-size:12px;font-weight:600;color:#5A7A7A;}' +
         '.trend-panel-total{font-size:30px;font-weight:800;line-height:1.05;margin:3px 0 0;}' +
         '.trend-panel-sub{font-size:11.5px;color:#8AA4A4;margin:2px 0 10px;}' +
         '.trend-panel-note{font-size:10.5px;color:#b0870f;margin:-6px 0 10px;}' +
@@ -252,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const panel = document.createElement('div');
       panel.className = 'trend-panel';
       panel.innerHTML =
-        '<div class="trend-panel-name">' + metric.name + '</div>' +
+        '<h3>' + metric.name + '</h3>' +
         '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
         '<div class="trend-panel-sub">' +
           (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
