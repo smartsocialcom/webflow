@@ -835,7 +835,7 @@ if (!window.scriptExecuted) {
         "very unlikely": 1, "unlikely": 2, "not likely": 2, "neutral": 3,
         "maybe": 3, "somewhat likely": 3, "likely": 4, "very likely": 5, "extremely likely": 5,
       };
-      const LEVEL_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
+      const LEVEL_COLORS = ["#ef4444", "#f97316", "#86efac", "#84cc16", "#22c55e"];
       const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       const likertKey = v => String(v || "").trim().toLowerCase();
