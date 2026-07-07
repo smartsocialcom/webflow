@@ -74,21 +74,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const TREND_METRICS = [
     {
-      key: 'registrations', name: '30 Day VIP Registrations', unit: 'registrations',
+      key: 'registrations', name: '90 Day VIP Registrations', unit: 'registrations',
       color: '#449997', getTs: () => trendRegistrationTs,
       note: () => trendRegistrationHasFullWindow ? null : 'Last 7 days only — add users_30days'
     },
     {
-      key: 'bootcamp', name: '30 Day Bootcamp Registrations', unit: 'registrations',
+      key: 'bootcamp', name: '90 Day Bootcamp Registrations', unit: 'registrations',
       color: '#8E7CB8', getTs: () => trendBootcampTs, note: () => null
     },
     {
-      key: 'feedbacks', name: '30 Day Feedbacks', unit: 'feedbacks',
+      key: 'feedbacks', name: '90 Day Feedbacks', unit: 'feedbacks',
       color: '#E8907C', getTs: () => trendFeedbackTs,
       note: (windowTotal, allTime) => allTime === 0 ? 'Add created_at to feedbacks to plot' : null
     },
     {
-      key: 'streamyard', name: '30 Day Streamyards', unit: 'signups',
+      key: 'streamyard', name: '90 Day Streamyards', unit: 'signups',
       color: '#E0A93B', getTs: () => trendStreamyardTs,
       note: (windowTotal, allTime) =>
         (windowTotal <= 3 && allTime > 50)
