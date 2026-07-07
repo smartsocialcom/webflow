@@ -292,27 +292,16 @@ if (!window.scriptExecuted) {
         }).render();
       }
 
-      // ═══════════════════════════════════════════════════════════════
-      // CHART: NEW ACTIVITY — LAST 30 DAYS (org-scoped small multiples)
-      //
-      // Each panel is one metric on its OWN scale: a cumulative area curve
-      // over a shared 30-day window so spikes line up across panels. Built
-      // ONLY from arrays the single org endpoint already returns (feedback +
-      // webinars_log) — no extra API calls. Registrations aren't plottable
-      // daily here: the endpoint exposes only monthly aggregates
-      // (users_per_month_arr). To add a daily Registrations panel, expose a
-      // raw users array with created_at on this endpoint.
-      // ═══════════════════════════════════════════════════════════════
-      const TREND_DAYS = 30;
+      const TREND_DAYS = 90;
       const webinarTsByAction = act => (webinars_log || [])
         .filter(l => l.action === act)
         .map(l => toTimestamp(l.created_at))
         .filter(v => v !== null);
       const trendMetrics = [
-        { key: "feedbacks", name: "New Feedbacks",  unit: "feedbacks",  color: "#E8907C", ts: (feedback || []).map(f => toTimestamp(f.created_at)).filter(v => v !== null) },
-        { key: "signups",   name: "Webinar Signups", unit: "signups",    color: "#E0A93B", ts: webinarTsByAction("registration") },
-        { key: "attendees", name: "Live Attendees",  unit: "attendees",  color: "#449997", ts: webinarTsByAction("live") },
-        { key: "replays",   name: "Replay Views",    unit: "views",      color: "#8E7CB8", ts: webinarTsByAction("on-demand") }
+        { key: "feedbacks", name: "Recent Parent Testimonials", unit: "feedbacks", color: "#E8907C", ts: (feedback || []).map(f => toTimestamp(f.created_at)).filter(v => v !== null) },
+        { key: "signups", name: "Recent Event Registrations", unit: "signups", color: "#E0A93B", ts: webinarTsByAction("registration") },
+        { key: "attendees", name: "Recent Live Attendees", unit: "attendees", color: "#449997", ts: webinarTsByAction("live") },
+        { key: "replays", name: "Recent Replay Views", unit: "views", color: "#8E7CB8", ts: webinarTsByAction("on-demand") }
       ];
 
       // Bucket epoch-ms timestamps into `days` daily points ending today,
@@ -415,7 +404,7 @@ if (!window.scriptExecuted) {
             '<h3>' + metric.name + '</h3>' +
             '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
             '<div class="trend-panel-sub">' +
-              (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
+            (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
             '</div>' +
             '<div class="trend-panel-chart"></div>';
           grid.appendChild(panel);
@@ -858,11 +847,11 @@ if (!window.scriptExecuted) {
         return `<svg class="meter" width="${max * 13}" height="12" viewBox="0 0 ${max * 13} 12" aria-hidden="true">${dots}</svg>`;
       };
       const ICONS = {
-        recommend:  `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4v9H3z"/><path d="M7 11l3.6-7.2A1.9 1.9 0 0 1 14 5.6V10h4.6a2 2 0 0 1 2 2.4l-1.1 5.2A2 2 0 0 1 17.5 20H7"/></svg>`,
-        watch:      `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>`,
+        recommend: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4v9H3z"/><path d="M7 11l3.6-7.2A1.9 1.9 0 0 1 14 5.6V10h4.6a2 2 0 0 1 2 2.4l-1.1 5.2A2 2 0 0 1 17.5 20H7"/></svg>`,
+        watch: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>`,
         strategies: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-3.4 10.9c.6.4 1 1.1 1 1.9h4.8c0-.8.4-1.5 1-1.9A6 6 0 0 0 12 3Z"/><path d="M9.8 19h4.4"/><path d="M10.6 21.5h2.8"/></svg>`,
-        kids:       `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="7.5" r="3"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9.5" r="2.3"/><path d="M14.8 20a4.3 4.3 0 0 1 6.7 0"/></svg>`,
-        check:      `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>`,
+        kids: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="7.5" r="3"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9.5" r="2.3"/><path d="M14.8 20a4.3 4.3 0 0 1 6.7 0"/></svg>`,
+        check: `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>`,
       };
       const statChip = (iconKey, label, value) => {
         const level = likertLevel(value);
@@ -891,10 +880,10 @@ if (!window.scriptExecuted) {
           ? new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
           : "";
         const statsRow = [
-          statChip("recommend",  "Recommend",      recommend_likely),
-          statChip("watch",      "Watch again",    watch_likely),
+          statChip("recommend", "Recommend", recommend_likely),
+          statChip("watch", "Watch again", watch_likely),
           statChip("strategies", "Use strategies", use_strategies_likely),
-          kidsChip(kid_attended,         "I brought my kids",       "Adults only this time"),
+          kidsChip(kid_attended, "I brought my kids", "Adults only this time"),
           kidsChip(bring_kids_next_time, "Bringing kids next time", "Not bringing kids next time", true),
         ].join("");
         testimonials += `
@@ -1134,10 +1123,10 @@ if (!window.scriptExecuted) {
             ? new Date(created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
             : "";
           const statsRow = [
-            statChip("recommend",  "Recommend",      recommend_likely),
-            statChip("watch",      "Watch again",    watch_likely),
+            statChip("recommend", "Recommend", recommend_likely),
+            statChip("watch", "Watch again", watch_likely),
             statChip("strategies", "Use strategies", use_strategies_likely),
-            kidsChip(kid_attended,         "I brought my kids",       "Adults only this time"),
+            kidsChip(kid_attended, "I brought my kids", "Adults only this time"),
             kidsChip(bring_kids_next_time, "Bringing kids next time", "Not bringing kids next time", true),
           ].join("");
           return `
@@ -1248,7 +1237,7 @@ if (!window.scriptExecuted) {
       console.error("Error:", err);
       document.querySelectorAll('.failed_loader').forEach(e => e.classList.remove('hide'));
       document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
-      axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t", { memberid: memberData?.id }).catch(() => {});
+      axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t", { memberid: memberData?.id }).catch(() => { });
     }
   });
 }

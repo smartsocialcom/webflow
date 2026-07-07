@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let trendBootcampTs = null;
   let trendRegistrationHasFullWindow = false; // true only when a 30-day user list is provided
   let trendChartRendered = false;
-  const TREND_DAYS = 30;
+  const TREND_DAYS = 90;
 
   function normalizeOrgKey(value) {
     if (value === undefined || value === null || value === '') return null;
@@ -72,38 +72,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---------------------------------------------------------
-  // "New Activity — Last 30 Days" — small multiples
-  //
-  // Four metrics of very different magnitude (registrations & bootcamp in
-  // the dozens/day, feedbacks & Streamyard near zero) and sporadic daily
-  // counts. A single overlaid line chart would crush the small series onto
-  // the axis and a smoothed curve would invent values on zero-activity days.
-  // Instead each metric gets its own panel: a daily COLUMN chart (no
-  // interpolation) on its OWN y-scale, sharing an aligned 30-day x-window so
-  // spikes still line up across panels. Each panel leads with a total + peak.
-  // ---------------------------------------------------------
-
-  // getTs is read lazily at render time because the timestamp arrays are
-  // populated asynchronously by two different endpoints. `note` returns an
-  // optional data-quality caveat for that panel (or null).
   const TREND_METRICS = [
     {
-      key: 'registrations', name: 'New Registrations', unit: 'registrations',
+      key: 'registrations', name: '30 Day VIP Registrations', unit: 'registrations',
       color: '#449997', getTs: () => trendRegistrationTs,
       note: () => trendRegistrationHasFullWindow ? null : 'Last 7 days only — add users_30days'
     },
     {
-      key: 'bootcamp', name: 'Bootcamp Registrations', unit: 'registrations',
+      key: 'bootcamp', name: '30 Day Bootcamp Registrations', unit: 'registrations',
       color: '#8E7CB8', getTs: () => trendBootcampTs, note: () => null
     },
     {
-      key: 'feedbacks', name: 'New Feedbacks', unit: 'feedbacks',
+      key: 'feedbacks', name: '30 Day Feedbacks', unit: 'feedbacks',
       color: '#E8907C', getTs: () => trendFeedbackTs,
       note: (windowTotal, allTime) => allTime === 0 ? 'Add created_at to feedbacks to plot' : null
     },
     {
-      key: 'streamyard', name: 'Streamyard Signups', unit: 'signups',
+      key: 'streamyard', name: '30 Day Streamyards', unit: 'signups',
       color: '#E0A93B', getTs: () => trendStreamyardTs,
       note: (windowTotal, allTime) =>
         (windowTotal <= 3 && allTime > 50)
@@ -254,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '<h3>' + metric.name + '</h3>' +
         '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
         '<div class="trend-panel-sub">' +
-          (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
+        (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
         '</div>' +
         (note ? '<div class="trend-panel-note">' + note + '</div>' : '') +
         '<div class="trend-panel-chart" id="trends_chart_' + metric.key + '"></div>';
