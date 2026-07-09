@@ -28,7 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let trendFeedbackTs = null;
   let trendStreamyardTs = null;
   let trendBootcampTs = null;
-  let trendRegistrationHasFullWindow = false; // true only when a 30-day user list is provided
+  let trendRegistrationHasFullWindow = false; // true only when a 90-day user list is provided
+  let trendFeedbackHasFullWindow = false;     // true only when a 90-day feedback list is provided
   let trendChartRendered = false;
   const TREND_DAYS = 90;
 
@@ -76,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       key: 'registrations', name: '90 Day VIP Registrations', unit: 'registrations',
       color: '#449997', getTs: () => trendRegistrationTs,
-      note: () => trendRegistrationHasFullWindow ? null : 'Last 7 days only — add users_30days'
+      note: () => trendRegistrationHasFullWindow ? null : 'Partial window — add users_90days for full 90 days'
     },
     {
       key: 'bootcamp', name: '90 Day Bootcamp Registrations', unit: 'registrations',
@@ -85,7 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       key: 'feedbacks', name: '90 Day Feedbacks', unit: 'feedbacks',
       color: '#E8907C', getTs: () => trendFeedbackTs,
-      note: (windowTotal, allTime) => allTime === 0 ? 'Add created_at to feedbacks to plot' : null
+      note: (windowTotal, allTime) =>
+        allTime === 0 ? 'Add created_at to feedbacks to plot'
+        : !trendFeedbackHasFullWindow ? 'Last 7 days only — add organization_feedbacks_90days'
+        : null
     },
     {
       key: 'streamyard', name: '90 Day Streamyards', unit: 'signups',
@@ -361,16 +365,22 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el7dVipRegs) el7dVipRegs.textContent = sevenDayUsers.length;
       if (el7dayFeedbacks) el7dayFeedbacks.textContent = feedbackList.length;
 
-      // Feed the 30-day trend chart. Prefer a full 30-day user list if the
-      // endpoint provides one (Xano returns it as `users_30days`; accept the
-      // singular too). Fall back to the 7-day list so the panel still renders.
+      // Feed the trend chart, which spans TREND_DAYS (90). Prefer the widest
+      // window the endpoint offers; users_30days only fills the last third, so
+      // accept users_90days (with users_30days / 7-day as partial fallbacks).
+      const ninetyDayUsers = response.data.users_90days || response.data.users_90day;
       const thirtyDayUsers = response.data.users_30days || response.data.users_30day;
-      const registrationUsers = thirtyDayUsers || sevenDayUsers;
-      trendRegistrationHasFullWindow = Array.isArray(thirtyDayUsers);
+      const registrationUsers = ninetyDayUsers || thirtyDayUsers || sevenDayUsers;
+      trendRegistrationHasFullWindow = Array.isArray(ninetyDayUsers) && ninetyDayUsers.length > 0;
       trendRegistrationTs = registrationUsers
         .map(u => toTimestamp(u.created_at))
         .filter(v => v !== null);
-      trendFeedbackTs = feedbackList
+      // organization_feedbacks is a 7-day feed; prefer a 90-day feed for the
+      // trend chart if the endpoint provides one (organization_feedbacks_90days).
+      const ninetyDayFeedbacks = response.data.organization_feedbacks_90days || response.data.feedbacks_90days;
+      const feedbackSource = ninetyDayFeedbacks || feedbackList;
+      trendFeedbackHasFullWindow = Array.isArray(ninetyDayFeedbacks) && ninetyDayFeedbacks.length > 0;
+      trendFeedbackTs = feedbackSource
         .map(f => toTimestamp(f.created_at))
         .filter(v => v !== null);
       maybeRenderTrendChart();
