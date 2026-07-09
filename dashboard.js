@@ -292,7 +292,7 @@ if (!window.scriptExecuted) {
         }).render();
       }
 
-      const TREND_DAYS = 90;
+      const TREND_DAYS = 365;
       const webinarTsByAction = act => (webinars_log || [])
         .filter(l => l.action === act)
         .map(l => toTimestamp(l.created_at))
@@ -306,7 +306,7 @@ if (!window.scriptExecuted) {
         // (webinars_log "registration" — the StreamYard signups), so it stands
         // in for the (user regs + streamyard regs) sum until a second
         // signup-timestamp source is wired into `ts`.
-        { key: "impact", name: "Recent Event Impact", unit: "families", color: "#449997", ts: webinarTsByAction("registration"), multiplier: 4, days: 365, fullWidth: true }
+        { key: "impact", name: "Recent Event Impact", unit: "families", color: "#449997", ts: webinarTsByAction("registration"), multiplier: 4, fullWidth: true }
       ];
 
       // Bucket epoch-ms timestamps into `days` daily points ending today,
@@ -361,8 +361,8 @@ if (!window.scriptExecuted) {
         const card = document.createElement("div");
         card.id = "trends_chart_card";
         card.innerHTML =
-          '<h3>New Activity — Last 30 Days</h3>' +
-          '<p id="trends_chart_note">Each panel has its own scale — daily counts over the last 30 days.</p>';
+          '<h3>New Activity — Last 12 Months</h3>' +
+          '<p id="trends_chart_note">Each panel has its own scale — daily counts over the last 12 months.</p>';
         const grid = document.createElement("div");
         grid.className = "trends-grid";
         card.appendChild(grid);
