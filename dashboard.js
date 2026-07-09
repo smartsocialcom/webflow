@@ -306,7 +306,7 @@ if (!window.scriptExecuted) {
         // (webinars_log "registration" — the StreamYard signups), so it stands
         // in for the (user regs + streamyard regs) sum until a second
         // signup-timestamp source is wired into `ts`.
-        { key: "impact", name: "Recent Event Impact", unit: "families", color: "#449997", ts: webinarTsByAction("registration"), multiplier: 4 }
+        { key: "impact", name: "Recent Event Impact", unit: "families", color: "#449997", ts: webinarTsByAction("registration"), multiplier: 4, days: 365, fullWidth: true }
       ];
 
       // Bucket epoch-ms timestamps into `days` daily points ending today,
@@ -393,7 +393,9 @@ if (!window.scriptExecuted) {
         }
 
         trendMetrics.forEach(metric => {
-          const points = bucketDailySeries(metric.ts, TREND_DAYS);
+          const days = metric.days || TREND_DAYS;
+          const points = bucketDailySeries(metric.ts, days);
+          const startMs = todayStart.getTime() - (days - 1) * dayMs;
           const mult = metric.multiplier || 1;
           const total = points.reduce((sum, p) => sum + p.y, 0) * mult;
           const peak = points.reduce((m, p) => (p.y > m.y ? p : m), { x: null, y: 0 });
@@ -407,6 +409,7 @@ if (!window.scriptExecuted) {
 
           const panel = document.createElement("div");
           panel.className = "trend-panel";
+          if (metric.fullWidth) panel.style.gridColumn = "1 / -1";
           panel.innerHTML =
             '<h3>' + metric.name + '</h3>' +
             '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
@@ -430,7 +433,7 @@ if (!window.scriptExecuted) {
             dataLabels: { enabled: false },
             grid: { show: false, padding: { left: 10, right: 10, top: 0, bottom: -6 } },
             xaxis: {
-              type: "datetime", min: windowStartMs, max: todayStart.getTime(), tickAmount: 5,
+              type: "datetime", min: startMs, max: todayStart.getTime(), tickAmount: 5,
               labels: { datetimeUTC: false, format: "MMM d", style: { colors: "#5A7A7A", fontSize: "12px" }, hideOverlappingLabels: true, rotate: 0 },
               axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false }
             },
