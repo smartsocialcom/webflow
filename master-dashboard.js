@@ -28,8 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let trendFeedbackTs = null;
   let trendStreamyardTs = null;
   let trendBootcampTs = null;
-  let trendRegistrationHasFullWindow = false; // true only when a 90-day user list is provided
-  let trendFeedbackHasFullWindow = false;     // true only when a 90-day feedback list is provided
   let trendChartRendered = false;
   const TREND_DAYS = 90;
 
@@ -77,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       key: 'registrations', name: '90 Day VIP Registrations', unit: 'registrations',
       color: '#449997', getTs: () => trendRegistrationTs,
-      note: () => trendRegistrationHasFullWindow ? null : 'Partial window — add users_90days for full 90 days'
+      note: () => null
     },
     {
       key: 'bootcamp', name: '90 Day Bootcamp Registrations', unit: 'registrations',
@@ -86,10 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       key: 'feedbacks', name: '90 Day Feedbacks', unit: 'feedbacks',
       color: '#E8907C', getTs: () => trendFeedbackTs,
-      note: (windowTotal, allTime) =>
-        allTime === 0 ? 'Add created_at to feedbacks to plot'
-        : !trendFeedbackHasFullWindow ? 'Last 7 days only — add organization_feedbacks_90days'
-        : null
+      note: (windowTotal, allTime) => allTime === 0 ? 'Add created_at to feedbacks to plot' : null
     },
     {
       key: 'streamyard', name: '90 Day Streamyards', unit: 'signups',
@@ -298,25 +293,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------------------------------------------------
-  // 1. UPDATED CODE: Latest Users (1 Day & 7 Day) + Feedbacks
+  // 1. Latest Users + Feedbacks — full logs; windows derived client-side
   // ---------------------------------------------------------
   axios.get('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/latest_users')
     .then(response => {
-      const oneDayUsers = response.data.users_1day || [];
-      const sevenDayUsers = response.data.users_7day || [];
-      const feedbackList = response.data.organization_feedbacks || [];
+      // The endpoint now ships two FULL logs (`users`, `organization_feedbacks`).
+      // Every 1d / 7d count is derived here by filtering on created_at, so a
+      // short backend window can never starve the chart or tiles again.
+      const users = response.data.users || [];
+      const feedbacks = response.data.organization_feedbacks || [];
 
-      // A. Create frequency map for Feedbacks
+      const now = Date.now();
+      const dayMs = 24 * 60 * 60 * 1000;
+      const oneDayAgo = now - dayMs;
+      const sevenDaysAgo = now - 7 * dayMs;
+
+      // All-time feedback count per org (full log).
       const feedbackCounts = {};
-      feedbackList.forEach(item => {
+      feedbacks.forEach(item => {
         const orgId = item.organization;
-        if (orgId) {
-          feedbackCounts[orgId] = (feedbackCounts[orgId] || 0) + 1;
-        }
+        if (orgId) feedbackCounts[orgId] = (feedbackCounts[orgId] || 0) + 1;
       });
 
+      // One summary row per org seen in either log.
       const summary = {};
-
       const initDistrict = (distName, parents, orgId, shortCode) => {
         if (!summary[distName]) {
           summary[distName] = {
@@ -332,61 +332,50 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
-      // Process 7-Day List
-      sevenDayUsers.forEach(user => {
+      // Seed orgs that have feedbacks but no registrations yet.
+      feedbacks.forEach(item => {
+        const det = item.organization_details || {};
+        initDistrict(det.district_name || 'Unknown District', 0, item.organization, det.short_code || '');
+      });
+
+      // Walk the full user log once: register every org, tally 24h/7d counts.
+      let oneDayCount = 0, sevenDayCount = 0;
+      users.forEach(user => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
         const orgId = user.organizations_id;
         const shortCode = user.organization ? user.organization.short_code : '';
-
         initDistrict(distName, user.parents, orgId, shortCode);
-        summary[distName].sevenDayCount++;
+        const created = toTimestamp(user.created_at);
+        if (created !== null) {
+          if (created >= sevenDaysAgo) { summary[distName].sevenDayCount++; sevenDayCount++; }
+          if (created >= oneDayAgo) { summary[distName].oneDayCount++; oneDayCount++; }
+        }
       });
 
-      // Process 1-Day List
-      oneDayUsers.forEach(user => {
-        const distName = user.organization ? user.organization.district_name : 'Unknown District';
-        const orgId = user.organizations_id;
-        const shortCode = user.organization ? user.organization.short_code : '';
-
-        initDistrict(distName, user.parents, orgId, shortCode);
-        summary[distName].oneDayCount++;
+      // 7-day feedback total for the stat tile.
+      let sevenDayFeedbackCount = 0;
+      feedbacks.forEach(item => {
+        const created = toTimestamp(item.created_at);
+        if (created !== null && created >= sevenDaysAgo) sevenDayFeedbackCount++;
       });
 
-      // Store processed data globally
       latestUsersData = Object.values(summary);
       applySevenDayStreamyardToLatestUsers();
 
-      // Populate VIP registration and feedback totals
+      // Stat tiles: 24h / 7d VIPs + 7-day feedbacks, all derived from the full logs.
       const el24hVipRegs = document.getElementById('24h_vip_registrations');
       const el7dVipRegs = document.getElementById('7d_vip_registrations');
       const el7dayFeedbacks = document.getElementById('7day_feedbacks');
+      if (el24hVipRegs) el24hVipRegs.textContent = oneDayCount;
+      if (el7dVipRegs) el7dVipRegs.textContent = sevenDayCount;
+      if (el7dayFeedbacks) el7dayFeedbacks.textContent = sevenDayFeedbackCount;
 
-      if (el24hVipRegs) el24hVipRegs.textContent = oneDayUsers.length;
-      if (el7dVipRegs) el7dVipRegs.textContent = sevenDayUsers.length;
-      if (el7dayFeedbacks) el7dayFeedbacks.textContent = feedbackList.length;
-
-      // Feed the trend chart, which spans TREND_DAYS (90). Prefer the widest
-      // window the endpoint offers; users_30days only fills the last third, so
-      // accept users_90days (with users_30days / 7-day as partial fallbacks).
-      const ninetyDayUsers = response.data.users_90days || response.data.users_90day;
-      const thirtyDayUsers = response.data.users_30days || response.data.users_30day;
-      const registrationUsers = ninetyDayUsers || thirtyDayUsers || sevenDayUsers;
-      trendRegistrationHasFullWindow = Array.isArray(ninetyDayUsers) && ninetyDayUsers.length > 0;
-      trendRegistrationTs = registrationUsers
-        .map(u => toTimestamp(u.created_at))
-        .filter(v => v !== null);
-      // organization_feedbacks is a 7-day feed; prefer a 90-day feed for the
-      // trend chart if the endpoint provides one (organization_feedbacks_90days).
-      const ninetyDayFeedbacks = response.data.organization_feedbacks_90days || response.data.feedbacks_90days;
-      const feedbackSource = ninetyDayFeedbacks || feedbackList;
-      trendFeedbackHasFullWindow = Array.isArray(ninetyDayFeedbacks) && ninetyDayFeedbacks.length > 0;
-      trendFeedbackTs = feedbackSource
-        .map(f => toTimestamp(f.created_at))
-        .filter(v => v !== null);
+      // Trend series: full timestamp arrays; bucketDailySeries keeps the 90-day window.
+      trendRegistrationTs = users.map(u => toTimestamp(u.created_at)).filter(v => v !== null);
+      trendFeedbackTs = feedbacks.map(f => toTimestamp(f.created_at)).filter(v => v !== null);
       maybeRenderTrendChart();
 
-      // Initial Sort
-      // Since currentSortSummaryColumn is null, this will apply Default logic (Descending for numbers)
+      // Initial Sort (Descending for numbers)
       sortLatestUsers('sevenDayCount');
     })
     .catch(error => {
@@ -440,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: '24h VIPs', key: 'oneDayCount' },
       { name: '7 Day VIPs', key: 'sevenDayCount' },
       { name: '7 Day Streamyard', key: 'sevenDayStreamyardCount' },
-      { name: '7 Day Feedbacks', key: 'feedbackTotal' },
+      { name: 'Total Feedbacks', key: 'feedbackTotal' },
       { name: 'Total VIPs', key: 'parents' }
     ];
 
