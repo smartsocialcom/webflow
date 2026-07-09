@@ -299,9 +299,7 @@ if (!window.scriptExecuted) {
         .filter(v => v !== null);
       const trendMetrics = [
         { key: "feedbacks", name: "Recent Parent Testimonials", unit: "feedbacks", color: "#E8907C", ts: (feedback || []).map(f => toTimestamp(f.created_at)).filter(v => v !== null) },
-        { key: "signups", name: "Recent Event Registrations", unit: "signups", color: "#E0A93B", ts: webinarTsByAction("registration") },
-        { key: "attendees", name: "Recent Live Attendees", unit: "attendees", color: "#449997", ts: webinarTsByAction("live") },
-        { key: "replays", name: "Recent Replay Views", unit: "views", color: "#8E7CB8", ts: webinarTsByAction("on-demand") }
+        { key: "signups", name: "Recent Event Registrations", unit: "signups", color: "#E0A93B", ts: webinarTsByAction("registration") }
       ];
 
       // Bucket epoch-ms timestamps into `days` daily points ending today,
@@ -404,7 +402,7 @@ if (!window.scriptExecuted) {
             '<h3>' + metric.name + '</h3>' +
             '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
             '<div class="trend-panel-sub">' +
-            (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
+            (total > 0 ? 'Busiest day ' + fmtDay(peak.x) : 'No activity in this window') +
             '</div>' +
             '<div class="trend-panel-chart"></div>';
           grid.appendChild(panel);

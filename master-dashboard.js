@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '<h3>' + metric.name + '</h3>' +
         '<div class="trend-panel-total" style="color:' + metric.color + '">' + total.toLocaleString() + '</div>' +
         '<div class="trend-panel-sub">' +
-        (total > 0 ? 'Busiest day ' + peak.y.toLocaleString() + ' · ' + fmtDay(peak.x) : 'No activity in this window') +
+        (total > 0 ? 'Busiest day ' + fmtDay(peak.x) : 'No activity in this window') +
         '</div>' +
         (note ? '<div class="trend-panel-note">' + note + '</div>' : '') +
         '<div class="trend-panel-chart" id="trends_chart_' + metric.key + '"></div>';
