@@ -299,7 +299,14 @@ if (!window.scriptExecuted) {
         .filter(v => v !== null);
       const trendMetrics = [
         { key: "feedbacks", name: "Recent Parent Testimonials", unit: "feedbacks", color: "#E8907C", ts: (feedback || []).map(f => toTimestamp(f.created_at)).filter(v => v !== null) },
-        { key: "signups", name: "Recent Event Registrations", unit: "signups", color: "#E0A93B", ts: webinarTsByAction("registration") }
+        { key: "signups", name: "Recent Event Registrations", unit: "signups", color: "#E0A93B", ts: webinarTsByAction("registration") },
+        // Recent Event Impact = registrations × 4 family members reached per
+        // signup (the ×4 mirrors the monthly_engagement family factor above).
+        // This endpoint exposes only one daily registration series
+        // (webinars_log "registration" — the StreamYard signups), so it stands
+        // in for the (user regs + streamyard regs) sum until a second
+        // signup-timestamp source is wired into `ts`.
+        { key: "impact", name: "Recent Event Impact", unit: "families", color: "#449997", ts: webinarTsByAction("registration"), multiplier: 4 }
       ];
 
       // Bucket epoch-ms timestamps into `days` daily points ending today,
@@ -387,14 +394,16 @@ if (!window.scriptExecuted) {
 
         trendMetrics.forEach(metric => {
           const points = bucketDailySeries(metric.ts, TREND_DAYS);
-          const total = points.reduce((sum, p) => sum + p.y, 0);
+          const mult = metric.multiplier || 1;
+          const total = points.reduce((sum, p) => sum + p.y, 0) * mult;
           const peak = points.reduce((m, p) => (p.y > m.y ? p : m), { x: null, y: 0 });
 
           // Cumulative running total — turns sporadic, mostly-zero daily
           // counts into a curve that rises across the window, while staying
-          // exact (each point is the true total through that day).
+          // exact (each point is the true total through that day). Scaled by
+          // `mult` so an impact panel shows families-reached, not raw signups.
           let running = 0;
-          const cumulative = points.map(p => { running += p.y; return { x: p.x, y: running }; });
+          const cumulative = points.map(p => { running += p.y; return { x: p.x, y: running * mult }; });
 
           const panel = document.createElement("div");
           panel.className = "trend-panel";
