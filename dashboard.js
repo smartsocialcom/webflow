@@ -306,7 +306,7 @@ if (!window.scriptExecuted) {
         // (webinars_log "registration" — the StreamYard signups), so it stands
         // in for the (user regs + streamyard regs) sum until a second
         // signup-timestamp source is wired into `ts`.
-        { key: "impact", name: "Recent Event Impact", unit: "families", color: "#449997", ts: webinarTsByAction("registration"), multiplier: 4, fullWidth: true }
+        { key: "impact", name: "Recent Event Impact", unit: "families", color: "#449997", ts: webinarTsByAction("registration"), multiplier: 4, fullWidth: true, days: 90 }
       ];
 
       // Bucket epoch-ms timestamps into `days` daily points ending today,
