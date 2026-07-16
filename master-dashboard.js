@@ -244,11 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
         '<div class="trend-panel-chart" id="trends_chart_' + metric.key + '"></div>';
       grid.appendChild(panel);
 
-      // No floating tooltip — it covered the 122px chart. On hover, echo the
-      // exact day's running total into the sub line; a marker dots the curve.
-      const subEl = panel.querySelector('.trend-panel-sub');
-      const defaultSub = subEl ? subEl.textContent : '';
-
       new ApexCharts(panel.querySelector('.trend-panel-chart'), {
         chart: {
           type: 'area',
@@ -257,15 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
           zoom: { enabled: false },
           parentHeightOffset: 0,
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-          animations: { enabled: true, speed: 650 },
-          events: {
-            dataPointMouseEnter: (_e, _ctx, cfg) => {
-              const idx = cfg && (cfg.dataPointIndex != null ? cfg.dataPointIndex : cfg.config && cfg.config.dataPointIndex);
-              const pt = idx != null ? cumulative[idx] : null;
-              if (subEl && pt) subEl.textContent = fmtDay(pt.x) + ' · ' + pt.y.toLocaleString() + ' ' + metric.unit;
-            },
-            dataPointMouseLeave: () => { if (subEl) subEl.textContent = defaultSub; }
-          }
+          animations: { enabled: true, speed: 650 }
         },
         series: [{ name: metric.name, data: cumulative }],
         colors: [metric.color],
@@ -295,7 +282,11 @@ document.addEventListener("DOMContentLoaded", () => {
           tooltip: { enabled: false }
         },
         yaxis: { show: false },
-        tooltip: { enabled: false }
+        tooltip: {
+          // Follow the cursor instead of pinning to a corner over the curve.
+          x: { format: 'MMM d, yyyy' },
+          y: { formatter: v => v.toLocaleString() + ' ' + metric.unit + ' (running total)' }
+        }
       }).render();
     });
   }
