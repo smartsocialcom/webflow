@@ -135,7 +135,9 @@ document.addEventListener("DOMContentLoaded", () => {
         '.trend-panel-total{font-size:30px;font-weight:800;line-height:1.05;margin:3px 0 0;}' +
         '.trend-panel-sub{font-size:11.5px;color:#8AA4A4;margin:2px 0 10px;}' +
         '.trend-panel-note{font-size:10.5px;color:#b0870f;margin:-6px 0 10px;}' +
-        '.trend-panel-chart{margin:0 -6px;}';
+        '.trend-panel-chart{margin:0 -6px;}' +
+        '.trend-panel-chart .apexcharts-tooltip{display:none !important;}' +
+        '.trend-panel-tip{min-height:16px;margin:0 0 4px;font-size:12px;font-weight:600;color:#2D5A5A;}';
       document.head.appendChild(style);
     }
 
@@ -241,8 +243,12 @@ document.addEventListener("DOMContentLoaded", () => {
         (total > 0 ? 'Busiest day ' + fmtDay(peak.x) : 'No activity in this window') +
         '</div>' +
         (note ? '<div class="trend-panel-note">' + note + '</div>' : '') +
+        '<div class="trend-panel-tip"></div>' +
         '<div class="trend-panel-chart" id="trends_chart_' + metric.key + '"></div>';
       grid.appendChild(panel);
+
+      // Tooltip renders into the reserved band above the chart, not over the curve.
+      const tipEl = panel.querySelector('.trend-panel-tip');
 
       new ApexCharts(panel.querySelector('.trend-panel-chart'), {
         chart: {
@@ -252,7 +258,8 @@ document.addEventListener("DOMContentLoaded", () => {
           zoom: { enabled: false },
           parentHeightOffset: 0,
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-          animations: { enabled: true, speed: 650 }
+          animations: { enabled: true, speed: 650 },
+          events: { mouseLeave: () => { if (tipEl) tipEl.textContent = ''; } }
         },
         series: [{ name: metric.name, data: cumulative }],
         colors: [metric.color],
@@ -283,9 +290,14 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         yaxis: { show: false },
         tooltip: {
-          // Follow the cursor instead of pinning to a corner over the curve.
-          x: { format: 'MMM d, yyyy' },
-          y: { formatter: v => v.toLocaleString() + ' ' + metric.unit + ' (running total)' }
+          enabled: true,
+          // Drive the readout in the reserved band above the chart; the native
+          // box is CSS-hidden so nothing floats over the curve.
+          custom: ({ dataPointIndex }) => {
+            const pt = cumulative[dataPointIndex];
+            if (tipEl && pt) tipEl.textContent = fmtDay(pt.x) + ' · ' + pt.y.toLocaleString() + ' ' + metric.unit;
+            return ' ';
+          }
         }
       }).render();
     });
