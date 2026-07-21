@@ -459,7 +459,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     html += `</tr></thead><tbody>`;
 
-    latestUsersData.forEach(item => {
+    const sevenDayRows = latestUsersData.filter(item => item.sevenDayCount > 0);
+    sevenDayRows.forEach(item => {
       const oneDayStyle = item.oneDayCount > 0 ? 'font-weight:bold; color:green;' : '';
 
       const parentLink = item.shortCode
