@@ -105,7 +105,13 @@
         axios.get(`https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/organizations/short_code/${asOrg}`)
           .then(res => applyOrgData(res.data.organization.district_name));
       }
-      if (!memberData) {
+      const studentSession = getCookie("student_session");
+      if (window.location.href.includes("/video-lessons/") && studentSession) {
+        axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/students_lessons_log', {
+          pin_code: studentSession,
+          page_url: `${window.location.origin}${window.location.pathname}`
+        }).catch(console.error);
+      } else if (!memberData) {
         if (orgValue) getOrg(orgValue).then(getAccess);
         setTimeout(() => {
           if (getCookie("org")) {
@@ -113,19 +119,11 @@
             document.querySelectorAll('.event_link-access').forEach(el => el.classList.remove('hide'));
           }
         }, 4000);
-      } else {
-        if (!window.location.href.includes("/video-lessons/")) {
-          axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
-            member_id: memberData.id,
-            page_url: window.location.href
-          });
-        } else if (getCookie("student_session")) {
-          console.log("student");
-          axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
-            member_id: memberData.id,
-            page_url: window.location.href
-          });
-        }
+      } else if (!window.location.href.includes("/video-lessons/")) {
+        axios.post('https://xlbh-3re4-5vsp.n7c.xano.io/api:eJ2WWeJh/log', {
+          member_id: memberData.id,
+          page_url: window.location.href
+        });
       }
       document.querySelectorAll('.lang-link').forEach(a => a.addEventListener('click', e => { e.preventDefault(); var x = '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/', h = location.hostname, b = h.replace(/^www\./, '');[h, '.' + h, b, '.' + b].forEach(d => document.cookie = 'googtrans' + x + ';domain=' + d); document.cookie = 'googtrans' + x; location.href = a.href }))
       document.querySelectorAll('[sms="store_link"]').forEach(link => link.addEventListener('click', () => localStorage.setItem("locat", location.href))); // Store Last Page
