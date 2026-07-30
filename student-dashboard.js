@@ -69,6 +69,29 @@ if (!window.studentDashboardScriptExecuted) {
       return `${datePart} ${timePart}`;
     };
 
+    const copyTextToClipboard = async text => {
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return;
+        } catch {
+          // Fall through for browsers that block the Clipboard API.
+        }
+      }
+
+      const input = document.createElement("textarea");
+      input.value = text;
+      input.setAttribute("readonly", "");
+      input.style.position = "fixed";
+      input.style.opacity = "0";
+      document.body.appendChild(input);
+      input.select();
+      const copied = document.execCommand("copy");
+      input.remove();
+
+      if (!copied) throw new Error("Clipboard copy failed.");
+    };
+
     const ensureStudentDashboardStyles = () => {
       if (byId("student-dashboard-chart-styles")) return;
 
@@ -98,6 +121,19 @@ if (!window.studentDashboardScriptExecuted) {
           font-size: 16px;
           font-weight: 500;
           line-height: 1.5;
+        }
+        #student_pin_list .pincode {
+          cursor: copy;
+        }
+        #student_pin_list .pincode:hover,
+        #student_pin_list .pincode:focus-visible {
+          color: #2D5A5A;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+        #student_pin_list .pincode:focus-visible {
+          outline: 2px solid #449997;
+          outline-offset: 3px;
         }
         @media (max-width: 767px) {
           #student-analytics .chart_embed {
@@ -139,6 +175,33 @@ if (!window.studentDashboardScriptExecuted) {
         const pinCode = document.createElement("span");
         pinCode.className = "pincode";
         pinCode.textContent = `Pincode: ${pin}`;
+        pinCode.tabIndex = 0;
+        pinCode.setAttribute("role", "button");
+        pinCode.setAttribute("aria-label", `Copy PIN ${pin}`);
+        pinCode.title = "Copy PIN";
+
+        const copyPin = async event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const originalText = `Pincode: ${pin}`;
+          try {
+            await copyTextToClipboard(pin);
+            pinCode.textContent = "PIN copied!";
+          } catch (error) {
+            pinCode.textContent = "Copy failed";
+            console.warn("Student PIN could not be copied.", error);
+          }
+
+          window.setTimeout(() => {
+            if (pinCode.isConnected) pinCode.textContent = originalText;
+          }, 1500);
+        };
+
+        pinCode.addEventListener("click", copyPin);
+        pinCode.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") copyPin(event);
+        });
         link.appendChild(pinCode);
         fragment.appendChild(link);
       });
