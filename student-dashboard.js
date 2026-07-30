@@ -122,16 +122,24 @@ if (!window.studentDashboardScriptExecuted) {
           font-weight: 500;
           line-height: 1.5;
         }
-        #student_pin_list .pincode {
+        #student_pin_list .student-pin-copy {
+          width: 100%;
+          appearance: none;
           cursor: copy;
+          font: inherit;
+          letter-spacing: 0;
+          text-align: left;
         }
-        #student_pin_list .pincode:hover,
-        #student_pin_list .pincode:focus-visible {
+        #student_pin_list .student-pin-copy .pincode {
+          pointer-events: none;
+        }
+        #student_pin_list .student-pin-copy:hover .pincode,
+        #student_pin_list .student-pin-copy:focus-visible .pincode {
           color: #2D5A5A;
           text-decoration: underline;
           text-underline-offset: 3px;
         }
-        #student_pin_list .pincode:focus-visible {
+        #student_pin_list .student-pin-copy:focus-visible {
           outline: 2px solid #449997;
           outline-offset: 3px;
         }
@@ -150,7 +158,7 @@ if (!window.studentDashboardScriptExecuted) {
       document.head.appendChild(style);
     };
 
-    const renderPinLinks = (schoolBuildings, studentAccess) => {
+    const renderPinButtons = (schoolBuildings, studentAccess) => {
       const lock = byId("student_registration_links_lock");
       if (lock) lock.classList.toggle("hide", studentAccess === true);
 
@@ -163,27 +171,20 @@ if (!window.studentDashboardScriptExecuted) {
       const fragment = document.createDocumentFragment();
 
       buildingsWithPins.forEach(building => {
-        const link = document.createElement("a");
         const pin = String(building.student_pin_code);
-        link.href = "#";
-        link.className = "link-list w-button";
-        link.setAttribute("fs-copyclip-text", `https://smartsocial.com/students?pin=${encodeURIComponent(pin)}`);
-        link.setAttribute("fs-copyclip-element", "click");
-        link.setAttribute("fs-copyclip-message", "Link Copied!");
-        link.appendChild(document.createTextNode(building.school_name || "School"));
+        const schoolName = building.school_name || "School";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "link-list w-button student-pin-copy";
+        button.setAttribute("aria-label", `Copy PIN ${pin} for ${schoolName}`);
+        button.title = "Copy PIN";
+        button.appendChild(document.createTextNode(schoolName));
 
         const pinCode = document.createElement("span");
         pinCode.className = "pincode";
         pinCode.textContent = `Pincode: ${pin}`;
-        pinCode.tabIndex = 0;
-        pinCode.setAttribute("role", "button");
-        pinCode.setAttribute("aria-label", `Copy PIN ${pin}`);
-        pinCode.title = "Copy PIN";
 
-        const copyPin = async event => {
-          event.preventDefault();
-          event.stopPropagation();
-
+        button.addEventListener("click", async () => {
           const originalText = `Pincode: ${pin}`;
           try {
             await copyTextToClipboard(pin);
@@ -196,14 +197,10 @@ if (!window.studentDashboardScriptExecuted) {
           window.setTimeout(() => {
             if (pinCode.isConnected) pinCode.textContent = originalText;
           }, 1500);
-        };
-
-        pinCode.addEventListener("click", copyPin);
-        pinCode.addEventListener("keydown", event => {
-          if (event.key === "Enter" || event.key === " ") copyPin(event);
         });
-        link.appendChild(pinCode);
-        fragment.appendChild(link);
+
+        button.appendChild(pinCode);
+        fragment.appendChild(button);
       });
 
       list.replaceChildren(fragment);
@@ -513,14 +510,6 @@ if (!window.studentDashboardScriptExecuted) {
       });
     };
 
-    const ensureCopyClip = () => {
-      if (document.querySelector('script[src*="attributes-copyclip"]')) return;
-      const script = document.createElement("script");
-      script.defer = true;
-      script.src = "https://cdn.jsdelivr.net/npm/@finsweet/attributes-copyclip@1/copyclip.js";
-      document.head.appendChild(script);
-    };
-
     const dashboardExists = byId("student_pin_list")
       || byId("studentLoginsPerMonthChart")
       || byId("studentLoginsPerBuilding")
@@ -562,7 +551,7 @@ if (!window.studentDashboardScriptExecuted) {
         customGraphicsElement.classList.toggle("hide", !customGraphics);
         if (customGraphics) customGraphicsElement.href = customGraphics;
       }
-      renderPinLinks(schoolBuildings, studentAccess);
+      renderPinButtons(schoolBuildings, studentAccess);
 
       const chartTargetsStillExist = byId("studentLoginsPerMonthChart")
         || byId("studentLoginsPerBuilding")
@@ -642,7 +631,6 @@ if (!window.studentDashboardScriptExecuted) {
       } else {
         renderTopLessons(lessonsLog || []);
       }
-      ensureCopyClip();
     } catch (error) {
       console.error("Student dashboard error:", error);
       setText("org_name", "Student Dashboard");
