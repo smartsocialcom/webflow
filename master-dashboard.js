@@ -329,18 +329,33 @@ document.addEventListener("DOMContentLoaded", () => {
       // One summary row per org seen in either log.
       const summary = {};
       const initDistrict = (distName, parents, orgId, shortCode) => {
-        if (!summary[distName]) {
-          summary[distName] = {
+        const orgKey = normalizeOrgKey(orgId);
+        const summaryKey = orgKey ? `org:${orgKey}` : `name:${distName}`;
+        const numericParents = Number(parents);
+        const hasParentTotal = parents !== undefined
+          && parents !== null
+          && Number.isFinite(numericParents);
+
+        if (!summary[summaryKey]) {
+          summary[summaryKey] = {
             name: distName,
             orgId: orgId || 0,
             shortCode: shortCode || '',
-            parents: parents || 0,
+            parents: hasParentTotal ? numericParents : 0,
             oneDayCount: 0,
             sevenDayCount: 0,
             sevenDayStreamyardCount: 0,
             feedbackTotal: feedbackCounts[orgId] || 0
           };
+        } else {
+          const district = summary[summaryKey];
+          if (hasParentTotal) district.parents = numericParents;
+          if (distName && distName !== 'Unknown District') district.name = distName;
+          if (orgId) district.orgId = orgId;
+          if (shortCode) district.shortCode = shortCode;
         }
+
+        return summary[summaryKey];
       };
 
       // Seed orgs that have feedbacks but no registrations yet.
@@ -355,11 +370,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const distName = user.organization ? user.organization.district_name : 'Unknown District';
         const orgId = user.organizations_id;
         const shortCode = user.organization ? user.organization.short_code : '';
-        initDistrict(distName, user.parents, orgId, shortCode);
+        const district = initDistrict(distName, user.parents, orgId, shortCode);
         const created = toTimestamp(user.created_at);
         if (created !== null) {
-          if (created >= sevenDaysAgo) { summary[distName].sevenDayCount++; sevenDayCount++; }
-          if (created >= oneDayAgo) { summary[distName].oneDayCount++; oneDayCount++; }
+          if (created >= sevenDaysAgo) { district.sevenDayCount++; sevenDayCount++; }
+          if (created >= oneDayAgo) { district.oneDayCount++; oneDayCount++; }
         }
       });
 
