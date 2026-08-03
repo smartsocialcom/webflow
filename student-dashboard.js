@@ -122,7 +122,7 @@ if (!window.studentDashboardScriptExecuted) {
           font-weight: 500;
           line-height: 1.5;
         }
-        #student_pin_list .student-pin-copy {
+        #student_pin_list .student-registration-link-copy {
           width: 100%;
           appearance: none;
           cursor: copy;
@@ -130,16 +130,16 @@ if (!window.studentDashboardScriptExecuted) {
           letter-spacing: 0;
           text-align: left;
         }
-        #student_pin_list .student-pin-copy .pincode {
+        #student_pin_list .student-registration-link-copy .pincode {
           pointer-events: none;
         }
-        #student_pin_list .student-pin-copy:hover .pincode,
-        #student_pin_list .student-pin-copy:focus-visible .pincode {
+        #student_pin_list .student-registration-link-copy:hover .pincode,
+        #student_pin_list .student-registration-link-copy:focus-visible .pincode {
           color: #2D5A5A;
           text-decoration: underline;
           text-underline-offset: 3px;
         }
-        #student_pin_list .student-pin-copy:focus-visible {
+        #student_pin_list .student-registration-link-copy:focus-visible {
           outline: 2px solid #449997;
           outline-offset: 3px;
         }
@@ -158,7 +158,7 @@ if (!window.studentDashboardScriptExecuted) {
       document.head.appendChild(style);
     };
 
-    const renderPinButtons = (schoolBuildings, studentAccess) => {
+    const renderRegistrationLinkButtons = (schoolBuildings, studentAccess) => {
       const lock = byId("student_registration_links_lock");
       if (lock) lock.classList.toggle("hide", studentAccess === true);
 
@@ -173,11 +173,15 @@ if (!window.studentDashboardScriptExecuted) {
       buildingsWithPins.forEach(building => {
         const pin = String(building.student_pin_code);
         const schoolName = building.school_name || "School";
+        const registrationUrl = new URL("https://smartsocial.com/students");
+        registrationUrl.searchParams.set("pin", pin);
+
         const button = document.createElement("button");
         button.type = "button";
-        button.className = "link-list w-button student-pin-copy";
-        button.setAttribute("aria-label", `Copy PIN ${pin} for ${schoolName}`);
-        button.title = "Copy PIN";
+        button.className = "link-list w-button student-registration-link-copy";
+        button.dataset.copyUrl = registrationUrl.href;
+        button.setAttribute("aria-label", `Copy student registration link for ${schoolName}`);
+        button.title = "Copy student registration link";
         button.appendChild(document.createTextNode(schoolName));
 
         const pinCode = document.createElement("span");
@@ -187,11 +191,11 @@ if (!window.studentDashboardScriptExecuted) {
         button.addEventListener("click", async () => {
           const originalText = `Pincode: ${pin}`;
           try {
-            await copyTextToClipboard(pin);
-            pinCode.textContent = "PIN copied!";
+            await copyTextToClipboard(registrationUrl.href);
+            pinCode.textContent = "Link copied!";
           } catch (error) {
             pinCode.textContent = "Copy failed";
-            console.warn("Student PIN could not be copied.", error);
+            console.warn("Student registration link could not be copied.", error);
           }
 
           window.setTimeout(() => {
@@ -551,7 +555,7 @@ if (!window.studentDashboardScriptExecuted) {
         customGraphicsElement.classList.toggle("hide", !customGraphics);
         if (customGraphics) customGraphicsElement.href = customGraphics;
       }
-      renderPinButtons(schoolBuildings, studentAccess);
+      renderRegistrationLinkButtons(schoolBuildings, studentAccess);
 
       const chartTargetsStillExist = byId("studentLoginsPerMonthChart")
         || byId("studentLoginsPerBuilding")
