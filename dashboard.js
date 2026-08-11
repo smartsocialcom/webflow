@@ -201,6 +201,74 @@ if (!window.scriptExecuted) {
       setText("total_students", formatNumber(total_students));
       setText("community_registration_goal", formatNumber(studentsGoal));
 
+      // Match the organization-level summary from the master dashboard and
+      // render it as one compact row in the Webflow-provided #overview host.
+      const renderOverviewStats = () => {
+        const overview = document.getElementById("overview");
+        if (!overview) return;
+
+        if (!document.getElementById("overview_stats_style")) {
+          const style = document.createElement("style");
+          style.id = "overview_stats_style";
+          style.textContent = `
+            #overview{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#a3dada transparent;}
+            .overview-stats-row{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));min-width:680px;overflow:hidden;background:linear-gradient(135deg,#fff 0%,#f6fbfb 100%);border:1px solid #dceaea;border-radius:16px;box-shadow:0 8px 28px rgba(45,90,90,.09);}
+            .overview-stat{position:relative;min-width:0;padding:19px 22px 18px;}
+            .overview-stat+.overview-stat:before{content:"";position:absolute;top:18px;bottom:18px;left:0;width:1px;background:#dfeaea;}
+            .overview-stat-label{display:block;margin-bottom:7px;color:#5A7A7A;font-size:11px;font-weight:700;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+            .overview-stat-value{display:block;color:#2D5A5A;font-size:clamp(24px,2.2vw,34px);font-weight:800;line-height:1;letter-spacing:-.035em;white-space:nowrap;}
+            .overview-stat--goal .overview-stat-value{color:#357A78;}
+            .overview-stat--vips .overview-stat-value{color:#449997;}
+            .overview-stat--percentage .overview-stat-value{color:#449997;}
+            .overview-stat--percentage[data-behind-goal="true"] .overview-stat-value{color:#C77B57;}
+            .overview-stat--streamyards .overview-stat-value{color:#8E7CB8;}
+            @media(max-width:767px){.overview-stat{padding:16px 18px 15px;}.overview-stats-row{min-width:650px;}}
+          `;
+          document.head.appendChild(style);
+        }
+
+        const students = Number(total_students) || 0;
+        const vips = Number(parentsCount) || 0;
+        const exactGoal = students * 0.05;
+        const goal = Math.round(exactGoal);
+        const percentageToGoal = exactGoal > 0 ? (vips / exactGoal) * 100 : 0;
+        const streamyards = (webinars_log || [])
+          .filter(entry => entry.action === "registration").length;
+        const stats = [
+          { label: "Students", value: formatNumber(students), modifier: "students" },
+          { label: "Goal", value: formatNumber(goal), modifier: "goal" },
+          { label: "VIPs", value: formatNumber(vips), modifier: "vips" },
+          { label: "% to Goal", value: `${percentageToGoal.toFixed(1)}%`, modifier: "percentage", behindGoal: percentageToGoal < 50 },
+          { label: "StreamYards", value: formatNumber(streamyards), modifier: "streamyards" }
+        ];
+
+        const row = document.createElement("div");
+        row.className = "overview-stats-row";
+        row.setAttribute("role", "list");
+        row.setAttribute("aria-label", "Organization overview");
+
+        stats.forEach(stat => {
+          const item = document.createElement("div");
+          item.className = `overview-stat overview-stat--${stat.modifier}`;
+          item.setAttribute("role", "listitem");
+          if (stat.behindGoal) item.dataset.behindGoal = "true";
+
+          const label = document.createElement("span");
+          label.className = "overview-stat-label";
+          label.textContent = stat.label;
+
+          const value = document.createElement("strong");
+          value.className = "overview-stat-value";
+          value.textContent = stat.value;
+
+          item.append(label, value);
+          row.appendChild(item);
+        });
+
+        overview.replaceChildren(row);
+      };
+      renderOverviewStats();
+
       const updateImpactMetrics = (useStudentsGoal) => {
         const v = useStudentsGoal ? studentsGoal : parentsCount;
         setText("parents", formatNumber(v));
