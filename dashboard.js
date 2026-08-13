@@ -215,13 +215,8 @@ if (!window.scriptExecuted) {
             .overview-stats-row{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));min-width:680px;overflow:hidden;background:linear-gradient(135deg,#fff 0%,#f6fbfb 100%);border:1px solid #dceaea;border-radius:16px;box-shadow:0 8px 28px rgba(45,90,90,.09);}
             .overview-stat{position:relative;min-width:0;padding:19px 22px 18px;}
             .overview-stat+.overview-stat:before{content:"";position:absolute;top:18px;bottom:18px;left:0;width:1px;background:#dfeaea;}
-            .overview-stat-label{display:block;margin-bottom:7px;color:#5A7A7A;font-size:11px;font-weight:700;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
-            .overview-stat-value{display:block;color:#2D5A5A;font-size:clamp(24px,2.2vw,34px);font-weight:800;line-height:1;letter-spacing:-.035em;white-space:nowrap;}
-            .overview-stat--goal .overview-stat-value{color:#357A78;}
-            .overview-stat--vips .overview-stat-value{color:#449997;}
-            .overview-stat--percentage .overview-stat-value{color:#449997;}
-            .overview-stat--percentage[data-behind-goal="true"] .overview-stat-value{color:#C77B57;}
-            .overview-stat--streamyards .overview-stat-value{color:#8E7CB8;}
+            .overview-stat-label{display:block;margin-bottom:7px;color:#000;font-size:11px;font-weight:700;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+            .overview-stat-value{display:block;color:#000;font-size:clamp(24px,2.2vw,34px);font-weight:800;line-height:1;letter-spacing:-.035em;white-space:nowrap;}
             @media(max-width:767px){.overview-stat{padding:16px 18px 15px;}.overview-stats-row{min-width:650px;}}
           `;
           document.head.appendChild(style);
