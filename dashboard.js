@@ -1,7 +1,193 @@
 if (!window.scriptExecuted) {
   window.scriptExecuted = true;
+
+  // ═══════════════════════════════════════════════════════════════
+  // SHIMMER LOADERS
+  // Swaps the spinner Webflow puts inside every .loader / #loader for
+  // a content-shaped skeleton with a soft gloss sweeping across it.
+  // The shape comes from data-shimmer when the Webflow element sets
+  // one, otherwise it is inferred from the host container (table /
+  // chart / donut / stat / cards) and finally from the host's box.
+  // hide() fades the skeleton out before the real .hide class lands
+  // so revealed content never pops.
+  // ═══════════════════════════════════════════════════════════════
+  window.ssShimmer = window.ssShimmer || (() => {
+    const STYLE_ID = "ss-shimmer-style";
+    const LOADERS = ".loader, #loader";
+    const FADE_MS = 380;
+
+    const CSS = `
+      .loader[data-ss-shim],#loader[data-ss-shim]{--ss-base:#e9f1f1;--ss-base-2:#e1ecec;--ss-gloss:rgba(255,255,255,.95);--ss-dur:1.5s;display:block!important;width:100%!important;height:auto!important;min-height:0!important;border:0!important;background:none!important;box-shadow:none!important;animation:none!important;}
+      .loader.hide[data-ss-shim],#loader.hide[data-ss-shim]{display:none!important;}
+      .loader[data-ss-shim]::before,.loader[data-ss-shim]::after,#loader[data-ss-shim]::before,#loader[data-ss-shim]::after{content:none!important;display:none!important;}
+      .ss-shim-out{opacity:0!important;transform:translateY(-4px)!important;transition:opacity .38s cubic-bezier(.4,0,.2,1),transform .38s cubic-bezier(.4,0,.2,1)!important;pointer-events:none!important;}
+      .ss-shim-stack{display:flex;flex-direction:column;gap:14px;width:100%;}
+      .ss-shim-row{display:grid;gap:16px;align-items:center;width:100%;}
+      .ss-shim-rule{width:100%;height:1px;background:#e4efef;border-radius:1px;}
+      .ss-shim-b{position:relative;overflow:hidden;flex:none;border-radius:8px;background:linear-gradient(180deg,var(--ss-base) 0%,var(--ss-base-2) 100%);}
+      .ss-shim-b::after{content:"";position:absolute;top:0;bottom:0;left:0;width:100%;min-width:280px;transform:translate3d(-100%,0,0);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.28) 32%,var(--ss-gloss) 50%,rgba(255,255,255,.28) 68%,rgba(255,255,255,0) 100%);animation-name:ss-shim-sweep;animation-duration:var(--ss-dur);animation-timing-function:cubic-bezier(.45,.05,.3,1);animation-iteration-count:infinite;animation-delay:var(--ss-d,0s);}
+      @keyframes ss-shim-sweep{0%{transform:translate3d(-100%,0,0)}100%{transform:translate3d(100%,0,0)}}
+      .ss-shim-circle{border-radius:50%;}
+      .ss-shim-cols{display:flex;align-items:flex-end;gap:6px;width:100%;height:158px;}
+      .ss-shim-cols .ss-shim-b{flex:1 1 0;min-width:0;border-radius:7px 7px 3px 3px;}
+      .ss-shim-donut{display:flex;align-items:center;gap:30px;width:100%;flex-wrap:wrap;}
+      .ss-shim-legend{display:flex;flex-direction:column;gap:13px;flex:1 1 170px;min-width:150px;}
+      .ss-shim-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;width:100%;}
+      .ss-shim-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;width:100%;}
+      .ss-shim-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 16px;border:1px solid #edf4f4;border-radius:12px;background:#fbfdfd;}
+      @media(max-width:767px){.ss-shim-cols{height:120px;gap:4px;}.ss-shim-cards{grid-template-columns:1fr;}.ss-shim-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}.ss-shim-row{gap:10px;}}
+      @media(prefers-reduced-motion:reduce){.ss-shim-b::after{min-width:0;transform:none;background:rgba(255,255,255,.6);animation-name:ss-shim-breathe;animation-duration:2.4s;animation-timing-function:ease-in-out;}}
+      @keyframes ss-shim-breathe{0%,100%{opacity:.2}50%{opacity:.85}}
+    `;
+
+    const ensureStyles = () => {
+      if (document.getElementById(STYLE_ID)) return;
+      const style = document.createElement("style");
+      style.id = STYLE_ID;
+      style.textContent = CSS;
+      document.head.appendChild(style);
+    };
+
+    // One skeleton bar. `delay` phases the gloss so a stack of bars
+    // reads as a single light travelling across the whole block.
+    const bar = (width, height, extra, delay) =>
+      `<div class="ss-shim-b${extra ? ` ${extra}` : ""}" style="width:${width};height:${height};--ss-d:-${(delay || 0).toFixed(2)}s"></div>`;
+
+    const TEXT_WIDTHS = ["100%", "92%", "68%", "84%", "74%"];
+    const ROW_WIDTHS = [
+      ["46%", "88%", "72%", "56%"],
+      ["54%", "72%", "62%", "68%"],
+      ["42%", "94%", "58%", "48%"],
+      ["58%", "68%", "80%", "62%"],
+      ["48%", "82%", "66%", "52%"]
+    ];
+    const COLUMN_HEIGHTS = [44, 66, 52, 78, 58, 90, 68, 96, 60, 84, 54, 74, 46, 70];
+    const LEGEND_WIDTHS = ["82%", "64%", "74%", "56%", "68%"];
+
+    const SHAPES = {
+      text: ({ rows }) => `<div class="ss-shim-stack">${
+        Array.from({ length: rows || 3 }, (unused, i) =>
+          bar(TEXT_WIDTHS[i % TEXT_WIDTHS.length], "13px", "", i * 0.08)).join("")
+      }</div>`,
+
+      table: ({ rows }) => {
+        const columns = "1.5fr 2.6fr 2fr 1.4fr";
+        const line = (widths, height, delay) =>
+          `<div class="ss-shim-row" style="grid-template-columns:${columns}">${
+            widths.map(width => bar(width, height, "", delay)).join("")}</div>`;
+        return `<div class="ss-shim-stack">${
+          line(["62%", "48%", "54%", "44%"], "11px", 0)
+        }<div class="ss-shim-rule"></div>${
+          Array.from({ length: rows || 5 }, (unused, i) =>
+            line(ROW_WIDTHS[i % ROW_WIDTHS.length], "14px", (i + 1) * 0.08)).join("")
+        }</div>`;
+      },
+
+      chart: () => `<div class="ss-shim-stack" style="gap:20px">
+        <div class="ss-shim-stack" style="gap:10px">${bar("38%", "16px", "", 0)}${bar("24%", "10px", "", 0.08)}</div>
+        <div class="ss-shim-cols">${
+          COLUMN_HEIGHTS.map((height, i) => bar("auto", `${height}%`, "", i * 0.05)).join("")}</div>
+        <div class="ss-shim-rule"></div>
+        <div class="ss-shim-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${
+          ["70%", "58%", "64%", "52%"].map((width, i) => bar(width, "10px", "", 0.4 + i * 0.06)).join("")}</div>
+      </div>`,
+
+      donut: () => `<div class="ss-shim-donut">${bar("156px", "156px", "ss-shim-circle", 0)}
+        <div class="ss-shim-legend">${
+          LEGEND_WIDTHS.map((width, i) => bar(width, "12px", "", 0.1 + i * 0.08)).join("")}</div>
+      </div>`,
+
+      stat: () => `<div class="ss-shim-stack" style="gap:9px">${bar("64px", "9px", "", 0)}${bar("112px", "28px", "", 0.09)}</div>`,
+
+      stats: () => `<div class="ss-shim-stats">${[0, 1, 2, 3, 4].map(i =>
+        `<div class="ss-shim-stack" style="gap:9px">${bar("62%", "9px", "", i * 0.09)}${bar("84%", "26px", "", i * 0.09 + 0.05)}</div>`
+      ).join("")}</div>`,
+
+      cards: () => `<div class="ss-shim-cards">${[0, 1, 2].map(i =>
+        `<div class="ss-shim-card">${bar("76px", "76px", "ss-shim-circle", i * 0.1)}${bar("74%", "12px", "", i * 0.1 + 0.06)}${bar("50%", "10px", "", i * 0.1 + 0.12)}</div>`
+      ).join("")}</div>`,
+
+      block: ({ height }) => bar("100%", `${Math.max(160, height || 0)}px`, "", 0)
+    };
+
+    // Hosts this dashboard family fills, matched by id first and then
+    // by any id/class in the loader's ancestor chain.
+    const ID_SHAPES = {
+      active: "table", inactive: "table", latest_users: "table",
+      student_pin_list: "table", org_feedbacks_list: "table",
+      other_feedbacks_list: "table", topSchoolBuildings: "table",
+      overview: "stats", parent_impact: "cards", trends_chart: "chart"
+    };
+
+    const SIGNATURE_SHAPES = [
+      [/donut|pie|ring/, "donut"],
+      [/chart|graph|trend|apex/, "chart"],
+      [/leader_board|webinars_log|pin_list|feedbacks_list|latest_users|table|_list/, "table"],
+      [/overview|kpi|metric|counter|percentage|goal|stat|number|score/, "stat"],
+      [/impact|card/, "cards"]
+    ];
+
+    const shapeFor = element => {
+      const requested = (element.getAttribute("data-shimmer") || "").trim().toLowerCase();
+      if (SHAPES[requested]) return requested;
+
+      let node = element;
+      for (let depth = 0; node && node !== document.body && depth < 8; depth++) {
+        if (ID_SHAPES[node.id]) return ID_SHAPES[node.id];
+        const signature = `${node.id} ${[...node.classList].join(" ")}`.toLowerCase();
+        const matched = SIGNATURE_SHAPES.find(([pattern]) => pattern.test(signature));
+        if (matched) return matched[1];
+        node = node.parentElement;
+      }
+      return null;
+    };
+
+    const mount = root => {
+      ensureStyles();
+      (root || document).querySelectorAll(LOADERS).forEach(element => {
+        try {
+          if (element.hasAttribute("data-ss-shim") || element.classList.contains("failed_loader")) return;
+
+          // Measure the host before the reset styles below change the box.
+          const height = Math.round((element.parentElement || element).getBoundingClientRect().height);
+          const shape = shapeFor(element)
+            || (height >= 220 ? "chart" : height > 0 && height <= 96 ? "stat" : "text");
+
+          element.setAttribute("data-ss-shim", shape);
+          element.setAttribute("role", "status");
+          element.setAttribute("aria-label", "Loading");
+          element.innerHTML = SHAPES[shape]({ rows: Number(element.getAttribute("data-shimmer-rows")) || 0, height });
+        } catch (error) {
+          console.warn("Shimmer loader skipped:", error);
+        }
+      });
+    };
+
+    // Fade first, then let the caller retire the node — the class
+    // changes land in one task so the skeleton never flashes back.
+    const fade = (elements, retire) => {
+      const nodes = elements.filter(Boolean);
+      if (!nodes.length) return;
+      nodes.forEach(node => node.classList.add("ss-shim-out"));
+      setTimeout(() => nodes.forEach(node => {
+        node.classList.remove("ss-shim-out");
+        node.removeAttribute("role");
+        node.removeAttribute("aria-label");
+        retire(node);
+      }), FADE_MS);
+    };
+
+    return {
+      mount,
+      hide: root => fade([...(root || document).querySelectorAll(LOADERS)], node => node.classList.add("hide")),
+      remove: target => fade([typeof target === "string" ? document.querySelector(target) : target], node => node.remove())
+    };
+  })();
+
   document.addEventListener("DOMContentLoaded", async () => {
     try {
+      window.ssShimmer.mount();
+
       // ═══════════════════════════════════════════════════════════════
       // COLOR PALETTES
       // ═══════════════════════════════════════════════════════════════
@@ -1275,7 +1461,7 @@ if (!window.scriptExecuted) {
       }
 
       // Hide loaders
-      document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
+      window.ssShimmer.hide();
 
       // Download Page PDF
       document.getElementById("screenshot").addEventListener("click", () => {
@@ -1309,7 +1495,7 @@ if (!window.scriptExecuted) {
     } catch (err) {
       console.error("Error:", err);
       document.querySelectorAll('.failed_loader').forEach(e => e.classList.remove('hide'));
-      document.querySelectorAll('.loader').forEach(e => e.classList.add('hide'));
+      window.ssShimmer.hide();
       axios.post("https://hook.us1.make.com/rif68igkkl1qju5ez06amm5svce3f89t", { memberid: memberData?.id }).catch(() => { });
     }
   });
