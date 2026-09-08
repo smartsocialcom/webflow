@@ -11,6 +11,7 @@ window.ssShimmer = window.ssShimmer || (() => {
   const STYLE_ID = 'ss-shimmer-style';
   const LOADERS = '.loader, #loader';
   const FADE_MS = 380;
+  const SWAP_MS = 260;
 
   const CSS = `
     .loader[data-ss-shim],#loader[data-ss-shim]{--ss-base:#e9f1f1;--ss-base-2:#e1ecec;--ss-gloss:rgba(255,255,255,.95);--ss-dur:1.5s;display:block!important;width:100%!important;height:auto!important;min-height:0!important;border:0!important;background:none!important;box-shadow:none!important;animation:none!important;}
@@ -20,7 +21,7 @@ window.ssShimmer = window.ssShimmer || (() => {
     .ss-shim-stack{display:flex;flex-direction:column;gap:14px;width:100%;}
     .ss-shim-row{display:grid;gap:16px;align-items:center;width:100%;}
     .ss-shim-rule{width:100%;height:1px;background:#e4efef;border-radius:1px;}
-    .ss-shim-b{position:relative;overflow:hidden;flex:none;border-radius:8px;background:linear-gradient(180deg,var(--ss-base) 0%,var(--ss-base-2) 100%);}
+    .ss-shim-b{--ss-base:#e9f1f1;--ss-base-2:#e1ecec;--ss-gloss:rgba(255,255,255,.95);--ss-dur:1.5s;position:relative;overflow:hidden;flex:none;border-radius:8px;background:linear-gradient(180deg,var(--ss-base) 0%,var(--ss-base-2) 100%);}
     .ss-shim-b::after{content:"";position:absolute;top:0;bottom:0;left:0;width:100%;min-width:280px;transform:translate3d(-100%,0,0);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.28) 32%,var(--ss-gloss) 50%,rgba(255,255,255,.28) 68%,rgba(255,255,255,0) 100%);animation-name:ss-shim-sweep;animation-duration:var(--ss-dur);animation-timing-function:cubic-bezier(.45,.05,.3,1);animation-iteration-count:infinite;animation-delay:var(--ss-d,0s);}
     @keyframes ss-shim-sweep{0%{transform:translate3d(-100%,0,0)}100%{transform:translate3d(100%,0,0)}}
     .ss-shim-circle{border-radius:50%;}
@@ -31,8 +32,14 @@ window.ssShimmer = window.ssShimmer || (() => {
     .ss-shim-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;width:100%;}
     .ss-shim-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;width:100%;}
     .ss-shim-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 16px;border:1px solid #edf4f4;border-radius:12px;background:#fbfdfd;}
+    .ss-shim-claimed{position:relative;min-height:var(--ss-min,0px);}
+    .ss-shim-claimed>*:not(.ss-shim-layer){visibility:hidden!important;}
+    .ss-shim-layer{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;overflow:hidden;pointer-events:none;z-index:3;}
+    .ss-shim-val{display:inline-block;vertical-align:middle;border-radius:.26em;}
+    .ss-shim-in{animation:ss-shim-in .26s cubic-bezier(.4,0,.2,1);}
+    @keyframes ss-shim-in{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
     @media(max-width:767px){.ss-shim-cols{height:120px;gap:4px;}.ss-shim-cards{grid-template-columns:1fr;}.ss-shim-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}.ss-shim-row{gap:10px;}}
-    @media(prefers-reduced-motion:reduce){.ss-shim-b::after{min-width:0;transform:none;background:rgba(255,255,255,.6);animation-name:ss-shim-breathe;animation-duration:2.4s;animation-timing-function:ease-in-out;}}
+    @media(prefers-reduced-motion:reduce){.ss-shim-b::after{min-width:0;transform:none;background:rgba(255,255,255,.6);animation-name:ss-shim-breathe;animation-duration:2.4s;animation-timing-function:ease-in-out;}.ss-shim-in{animation:none;}}
     @keyframes ss-shim-breathe{0%,100%{opacity:.2}50%{opacity:.85}}
   `;
 
@@ -44,8 +51,8 @@ window.ssShimmer = window.ssShimmer || (() => {
     document.head.appendChild(style);
   };
 
-  // One skeleton bar. `delay` phases the gloss so a stack of bars
-  // reads as a single light travelling across the whole block.
+  // One skeleton bar. `delay` phases the gloss so a stack of bars reads
+  // as a single light travelling across the whole block.
   const bar = (width, height, extra, delay) =>
     `<div class="ss-shim-b${extra ? ` ${extra}` : ''}" style="width:${width};height:${height};--ss-d:-${(delay || 0).toFixed(2)}s"></div>`;
 
@@ -106,8 +113,9 @@ window.ssShimmer = window.ssShimmer || (() => {
     block: ({ height }) => bar('100%', `${Math.max(160, height || 0)}px`, '', 0)
   };
 
-  // Hosts this dashboard family fills, matched by id first and then by
-  // any id/class in the loader's ancestor chain.
+  // ── Webflow-authored .loader blocks ────────────────────────────────────
+  // Hosts this dashboard family fills, matched by id first and then by any
+  // id/class in the loader's ancestor chain.
   const ID_SHAPES = {
     active: 'table', inactive: 'table', latest_users: 'table',
     student_pin_list: 'table', org_feedbacks_list: 'table',
@@ -173,8 +181,137 @@ window.ssShimmer = window.ssShimmer || (() => {
     }), FADE_MS);
   };
 
+  // ── Per-element claims on the Xano-bound targets ───────────────────────
+  // claim() shims every element listed in a registry and each one clears
+  // itself the moment something writes to it, so a slow endpoint only
+  // shimmers the fields it actually feeds.
+  const claims = new Map();
+
+  // Floor for a host that is empty while loading and would collapse.
+  const MIN_HEIGHT = { chart: 260, donut: 210, table: 200, cards: 190, block: 170, stats: 92, stat: 78, text: 90 };
+
+  const elementsFor = key => key[0] === '#' || key[0] === '.'
+    ? [...document.querySelectorAll(key)]
+    : [document.getElementById(key)].filter(Boolean);
+
+  // A mutation is a real write unless it happened inside our own layer.
+  const observe = (element, onWrite) => {
+    const observer = new MutationObserver(records => {
+      const wrote = records.some(record => {
+        const node = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+        return !(node && node.closest('.ss-shim-layer'));
+      });
+      if (wrote) onWrite();
+    });
+    observer.observe(element, { childList: true, characterData: true, subtree: true });
+    return observer;
+  };
+
+  const fadeIn = element => {
+    element.classList.add('ss-shim-in');
+    setTimeout(() => element.classList.remove('ss-shim-in'), SWAP_MS);
+  };
+
+  // `immediate` tears the overlay out synchronously. Callers that follow up
+  // with `innerHTML +=` need that — a lingering layer would be serialised
+  // into the new markup and re-parsed into a copy nothing can clean up.
+  const release = (target, immediate) => {
+    (typeof target === 'string' ? elementsFor(target) : [target]).forEach(element => {
+      const claim = element && claims.get(element);
+      if (!claim) return;
+      claims.delete(element);
+      claim.observer.disconnect();
+
+      // Reveal the real content first, then cross-fade the skeleton out
+      // over the top of it.
+      element.classList.remove('ss-shim-claimed');
+      element.style.removeProperty('--ss-min');
+      if (claim.positioned) element.style.removeProperty('position');
+
+      const layers = [...element.querySelectorAll('.ss-shim-layer')];
+      if (!layers.length) return fadeIn(element);
+
+      if (immediate) {
+        layers.forEach(layer => layer.remove());
+        fadeIn(element);
+      } else {
+        layers.forEach(layer => layer.classList.add('ss-shim-out'));
+        setTimeout(() => layers.forEach(layer => layer.remove()), SWAP_MS);
+      }
+    });
+  };
+
+  const claimOne = (element, spec) => {
+    if (!element || claims.has(element)) return;
+    const [shape, size] = String(spec).split(':');
+    const count = Number(size) || 0;
+
+    // Leaf values swap their placeholder text for an inline pill scaled to
+    // the element's own type; containers get a non-destructive overlay so
+    // a pre-existing <canvas> or header row is never thrown away.
+    if (shape === 'value' || shape === 'line') {
+      const html = element.innerHTML;
+      const fontSize = parseFloat(getComputedStyle(element).fontSize) || 16;
+      const chars = count || (shape === 'value' ? 4 : 14);
+      element.innerHTML = bar(
+        `${Math.round(chars * fontSize * 0.56)}px`,
+        `${Math.max(8, Math.round(fontSize * 0.7))}px`,
+        'ss-shim-val',
+        0
+      );
+      claims.set(element, { observer: observe(element, () => release(element)), html });
+      return;
+    }
+
+    const positioned = getComputedStyle(element).position === 'static';
+    if (positioned) element.style.position = 'relative';
+    element.style.setProperty('--ss-min', `${MIN_HEIGHT[shape] || 120}px`);
+    element.classList.add('ss-shim-claimed');
+
+    const layer = document.createElement('div');
+    layer.className = 'ss-shim-layer';
+    layer.innerHTML = (SHAPES[shape] || SHAPES.text)({
+      rows: count,
+      height: Math.round(element.getBoundingClientRect().height)
+    });
+    element.appendChild(layer);
+    claims.set(element, { observer: observe(element, () => release(element)), positioned });
+  };
+
+  const claim = registry => {
+    ensureStyles();
+    Object.entries(registry).forEach(([key, spec]) => {
+      elementsFor(key).forEach(element => {
+        try {
+          claimOne(element, spec);
+        } catch (error) {
+          console.warn('Shimmer claim skipped:', key, error);
+        }
+      });
+    });
+  };
+
+  // Safety net for fields the response never fed: put the original markup
+  // back so nothing is left shimmering after a request finishes. Pass the
+  // registry (or a list of keys) a single endpoint owns to settle only its
+  // fields — a page with independent fetches must not retire the targets
+  // another one is still loading.
+  const settle = subset => {
+    const scoped = subset && new Set(
+      (Array.isArray(subset) ? subset : Object.keys(subset)).flatMap(elementsFor)
+    );
+    [...claims.entries()].forEach(([element, claim]) => {
+      if (scoped && !scoped.has(element)) return;
+      if (claim.html !== undefined && element.querySelector('.ss-shim-b')) element.innerHTML = claim.html;
+      release(element);
+    });
+  };
+
   return {
     mount,
+    claim,
+    release,
+    settle,
     hide: root => fade([...(root || document).querySelectorAll(LOADERS)], node => node.classList.add('hide')),
     remove: target => fade([typeof target === 'string' ? document.querySelector(target) : target], node => node.remove())
   };
@@ -182,6 +319,29 @@ window.ssShimmer = window.ssShimmer || (() => {
 
 document.addEventListener("DOMContentLoaded", () => {
   window.ssShimmer.mount();
+
+  // Everything this page fills from Xano, split by the endpoint that owns
+  // it. The two requests resolve independently, so each settles only its
+  // own fields — settling all of them from the first would strip the
+  // shimmer off tiles the other request is still loading.
+  const SHIM_LATEST = {
+    '24h_vip_registrations': 'value:4',
+    '7d_vip_registrations': 'value:4',
+    '7day_feedbacks': 'value:4',
+    latest_users: 'table:6'
+  };
+  const SHIM_ORGS = {
+    '24h_registrations': 'value:4',
+    '7day_registrations': 'value:4',
+    '7day_attendees': 'value:4',
+    '7day_bootcamp': 'value:4',
+    '30day_bootcamp': 'value:4',
+    all_bootcamp: 'value:5',
+    active: 'table:6',
+    inactive: 'table:5',
+    trends_chart: 'chart'
+  };
+  window.ssShimmer.claim({ ...SHIM_LATEST, ...SHIM_ORGS });
 
   // ---------------------------------------------------------
   // Global Variables for "Active/Inactive" Tables
@@ -587,9 +747,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Initial Sort (Descending for numbers)
       sortLatestUsers('sevenDayCount');
+      window.ssShimmer.settle(SHIM_LATEST);
     })
     .catch(error => {
       console.error("Error fetching latest users:", error);
+      window.ssShimmer.settle(SHIM_LATEST);
       // Let the chart still render from the other endpoint's data.
       if (trendRegistrationTs === null) trendRegistrationTs = [];
       if (trendFeedbackTs === null) trendFeedbackTs = [];
@@ -788,6 +950,7 @@ document.addEventListener("DOMContentLoaded", () => {
       maybeRenderTrendChart();
 
       window.ssShimmer.remove('#loader');
+      window.ssShimmer.settle(SHIM_ORGS);
 
       const feedbackHeader = document.querySelector('#active th[data-key="total_feedbacks"]');
       if (feedbackHeader) {
@@ -797,8 +960,9 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(error => {
       console.error("Error:", error);
-      // Retire the skeleton too — otherwise it shimmers forever here.
+      // Retire the skeletons too — otherwise they shimmer forever here.
       window.ssShimmer.remove('#loader');
+      window.ssShimmer.settle(SHIM_ORGS);
       // Let the chart still render from the other endpoint's data.
       if (trendStreamyardTs === null) trendStreamyardTs = [];
       if (trendBootcampTs === null) trendBootcampTs = [];
