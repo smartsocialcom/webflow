@@ -43,8 +43,8 @@ if (!window.studentDashboardScriptExecuted) {
       .ss-shim-in{animation:ss-shim-in .26s cubic-bezier(.4,0,.2,1);}
       @keyframes ss-shim-in{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
       @media(max-width:767px){.ss-shim-cols{height:120px;gap:4px;}.ss-shim-cards{grid-template-columns:1fr;}.ss-shim-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}.ss-shim-row{gap:10px;}}
-      @media(prefers-reduced-motion:reduce){.ss-shim-b::after{min-width:0;transform:none;background:rgba(255,255,255,.6);animation-name:ss-shim-breathe;animation-duration:2.4s;animation-timing-function:ease-in-out;}.ss-shim-in{animation:none;}}
-      @keyframes ss-shim-breathe{0%,100%{opacity:.2}50%{opacity:.85}}
+      @media(prefers-reduced-motion:reduce){.ss-shim-b{--ss-base:#dce8e8;--ss-base-2:#d4e3e3;animation-name:ss-shim-pulse;animation-duration:1.8s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-delay:var(--ss-d,0s);}.ss-shim-b::after{display:none!important;}.ss-shim-in{animation:none;}}
+      @keyframes ss-shim-pulse{0%,100%{opacity:1}50%{opacity:.32}}
     `;
 
     const ensureStyles = () => {
