@@ -874,14 +874,20 @@ if (!window.scriptExecuted) {
       // ═══════════════════════════════════════════════════════════════
       // CHART 2: SCHOOL BUILDINGS (Donut - Full Width + Overlay Legend)
       // ═══════════════════════════════════════════════════════════════
-      if (school_buildings.length) {
+      // An all-zero set (no registered parents on any building yet) can't be
+      // drawn: every slice would be 0/0 and every legend row NaN%, so treat
+      // it like the empty case and show the fallback message instead.
+      const hasRegisteredParents = school_buildings.some(b => Number(b.registered_school_parents) > 0);
+      if (school_buildings.length && hasRegisteredParents) {
         const schoolBuildingsEl = document.getElementById("schoolBuildingsChart");
         const schoolBuildingsWrapper = document.getElementById("schoolBuildingsChartWrapper");
         if (schoolBuildingsEl && schoolBuildingsWrapper) {
-          // Sort by value for better visual hierarchy
-          const sortedBuildings = [...school_buildings].sort((a, b) =>
-            b.registered_school_parents - a.registered_school_parents
-          );
+          // Sort by value for better visual hierarchy; null counts read as 0
+          const sortedBuildings = [...school_buildings]
+            .map(b => ({ ...b, registered_school_parents: Number(b.registered_school_parents) || 0 }))
+            .sort((a, b) =>
+              b.registered_school_parents - a.registered_school_parents
+            );
 
           const total = sortedBuildings.reduce((sum, b) => sum + b.registered_school_parents, 0);
 
