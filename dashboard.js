@@ -1,16 +1,7 @@
 if (!window.scriptExecuted) {
   window.scriptExecuted = true;
 
-  // ═══════════════════════════════════════════════════════════════
   // SHIMMER LOADERS
-  // Swaps the spinner Webflow puts inside every .loader / #loader for
-  // a content-shaped skeleton with a soft gloss sweeping across it.
-  // The shape comes from data-shimmer when the Webflow element sets
-  // one, otherwise it is inferred from the host container (table /
-  // chart / donut / stat / cards) and finally from the host's box.
-  // hide() fades the skeleton out before the real .hide class lands
-  // so revealed content never pops.
-  // ═══════════════════════════════════════════════════════════════
   window.ssShimmer = window.ssShimmer || (() => {
     const STYLE_ID = "ss-shimmer-style";
     const LOADERS = ".loader, #loader";
@@ -70,36 +61,29 @@ if (!window.scriptExecuted) {
     const LEGEND_WIDTHS = ["82%", "64%", "74%", "56%", "68%"];
 
     const SHAPES = {
-      text: ({ rows }) => `<div class="ss-shim-stack">${
-        Array.from({ length: rows || 3 }, (unused, i) =>
-          bar(TEXT_WIDTHS[i % TEXT_WIDTHS.length], "13px", "", i * 0.08)).join("")
-      }</div>`,
+      text: ({ rows }) => `<div class="ss-shim-stack">${Array.from({ length: rows || 3 }, (unused, i) =>
+        bar(TEXT_WIDTHS[i % TEXT_WIDTHS.length], "13px", "", i * 0.08)).join("")
+        }</div>`,
 
       table: ({ rows }) => {
         const columns = "1.5fr 2.6fr 2fr 1.4fr";
         const line = (widths, height, delay) =>
-          `<div class="ss-shim-row" style="grid-template-columns:${columns}">${
-            widths.map(width => bar(width, height, "", delay)).join("")}</div>`;
-        return `<div class="ss-shim-stack">${
-          line(["62%", "48%", "54%", "44%"], "11px", 0)
-        }<div class="ss-shim-rule"></div>${
-          Array.from({ length: rows || 5 }, (unused, i) =>
+          `<div class="ss-shim-row" style="grid-template-columns:${columns}">${widths.map(width => bar(width, height, "", delay)).join("")}</div>`;
+        return `<div class="ss-shim-stack">${line(["62%", "48%", "54%", "44%"], "11px", 0)
+          }<div class="ss-shim-rule"></div>${Array.from({ length: rows || 5 }, (unused, i) =>
             line(ROW_WIDTHS[i % ROW_WIDTHS.length], "14px", (i + 1) * 0.08)).join("")
-        }</div>`;
+          }</div>`;
       },
 
       chart: () => `<div class="ss-shim-stack" style="gap:20px">
         <div class="ss-shim-stack" style="gap:10px">${bar("38%", "16px", "", 0)}${bar("24%", "10px", "", 0.08)}</div>
-        <div class="ss-shim-cols">${
-          COLUMN_HEIGHTS.map((height, i) => bar("auto", `${height}%`, "", i * 0.05)).join("")}</div>
+        <div class="ss-shim-cols">${COLUMN_HEIGHTS.map((height, i) => bar("auto", `${height}%`, "", i * 0.05)).join("")}</div>
         <div class="ss-shim-rule"></div>
-        <div class="ss-shim-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${
-          ["70%", "58%", "64%", "52%"].map((width, i) => bar(width, "10px", "", 0.4 + i * 0.06)).join("")}</div>
+        <div class="ss-shim-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${["70%", "58%", "64%", "52%"].map((width, i) => bar(width, "10px", "", 0.4 + i * 0.06)).join("")}</div>
       </div>`,
 
       donut: () => `<div class="ss-shim-donut">${bar("156px", "156px", "ss-shim-circle", 0)}
-        <div class="ss-shim-legend">${
-          LEGEND_WIDTHS.map((width, i) => bar(width, "12px", "", 0.1 + i * 0.08)).join("")}</div>
+        <div class="ss-shim-legend">${LEGEND_WIDTHS.map((width, i) => bar(width, "12px", "", 0.1 + i * 0.08)).join("")}</div>
       </div>`,
 
       stat: () => `<div class="ss-shim-stack" style="gap:9px">${bar("64px", "9px", "", 0)}${bar("112px", "28px", "", 0.09)}</div>`,
@@ -1441,7 +1425,7 @@ if (!window.scriptExecuted) {
 
         // Family concern index — from the structured concerns[] selections (multi-select; totals can exceed 100%).
         // Denominator = only respondents who selected at least one concern (the recent responders).
-        const CONCERN_BAR_LIMIT = 6;
+        const CONCERN_BAR_LIMIT = 10;
         const concernLabel = new Map((parentConcerns || [])
           .filter(p => p.display_concern !== false)
           .map(p => [String(p.id), p.concern_topic]));
