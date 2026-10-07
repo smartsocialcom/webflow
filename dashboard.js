@@ -1497,7 +1497,7 @@ if (!window.scriptExecuted) {
                   </div>`).join("")}
               </div>
             </div>
-            <div class="footer-note"><span data-ms-content="master-admin">${N.toLocaleString()} survey ${N === 1 ? "response" : "responses"} &nbsp;·&nbsp; </span>Ring % = "Likely" + "Very Likely" responses &nbsp;·&nbsp; Concern % = share of parents who selected each topic (multi-select; totals may exceed 100%)</div>
+            <div class="footer-note"><span data-ms-content="master-admin">${N.toLocaleString()} ${N === 1 ? "" : ""} &nbsp;·&nbsp; </span>Ring % = "Likely" + "Very Likely" responses &nbsp;·&nbsp; Concern % = share of parents who selected each topic (multi-select; totals may exceed 100%)</div>
           </div>`;
 
         // Animate rings (sweep + count-up)
